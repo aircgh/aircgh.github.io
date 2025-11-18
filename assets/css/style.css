@@ -1,0 +1,282 @@
+:root {
+    --bg: #020617;
+    --bg-alt: #020617;
+    --surface: #0f172a;
+    --surface-alt: #020617;
+    --header: #111827;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --accent-gold: #fbbf24;
+    --accent-cyan: #22d3ee;
+    --border-subtle: rgba(148, 163, 184, 0.25);
+  }
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  
+  /* HEADER */
+  
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 5vw;
+    background: linear-gradient(to bottom, rgba(15,23,42,0.9), rgba(15,23,42,0.85));
+    border-bottom: 1px solid var(--border-subtle);
+    backdrop-filter: blur(12px);
+  }
+  
+  .logo-title {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  
+  .logo {
+    height: 44px;
+    width: auto;
+  }
+  
+  .site-header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  
+  .tagline {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding-bottom: 0.2rem;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .nav a:hover {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+  }
+  
+  /* HERO */
+  
+  .hero {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    padding: 4rem 5vw 3rem;
+    overflow: hidden;
+  }
+  
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.3)),
+      url("../img/space_network.jpg");
+    background-size: cover;
+    background-position: center;
+    filter: saturate(1.2);
+    z-index: -1;
+  }
+  
+  .hero-content {
+    max-width: 800px;
+  }
+  
+  .hero h2 {
+    font-size: clamp(2.1rem, 3vw, 2.7rem);
+    margin-bottom: 1rem;
+  }
+  
+  .hero p {
+    max-width: 700px;
+    color: #d1d5db;
+  }
+  
+  .hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--accent-gold), var(--accent-cyan));
+    color: #020617;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  
+  .btn:hover {
+    filter: brightness(1.05);
+  }
+  
+  .btn.btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--accent-cyan);
+  }
+  
+  /* SECTIONS */
+  
+  .section {
+    padding: 3rem 5vw;
+    background: radial-gradient(circle at top left, rgba(56,189,248,0.06), transparent 60%);
+  }
+  
+  .section.alt {
+    background: radial-gradient(circle at top right, rgba(251,191,36,0.06), transparent 60%);
+  }
+  
+  .section-title {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-intro {
+    max-width: 720px;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .single-card {
+    max-width: 900px;
+  }
+  
+  .card {
+    background: linear-gradient(to bottom right, rgba(15,23,42,0.96), rgba(15,23,42,0.9));
+    border-radius: 1rem;
+    padding: 1.4rem 1.5rem;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 18px 40px rgba(15,23,42,0.8);
+  }
+  
+  .card h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+  }
+  
+  .card-meta {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  
+  .text-link {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  
+  .text-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* TEAM */
+  
+  .subheading {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+  }
+  
+  .person {
+    text-align: left;
+  }
+  
+  .person img {
+    width: 80px;
+    height: 80px;
+    border-radius: 999px;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+    border: 2px solid rgba(148,163,184,0.4);
+  }
+  
+  .person h5 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  .role {
+    margin: 0.2rem 0 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent-cyan);
+  }
+  
+  .bio {
+    font-size: 0.9rem;
+  }
+  
+  /* FOOTER */
+  
+  .site-footer {
+    padding: 1rem 5vw 1.4rem;
+    background: #020617;
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  
+  /* RESPONSIVE */
+  
+  @media (max-width: 720px) {
+    .site-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+  
+    .nav {
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+    }
+  
+    .hero {
+      padding-top: 3.5rem;
+    }
+  
+    .hero-content {
+      text-align: left;
+    }
+  }
+  

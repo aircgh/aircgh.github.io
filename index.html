@@ -2,106 +2,273 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Artificial Intelligence Research Corps</title>
+  <title>AI Research Corps (AIRC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body style="margin:0; font-family:Arial,sans-serif; background-color:#f8f9fb; color:#222;">
-
-  <!-- Header -->
-  <header style="display:flex;align-items:center;justify-content:space-between;padding:20px 40px;background-color:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-    <div style="display:flex;align-items:center;">
-      <img src="AIRC_LOGO.png" alt="AIRC Logo" style="height:50px;margin-right:15px;">
-      <div style="line-height:1.2;">
-        <span style="font-size:18px;font-weight:bold;">ARTIFICIAL INTELLIGENCE</span><br>
-        <span style="font-size:16px;color:#555;">RESEARCH CORPS</span>
+<body>
+  <header class="site-header">
+    <div class="logo-title">
+      <img src="assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo">
+      <div>
+        <h1>AI Research Corps</h1>
+        <p class="tagline">Nonprofit science & technology research institute · 501(c)(3)</p>
       </div>
     </div>
-    <nav style="display:flex;gap:20px;align-items:center;">
-      <a href="#home" style="text-decoration:none;color:#222;font-weight:bold;">Home</a>
-      <a href="#about" style="text-decoration:none;color:#222;font-weight:bold;">About</a>
-      <a href="#volunteers" style="text-decoration:none;color:#222;font-weight:bold;">Volunteers</a>
-      <a href="#partners" style="text-decoration:none;color:#222;font-weight:bold;">Partners</a>
-      <a href="#contact" style="text-decoration:none;color:#222;font-weight:bold;">Contact</a>
-      <a href="#" style="text-decoration:none;color:#222;font-weight:bold;">Streamlit</a>
-      <a href="#" style="text-decoration:none;color:#222;font-weight:bold;">Myst</a>
-      <a href="#" style="padding:8px 16px;border:2px solid #2f80ed;border-radius:20px;color:#2f80ed;text-decoration:none;font-weight:bold;">Donate</a>
+    <nav class="nav">
+      <a href="#programs">Programs</a>
+      <a href="#open-data">Open Data & Apps</a>
+      <a href="#library">Library</a>
+      <a href="#events">Events</a>
+      <a href="#team">Team</a>
+      <a href="#get-involved">Get Involved</a>
     </nav>
   </header>
 
-  <!-- Home Section -->
-  <section id="home" style="padding:60px 20px;background:white;">
-    <div style="max-width:900px;margin:auto;">
-      <h2 style="font-size:32px;color:#14579D;">Help us make a positive impact on the future of AI</h2>
-      <p style="line-height:1.6;">AIRC is a science and technology research institute, dedicated to creating talent, tools, and bridges necessary to improve the human and economic condition in a world bound by advanced technologies.</p>
-      <p style="line-height:1.6;">We are excited about the future. Harnessing AI technologies to our benefit can help us prosper. However, technology is a double-edged sword...</p>
-      <p style="line-height:1.6;">We are a community led by volunteers... It's our responsibility as individuals to maintain these standards.</p>
-      <p style="line-height:1.6;"><strong>Partners:</strong> We seek partners from industry, academia, and the public sector...</p>
-    </div>
-  </section>
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <h2>Building the talent, tools, and bridges for an AI-shaped world.</h2>
+        <p>
+          AI Research Corps (AIRC) is a 501(c)(3) nonprofit working at the intersection of
+          artificial intelligence, GIS, data science, and public-sector innovation.
+          We design low-barrier, high-impact programs in mentorship, policy, innovation,
+          and open data so learners and professionals can explore, experiment, and grow.
+        </p>
+        <div class="hero-buttons">
+          <a href="#programs" class="btn">Explore Programs</a>
+          <a href="#get-involved" class="btn btn-outline">Get Involved</a>
+        </div>
+      </div>
+    </section>
 
-<!-- Centered Logo Section -->
-<section style="padding:60px 20px; background:white; text-align:center;">
-  <img src="airc2.png" alt="AIRC Logo Centered" style="max-width:80px; width:70%; height:auto; display:inline-block;">
-</section>
+    <!-- PROGRAMS -->
+    <section id="programs" class="section">
+      <h3 class="section-title">Programs</h3>
+      <p class="section-intro">
+        Our work is organized around four connected programs. The initial pilot for the
+        Mentor &amp; Speaker Series is planned for <strong>Jan–Jun 2026</strong>.
+      </p>
+      <div class="card-grid">
+        <article class="card">
+          <h4>Mentor &amp; Speaker Series</h4>
+          <p>
+            Structured interviews with professional leaders and innovators across AI, GIS,
+            data science, and public-sector innovation. Each guest is asked a common core
+            set of questions so their stories can be compared and re-used for teaching.
+          </p>
+          <p class="card-meta">
+            Sessions are recorded and shared via the AIRC website, YouTube, and social media.
+          </p>
+        </article>
 
-  <!-- About Section -->
-  <section id="about" style="padding:50px 20px;background-color:#eef3f8;">
-    <div style="max-width:900px;margin:auto;">
-      <h2 style="color:#14579D;">About Us</h2>
-      <h3>Mission</h3>
-      <p style="line-height:1.6;">Our mission is to provide the public with research and software development services...</p>
-      <h3>Core Values</h3>
-      <ul style="line-height:1.8;">
-        <li><strong>Ethical Responsibility:</strong> AI technologies are going to impact all of humanity...</li>
-        <li><strong>Excellence:</strong> Excellence starts at the individual level...</li>
-        <li><strong>Integrity:</strong> We follow a set of rules and ethical principles...</li>
-        <li><strong>Fellowship:</strong> Fellowship defines a strong community...</li>
-        <li><strong>Diversity:</strong> Our differences eliminate our blind spots...</li>
-        <li><strong>Freedom:</strong> Modern societies must enjoy new technologies...</li>
-      </ul>
-    </div>
-  </section>
+        <article class="card">
+          <h4>Policy Program</h4>
+          <p>
+            Focused on policy research, public comment, and consortium-building around
+            responsible and inclusive AI adoption. Students and volunteers contribute to
+            research sprints, comment letters, and practical guidance.
+          </p>
+          <p class="card-meta">Details and pilot projects: coming soon.</p>
+        </article>
 
-  <!-- Volunteers Section -->
-  <section id="volunteers" style="padding:50px 20px;">
-    <div style="max-width:900px;margin:auto;">
-      <h2 style="color:#14579D;">Volunteers</h2>
-      <p style="line-height:1.6;">We are a community led by volunteers committed to advancing the adoption and adaptation of AI technologies...</p>
-      <h3>Why Volunteer with Us?</h3>
-      <ul style="line-height:1.8;">
-        <li>Impactful Work</li>
-        <li>Professional Growth</li>
-        <li>Networking</li>
-        <li>Skill Development</li>
-        <li>Community</li>
-      </ul>
-      <h3>Volunteer Opportunities</h3>
-      <ul style="line-height:1.8;">
-        <li>AI Research</li>
-        <li>Software Development</li>
-        <li>Community Engagement</li>
-        <li>Education and Outreach</li>
-        <li>Technical Support</li>
-      </ul>
-      <a href="#" style="display:inline-block;background-color:#2f80ed;color:white;padding:12px 24px;border-radius:25px;text-decoration:none;font-weight:bold;margin-top:10px;">Fill Out Volunteer Form</a>
-    </div>
-  </section>
+        <article class="card">
+          <h4>Innovation Program</h4>
+          <p>
+            Coding projects, pilots, hackathons, and student challenges that use real-world
+            datasets and open tools. This is where we prototype ideas, test pilots, and
+            share open-source examples.
+          </p>
+          <p class="card-meta">
+            Includes collaborations with professionals, students, and partner organizations.
+          </p>
+        </article>
 
-  <!-- Partners Section -->
-  <section id="partners" style="padding:50px 20px;background-color:#eef3f8;">
-    <div style="max-width:900px;margin:auto;">
-      <h2 style="color:#14579D;">Partners</h2>
-      <p style="line-height:1.6;">We seek partners from industry, academia, and the public sector...</p>
-      <h3>Why Partner with AIRC?</h3>
-      <ul style="line-height:1.8;">
-        <li>Advance AI Solutions</li>
-        <li>Expand Reach and Impact</li>
-        <li>Leverage Expertise</li>
-        <li>Drive Innovation</li>
-        <li>Build Strategic Relationships</li>
-      </ul>
-      <a href="#" style="display:inline-block;background-color:#2f80ed;color:white;padding:12px 24px;border-radius:25px;text-decoration:none;font-weight:bold;margin-top:10px;">Fill Out Form</a>
-    </div>
-  </section>
+        <article class="card">
+          <h4>Open Data Program</h4>
+          <p>
+            A curated collection of large, well-documented datasets made available for
+            learners, professionals, and researchers. Designed to support coursework,
+            independent research, and portfolio-building.
+          </p>
+          <p class="card-meta">
+            Paired with example notebooks, explainers, and interactive apps.
+          </p>
+        </article>
+      </div>
+    </section>
 
+    <!-- OPEN DATA & APPS (STREAMLIT) -->
+    <section id="open-data" class="section alt">
+      <h3 class="section-title">Open Data &amp; Apps</h3>
+      <p class="section-intro">
+        AIRC hosts interactive tools and examples built with open data. These are implemented
+        using Streamlit and related open-source libraries.
+      </p>
+      <div class="card-grid">
+        <article class="card">
+          <h4>Open Data Explorer</h4>
+          <p>
+            Browse and filter large datasets curated by AIRC. Designed for students and
+            practitioners who want to explore data without needing to install anything locally.
+          </p>
+          <a href="#" class="text-link">Launch Streamlit app (coming soon)</a>
+        </article>
+
+        <article class="card">
+          <h4>Innovation Demos</h4>
+          <p>
+            Prototype tools showcasing geospatial analytics, AI-assisted workflows, and
+            civic-tech use cases. Ideal for workshops, hackathons, and student projects.
+          </p>
+          <a href="#" class="text-link">View demo gallery (coming soon)</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- LIBRARY (MYST / PUBLICATIONS) -->
+    <section id="library" class="section">
+      <h3 class="section-title">Library &amp; Publications</h3>
+      <p class="section-intro">
+        All long-form content is published using MyST (Markedly Structured Text) to keep
+        reports, briefs, and event notes consistent and easy to reuse.
+      </p>
+      <div class="card-grid">
+        <article class="card">
+          <h4>Policy Notes</h4>
+          <p>
+            Short, accessible explainers and public comments on AI, data governance, and
+            related topics. Written to bridge technical and non-technical audiences.
+          </p>
+          <a href="#" class="text-link">View policy library (coming soon)</a>
+        </article>
+
+        <article class="card">
+          <h4>Innovation &amp; Methods</h4>
+          <p>
+            Walkthroughs of pilots, methods, and technical experiments, including GIS,
+            data science, and AI workflows that can be replicated by others.
+          </p>
+          <a href="#" class="text-link">Explore methods &amp; reports (coming soon)</a>
+        </article>
+
+        <article class="card">
+          <h4>Events &amp; Sessions</h4>
+          <p>
+            Summaries of Mentor Sessions, Speaker Series events, and special programs such
+            as GIS Day at Cabrillo National Monument with Ecologik.
+          </p>
+          <a href="#" class="text-link">Browse event summaries (coming soon)</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- EVENTS -->
+    <section id="events" class="section alt">
+      <h3 class="section-title">Events</h3>
+      <div class="single-card">
+        <article class="card">
+          <h4>GIS Day 2025 @ Cabrillo National Monument (with Ecologik)</h4>
+          <p>
+            Planning is underway for our second GIS Day in collaboration with Ecologik.
+            This year’s event will be hosted online, tentatively on a Sunday in mid-to-late
+            November (e.g., 11/16 or 11/23).
+          </p>
+          <p>
+            The event will feature live talks, student and volunteer projects, and
+            demonstrations of open tools for geospatial and AI-driven analysis.
+          </p>
+          <p class="card-meta">
+            If you are interested in attending, presenting, or supporting the event,
+            please reach out using the contact information below.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section id="team" class="section">
+      <h3 class="section-title">Board &amp; Volunteers</h3>
+      <p class="section-intro">
+        AIRC is powered by a small board, a growing network of volunteers, and mentors who
+        contribute their time and expertise.
+      </p>
+      <h4 class="subheading">Board &amp; Leadership</h4>
+      <div class="card-grid">
+        <article class="card person">
+          <img src="assets/img/team/mohamad.jpg" alt="Photo of Mohamad Alsheikh Yassin">
+          <h5>Mohamad Alsheikh Yassin</h5>
+          <p class="role">Founder &amp; Executive Director</p>
+          <p class="bio">
+            Leads AIRC’s programs at the intersection of AI, GIS, and public-sector
+            innovation, with a focus on practical, community-centered applications.
+          </p>
+        </article>
+
+        <!-- Add additional board members here -->
+        <!--
+        <article class="card person">
+          <img src="assets/img/team/name.jpg" alt="Photo of Name">
+          <h5>Name</h5>
+          <p class="role">Board Member</p>
+          <p class="bio">Short 2–3 sentence bio.</p>
+        </article>
+        -->
+      </div>
+
+      <h4 class="subheading">Volunteer Coordinators &amp; Mentors</h4>
+      <div class="card-grid">
+        <article class="card person">
+          <h5>Mentor Program Coordinators</h5>
+          <p class="role">Volunteer role</p>
+          <p class="bio">
+            A small team of volunteers coordinating the Mentor &amp; Speaker Series pilot
+            (Jan–Jun 2026). Each coordinator recruits subject-matter experts and conducts
+            structured interviews for publication.
+          </p>
+        </article>
+
+        <!-- Add individual volunteers as you collect bios and photos -->
+      </div>
+    </section>
+
+    <!-- GET INVOLVED -->
+    <section id="get-involved" class="section alt">
+      <h3 class="section-title">Get Involved</h3>
+      <div class="single-card">
+        <article class="card">
+          <h4>Volunteer: Mentor Program Coordinator (Unpaid)</h4>
+          <p>
+            Help coordinate AIRC’s Mentor Sessions &amp; Speaker Series — from inviting
+            speakers, to scheduling virtual sessions, to sharing recordings on our website
+            and social media channels.
+          </p>
+          <ul>
+            <li>Approx. 4–6 hours per month (flexible)</li>
+            <li>Remote (U.S.-based preferred)</li>
+            <li>6-month minimum commitment (Jan–Jun 2026 pilot)</li>
+          </ul>
+          <p class="card-meta">
+            Full role description available on volunteer listings (LinkedIn, Idealist, UCSD, etc.).
+          </p>
+          <p>
+            To learn more, express interest, or propose a new collaboration (policy, innovation,
+            open data, or events), please email:
+            <strong>info@airesearchcorps.org</strong>
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> AI Research Corps (AIRC) · 501(c)(3)</p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
