@@ -3,83 +3,473 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AIRC Mentor Program Hub</title>
+  <title>AIRC Mentor Program | Pilot Kickoff Hub (Jan–Jun 2026)</title>
+  <meta name="description" content="AIRC Mentor Program Pilot Kickoff Hub: steps, tools, and lightweight procedures to run successful speaker interviews and mentor sessions." />
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #0b0f17; color: #e8eefc; }
-    header { padding: 28px 18px; background: #101826; border-bottom: 1px solid #1f2a3a; }
-    h1 { margin: 0 0 8px; font-size: 22px; }
-    .sub { opacity: .85; }
-    main { max-width: 920px; margin: 0 auto; padding: 18px; }
-    .card { background: #101826; border: 1px solid #1f2a3a; border-radius: 14px; padding: 16px; margin: 14px 0; }
-    a { color: #79b8ff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .btns a {
-      display: inline-block; margin: 8px 10px 0 0; padding: 10px 12px;
-      border: 1px solid #2a3a52; border-radius: 10px; background: #0f1726;
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
     }
-    ul { margin: 10px 0 0 18px; }
-    .small { font-size: 13px; opacity: .85; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:22px 20px;
+    }
+    .kicker{color:var(--muted); font-size:13px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:28px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:75ch}
+    .grid{display:grid; grid-template-columns: 1.2fr 0.8fr; gap:14px; margin-top:14px}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+    .card{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 8px; font-size:18px}
+    .pillrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+    .pill{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .pill strong{color:var(--text); font-weight:600}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .steps{display:grid; gap:10px}
+    .step{
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+    }
+    .stephead{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .num{
+      width:28px; height:28px; border-radius:8px;
+      background: rgba(125,211,252,0.12);
+      border:1px solid rgba(125,211,252,0.25);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .steptitle{margin:0; font-weight:650}
+    .stepdesc{margin:6px 0 0; color:var(--muted)}
+    .mini{font-size:13px; color:var(--muted)}
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+    }
+    .callout strong{color:var(--warn)}
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .muted{color:var(--muted)}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+    .foot{margin-top:14px; color:var(--muted); font-size:12px}
+    .tiny{font-size:12px}
+    .tag{
+      display:inline-block;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-right:6px;
+      margin-top:6px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>AIRC Mentor Program — Volunteer Hub</h1>
-    <div class="sub">Pilot cohort • Jan–Jun 2026 • 2 sessions per volunteer</div>
-  </header>
+  <div class="wrap">
 
-  <main>
-    <div class="card">
-      <h2>1) Kickoff Recording</h2>
-      <p>Watch anytime. This explains the program, interview workflow, and how to use the toolkit.</p>
-      <div class="btns">
-        <a href="PASTE_KICKOFF_VIDEO_LINK" target="_blank">Watch the kickoff video</a>
+    <header>
+      <div class="kicker">AI Research Corp (AIRC) • Mentor Program</div>
+      <h1>Pilot Kickoff Hub (Jan–Jun 2026)</h1>
+      <p class="sub">
+        This page replaces the “kickoff meeting.” It’s a lightweight, practical guide to help you run
+        <strong>two high-quality sessions</strong> during the pilot — using templates as <em>guidance</em>, not hard rules.
+      </p>
+      <div class="pillrow">
+        <div class="pill"><strong>Pilot goal:</strong> 2 sessions / volunteer</div>
+        <div class="pill"><strong>Format:</strong> recorded interviews + mentor sessions</div>
+        <div class="pill"><strong>Style:</strong> friendly, clear, low-friction</div>
+        <div class="pill"><strong>Support:</strong> async + minimal overhead</div>
       </div>
-      <p class="small">Tip: watch once, then rewatch Slides 6–10 when you schedule your first guest.</p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>1) Start Here</h2>
+        <p class="muted" style="margin:0 0 10px">
+          Watch the kickoff recording, then use the procedure below to plan and run your first session.
+        </p>
+
+        <div class="btnrow">
+          <a class="btn primary" href="#" id="kickoffLink">▶ Kickoff Recording (add link)</a>
+          <a class="btn" href="#" id="quickGuideLink">📄 1-Page Checklist (add link)</a>
+          <a class="btn" href="https://drive.google.com/drive/folders/18H6aBRzxRQAiATV7Udl3t8eriCF87NWI?usp=sharing" target="_blank" rel="noopener">
+            📁 Procedures & Templates Folder
+          </a>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="callout">
+          <strong>Important:</strong> You don’t need to “fill forms.” Use the templates only when they help.
+          The main deliverable is the <strong>session</strong> (recorded + shared back with AIRC).
+        </div>
+
+        <p class="mini" style="margin-top:10px">
+          The Mentor Program Coordinator role is designed to coordinate sessions, outreach, logistics, and follow-up —
+          keeping things organized and professional while staying volunteer-friendly.
+        </p>
+      </section>
+
+      <aside class="card">
+        <h2>2) Your First Session Targets</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="stephead">
+              <div style="display:flex; gap:10px; align-items:center">
+                <div class="num">A</div>
+                <p class="steptitle">Pick a theme</p>
+              </div>
+            </div>
+            <p class="stepdesc">Choose one topic area you can comfortably explore (ex: AI ethics, GIS, biotech, education, industry).</p>
+          </div>
+
+          <div class="step">
+            <div class="stephead">
+              <div style="display:flex; gap:10px; align-items:center">
+                <div class="num">B</div>
+                <p class="steptitle">Pick a speaker</p>
+              </div>
+            </div>
+            <p class="stepdesc">Someone with real-world experience and willingness to share lessons, not just hype.</p>
+          </div>
+
+          <div class="step">
+            <div class="stephead">
+              <div style="display:flex; gap:10px; align-items:center">
+                <div class="num">C</div>
+                <p class="steptitle">Run a clean interview</p>
+              </div>
+            </div>
+            <p class="stepdesc">Use the AIRC question script and keep it human: clear intro, structured questions, respectful timing.</p>
+          </div>
+
+          <div class="step">
+            <div class="stephead">
+              <div style="display:flex; gap:10px; align-items:center">
+                <div class="num">D</div>
+                <p class="steptitle">Close out & handoff</p>
+              </div>
+            </div>
+            <p class="stepdesc">Send the recording + notes back to AIRC using the “Session Plan / Handoff” template below.</p>
+          </div>
+        </div>
+
+      </aside>
     </div>
 
-    <div class="card">
-      <h2>2) Quick Guide (1-page)</h2>
-      <p>A simple checklist to run a clean interview and submit deliverables.</p>
-      <div class="btns">
-        <a href="PASTE_QUICK_GUIDE_LINK" target="_blank">Open Quick Guide</a>
+    <section class="card" style="margin-top:14px">
+      <h2>3) Procedure: Run a Successful AIRC Session (Simple + Repeatable)</h2>
+      <p class="muted" style="margin:0 0 10px">
+        This is the core workflow. It mirrors the responsibilities we defined (outreach → scheduling → facilitation → follow-up → tracking). 
+      </p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="stephead">
+            <div style="display:flex; gap:10px; align-items:center">
+              <div class="num">1</div>
+              <p class="steptitle">Define the session</p>
+            </div>
+          </div>
+          <p class="stepdesc">
+            Set: (a) topic theme, (b) intended audience, (c) 3–5 outcomes (what viewers should learn), (d) 30–45 min target length.
+          </p>
+          <div class="tiny muted">Output: a 1-paragraph “session intent” you can paste into your outreach.</div>
+        </div>
+
+        <div class="step">
+          <div class="stephead">
+            <div style="display:flex; gap:10px; align-items:center">
+              <div class="num">2</div>
+              <p class="steptitle">Outreach & invite</p>
+            </div>
+          </div>
+          <p class="stepdesc">
+            Invite a speaker aligned with AIRC’s mission. Keep it short: why them, what the session is, time estimate, and permission to record.
+          </p>
+          <div class="tiny muted">Output: confirmed speaker + tentative date window.</div>
+        </div>
+
+        <div class="step">
+          <div class="stephead">
+            <div style="display:flex; gap:10px; align-items:center">
+              <div class="num">3</div>
+              <p class="steptitle">Prep (lightweight)</p>
+            </div>
+          </div>
+          <p class="stepdesc">
+            Collect their short bio, links (LinkedIn/site), and 3 suggested “high points.” Pick your final questions and timing.
+          </p>
+          <div class="tiny muted">Output: final question list + intro blurb.</div>
+        </div>
+
+        <div class="step">
+          <div class="stephead">
+            <div style="display:flex; gap:10px; align-items:center">
+              <div class="num">4</div>
+              <p class="steptitle">Host the session</p>
+            </div>
+          </div>
+          <p class="stepdesc">
+            Open with AIRC mission + what viewers will get. Ask questions, keep the flow, and watch time.
+            End with: “Where can people follow your work?” + “Any final advice?”
+          </p>
+          <div class="tiny muted">Output: recording + any notes.</div>
+        </div>
+
+        <div class="step">
+          <div class="stephead">
+            <div style="display:flex; gap:10px; align-items:center">
+              <div class="num">5</div>
+              <p class="steptitle">Close out & handoff to AIRC</p>
+            </div>
+          </div>
+          <p class="stepdesc">
+            Send recording link/file, title suggestion, speaker bio, and 5–8 bullet highlights (not a full transcript).
+          </p>
+          <div class="tiny muted">Output: AIRC can publish + archive consistently.</div>
+        </div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2>3) Templates & Procedures Folder</h2>
-      <p>Outreach templates, question bank, session checklist, upload instructions.</p>
-      <div class="btns">
-        <a href="https://drive.google.com/drive/folders/18H6aBRzxRQAiATV7Udl3t8eriCF87NWI?usp=sharing" target="_blank">Open Drive folder</a>
+      <div class="hr"></div>
+
+      <div class="twoCol">
+        <div>
+          <h3 style="margin:0 0 8px; font-size:16px">What “Good” Looks Like</h3>
+          <span class="tag">Clear intro</span>
+          <span class="tag">Aligned questions</span>
+          <span class="tag">Respectful timing</span>
+          <span class="tag">Practical takeaways</span>
+          <span class="tag">Clean close-out</span>
+          <p class="muted" style="margin:10px 0 0">
+            A session doesn’t need to be perfect. It needs to be <strong>useful</strong>, <strong>coherent</strong>, and <strong>repeatable</strong>.
+          </p>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px; font-size:16px">Boundaries (Keeps it Simple)</h3>
+          <ul class="muted" style="margin:0; padding-left:18px">
+            <li>No heavy paperwork.</li>
+            <li>No micromanaging.</li>
+            <li>No perfectionism required.</li>
+            <li>We prioritize volunteers who deliver sessions.</li>
+          </ul>
+          <p class="muted" style="margin:10px 0 0">
+            If you can do <strong>two solid sessions</strong> during the pilot, you’re doing the job.
+          </p>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <h2>4) Submit Session Info</h2>
-      <p>After recording a session, submit: title, guest, link, and 5–10 highlights.</p>
+    <section class="card" style="margin-top:14px">
+      <h2>4) Session Plan / Handoff (Send to AIRC)</h2>
+      <p class="muted" style="margin:0 0 10px">
+        Use this section to send the basics back to Mohamad. This is intentionally minimal.
+      </p>
 
-      <!-- Option A: Link to a Google Form -->
-      <div class="btns">
-        <a href="PASTE_GOOGLE_FORM_LINK" target="_blank">Submit session details</a>
+      <div class="callout">
+        <strong>Private by default:</strong> This “Submit” action uses your email app (mailto). No web server needed.
+        If you want a true web submission later, we can swap this for a secure form endpoint.
       </div>
 
-      <!-- Option B: Embed the Google Form directly (uncomment and paste embed link)
-      <iframe
-        src="PASTE_GOOGLE_FORM_EMBED_LINK"
-        width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0">
-        Loading…
-      </iframe>
-      -->
-    </div>
+      <form id="handoffForm">
+        <div class="twoCol">
+          <div>
+            <label for="volName">Your name</label>
+            <input id="volName" name="volName" placeholder="e.g., Shante Stokes" />
+          </div>
+          <div>
+            <label for="topic">Session theme</label>
+            <input id="topic" name="topic" placeholder="e.g., AI ethics in education / GIS in industry" />
+          </div>
+        </div>
 
-    <div class="card">
-      <h2>5) What to do next</h2>
-      <ul>
-        <li>Pick your topic area</li>
-        <li>Identify 2 guest candidates</li>
-        <li>Schedule Session #1 for January</li>
-      </ul>
-      <p class="small">Reply to Mohamad with your topic + 2 guest ideas to get moving.</p>
-    </div>
-  </main>
+        <div class="twoCol">
+          <div>
+            <label for="speaker">Speaker name + org</label>
+            <input id="speaker" name="speaker" placeholder="e.g., Jane Doe — Company / Lab / Agency" />
+          </div>
+          <div>
+            <label for="dateWin">Target date window</label>
+            <input id="dateWin" name="dateWin" placeholder="e.g., Feb 10–25" />
+          </div>
+        </div>
+
+        <label for="links">Links (speaker site / LinkedIn / reading)</label>
+        <input id="links" name="links" placeholder="Paste URLs or references (optional)" />
+
+        <label for="highlights">Key highlights (5–8 bullets)</label>
+        <textarea id="highlights" name="highlights" placeholder="- Bullet 1
+- Bullet 2
+- Bullet 3"></textarea>
+
+        <label for="recording">Recording link (or “will upload”)</label>
+        <input id="recording" name="recording" placeholder="Link to file or 'will upload to Drive'" />
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="emailSubmit">✉️ Send Handoff via Email</button>
+          <button class="btn" type="button" id="copyText">Copy as Text</button>
+        </div>
+
+        <p class="foot">
+          Tip: If your email app strips formatting, click “Copy as Text” and paste into an email.
+        </p>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:14px">
+      <h2>5) Next Step (Optional): Convert Paperwork → Simple HTML</h2>
+      <p class="muted" style="margin:0">
+        Yes — you can replace Drive-based paperwork with a private, lightweight browser flow:
+        <strong>(a)</strong> a static “Volunteer Acknowledgement” page, plus
+        <strong>(b)</strong> a single submission form (either mailto, or a secure endpoint).
+        This keeps everything clean and consistent, and avoids scattering forms.
+      </p>
+      <div class="hr"></div>
+      <p class="muted" style="margin:0">
+        If you want, I can generate a second HTML page called <strong>volunteer-acknowledgement.html</strong>
+        that includes: code of conduct checkbox, recording consent checkbox, and a single “I agree” submission.
+      </p>
+    </section>
+
+    <p class="foot">
+      © AI Research Corp (AIRC). This hub is intended for the pilot cohort. Keep links minimal if you publish publicly.
+    </p>
+  </div>
+
+  <script>
+    // === Configure these without changing the rest of the page ===
+    const CONFIG = {
+      kickoffRecordingUrl: "",       // add your YouTube/Drive link
+      quickGuideUrl: "",             // add your PDF/Doc link
+      handoffEmailTo: "mohamad@airesearchcorp.org", // change if needed
+      handoffEmailSubject: "AIRC Mentor Program | Session Handoff (Pilot Jan–Jun 2026)"
+    };
+
+    // Apply links
+    const kickoffLink = document.getElementById("kickoffLink");
+    const quickGuideLink = document.getElementById("quickGuideLink");
+    if (CONFIG.kickoffRecordingUrl) kickoffLink.href = CONFIG.kickoffRecordingUrl;
+    if (CONFIG.quickGuideUrl) quickGuideLink.href = CONFIG.quickGuideUrl;
+
+    // Build handoff text
+    function buildHandoffText(){
+      const v = (id) => (document.getElementById(id)?.value || "").trim();
+
+      const lines = [
+        "AIRC Mentor Program — Session Handoff",
+        "-----------------------------------",
+        `Volunteer: ${v("volName") || "[name]"}`,
+        `Theme: ${v("topic") || "[theme]"}`,
+        `Speaker: ${v("speaker") || "[speaker]"}`,
+        `Target window: ${v("dateWin") || "[date window]"}`,
+        "",
+        `Links: ${v("links") || "[optional]"}`,
+        "",
+        "Highlights:",
+        v("highlights") || "- [add 5–8 bullets]",
+        "",
+        `Recording: ${v("recording") || "[link or 'will upload']"}`,
+        ""
+      ];
+      return lines.join("\n");
+    }
+
+    // Copy as text
+    document.getElementById("copyText").addEventListener("click", async () => {
+      const text = buildHandoffText();
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    });
+
+    // Mailto submit
+    document.getElementById("emailSubmit").addEventListener("click", () => {
+      const body = encodeURIComponent(buildHandoffText());
+      const subject = encodeURIComponent(CONFIG.handoffEmailSubject);
+      const to = encodeURIComponent(CONFIG.handoffEmailTo);
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+  </script>
 </body>
 </html>
