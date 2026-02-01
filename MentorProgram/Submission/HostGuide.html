@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Host Guide</title>
+  <meta name="description" content="AIRC Mentor Program — Interview Script & Host Guide. Serverless: copy as text or mailto." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+      --ok:#34d399;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:86ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    @media (max-width: 900px){
+      header{flex-direction:column; align-items:stretch}
+      .toplinks{justify-content:flex-start}
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:110px; resize:vertical}
+
+    .checkgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:10px}
+    @media (max-width: 900px){ .checkgrid{grid-template-columns:1fr} }
+    .chk{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      padding:10px 10px;
+    }
+    .chk input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--accent);
+    }
+
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+    }
+    .callout strong{color:var(--warn)}
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
+
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      margin-top:10px;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      font-size:13px;
+    }
+    th{color:var(--muted); font-weight:700; background: rgba(255,255,255,0.03)}
+    tr:last-child td{border-bottom:none}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Interview Script &amp; Host Guide</h1>
+          <p class="sub">A lightweight script to stay confident, avoid awkward pauses, and keep sessions consistent. Serverless: copy as text or mailto.</p>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Purpose</h2>
+      <p class="muted" style="margin:0">
+        This guide helps volunteers stay confident, keep sessions professional, maintain consistency, and reduce anxiety.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Section 1 — Session Information</h2>
+
+      <form id="hostForm">
+        <div class="twoCol">
+          <div>
+            <label for="sessionTitle">Session Title</label>
+            <input id="sessionTitle" name="sessionTitle" placeholder="e.g., Real-world AI in Healthcare" />
+          </div>
+          <div>
+            <label for="guestSpeaker">Guest Speaker</label>
+            <input id="guestSpeaker" name="guestSpeaker" placeholder="e.g., Dr. Jane Doe" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="date">Date</label>
+            <input id="date" name="date" placeholder="e.g., 2026-03-05" />
+          </div>
+          <div>
+            <label for="time">Time</label>
+            <input id="time" name="time" placeholder="e.g., 6:00 PM PT" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="platform">Platform</label>
+            <input id="platform" name="platform" placeholder="e.g., Zoom / Google Meet" />
+          </div>
+          <div>
+            <label for="hostName">Host (Volunteer)</label>
+            <input id="hostName" name="hostName" placeholder="e.g., Dennis Smith" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 2 — Pre-Session Checklist</h2>
+        <p class="muted" style="margin:0 0 8px; font-size:13px">Complete before going live.</p>
+
+        <div class="checkgrid" id="preChecklist">
+          <label class="chk"><input type="checkbox" data-label="Confirm speaker consent to record" /> <span>Confirm speaker consent to record</span></label>
+          <label class="chk"><input type="checkbox" data-label="Test audio and video" /> <span>Test audio and video</span></label>
+          <label class="chk"><input type="checkbox" data-label="Confirm recording is enabled" /> <span>Confirm recording is enabled</span></label>
+          <label class="chk"><input type="checkbox" data-label="Close unnecessary apps/tabs" /> <span>Close unnecessary apps/tabs</span></label>
+          <label class="chk"><input type="checkbox" data-label="Review questions" /> <span>Review questions</span></label>
+          <label class="chk"><input type="checkbox" data-label="Prepare brief intro" /> <span>Prepare brief intro</span></label>
+          <label class="chk"><input type="checkbox" data-label="Have timer/clock ready" /> <span>Have timer/clock ready</span></label>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 3 — Opening Script</h2>
+        <p class="muted" style="margin:0 0 8px; font-size:13px">Read or adapt.</p>
+
+        <label for="openingScript">Opening Script</label>
+        <textarea id="openingScript" name="openingScript">Hello everyone, and welcome to today’s AIRC Mentor Program session.
+My name is [Name], and I’ll be your host today.
+We’re excited to be joined by [Speaker Name], who is [brief description].
+Today’s session will focus on [topic].
+This conversation is being recorded and will be shared publicly through AIRC.
+Thank you for joining us, and welcome [Speaker Name].</textarea>
+
+        <div class="callout" style="margin-top:10px">
+          <strong>Quick tweak:</strong> Personalize two lines: (1) why the guest matters, (2) what learners will gain.
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 4 — Speaker Introduction</h2>
+        <label for="bio">Prepared Bio (2–3 sentences)</label>
+        <textarea id="bio" name="bio" placeholder="Write a short bio you can read out loud."></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 5 — Core Interview Questions</h2>
+        <p class="muted" style="margin:0 0 8px; font-size:13px">Use as your primary guide. Keep it human.</p>
+
+        <label for="questionSet">Question Set</label>
+        <textarea id="questionSet" name="questionSet" placeholder="List your main questions here (5–8)."></textarea>
+
+        <label for="followUps">Follow-Up Prompts (Optional)</label>
+        <textarea id="followUps" name="followUps">Can you expand on that?
+What challenges did you face?
+What would you do differently?
+How did you learn that skill?
+What advice would you give?</textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 6 — Time Management Guide</h2>
+        <table aria-label="Time management guide">
+          <thead>
+            <tr>
+              <th>Segment</th>
+              <th>Target Time</th>
+              <th>Notes (optional)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Intro</td><td>2 min</td><td><input id="tmIntro" placeholder="Optional notes" /></td></tr>
+            <tr><td>Background</td><td>5 min</td><td><input id="tmBg" placeholder="Optional notes" /></td></tr>
+            <tr><td>Main Content</td><td>25 min</td><td><input id="tmMain" placeholder="Optional notes" /></td></tr>
+            <tr><td>Advice</td><td>8 min</td><td><input id="tmAdvice" placeholder="Optional notes" /></td></tr>
+            <tr><td>Q&amp;A</td><td>8 min</td><td><input id="tmQA" placeholder="Optional notes" /></td></tr>
+            <tr><td>Closing</td><td>2 min</td><td><input id="tmClose" placeholder="Optional notes" /></td></tr>
+          </tbody>
+        </table>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 7 — Audience Q&amp;A (if applicable)</h2>
+        <label for="qaQuestions">Questions Asked</label>
+        <textarea id="qaQuestions" name="qaQuestions" placeholder="List audience questions + short notes."></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 8 — Closing Script</h2>
+        <label for="closingScript">Closing Script</label>
+        <textarea id="closingScript" name="closingScript">Thank you, [Speaker Name], for sharing your experience and insights.
+We truly appreciate your time and perspective.
+Thank you to everyone who joined us today.
+You can find this session and future events on AIRC’s channels.
+Have a great day.</textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 9 — Post-Session Checklist</h2>
+        <div class="checkgrid" id="postChecklist">
+          <label class="chk"><input type="checkbox" data-label="Stop recording" /> <span>Stop recording</span></label>
+          <label class="chk"><input type="checkbox" data-label="Save backup copy" /> <span>Save backup copy</span></label>
+          <label class="chk"><input type="checkbox" data-label="Upload recording" /> <span>Upload recording</span></label>
+          <label class="chk"><input type="checkbox" data-label="Thank speaker via email" /> <span>Thank speaker via email</span></label>
+          <label class="chk"><input type="checkbox" data-label="Complete documentation" /> <span>Complete documentation</span></label>
+          <label class="chk"><input type="checkbox" data-label="Submit materials" /> <span>Submit materials</span></label>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 10 — Host Notes (after session)</h2>
+        <div class="twoCol">
+          <div>
+            <label for="observations">Observations</label>
+            <textarea id="observations" name="observations"></textarea>
+          </div>
+          <div>
+            <label for="improvements">Improvements for next time</label>
+            <textarea id="improvements" name="improvements"></textarea>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Export / Send</h2>
+        <p class="muted" style="margin:0 0 8px; font-size:13px">
+          Copy as text to paste into an email/doc, or open your email client with a prefilled message.
+        </p>
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="copyTextBtn">Copy as Text</button>
+          <button class="btn" type="button" id="emailBtn">✉️ Send via Email</button>
+          <button class="btn ghost" type="button" id="printBtn">Print / Save as PDF</button>
+          <button class="btn" type="button" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="preview" id="exportPreview"></div>
+
+        <p class="foot">Tip: “Print / Save as PDF” creates a clean archive file (handy for internal records).</p>
+      </form>
+    </section>
+
+    <p class="foot">© AI Research Corps (AIRC). Serverless form (no data is stored).</p>
+
+  </div>
+
+  <script>
+    // === Configure these without changing the rest of the page ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org", // change if needed
+      emailSubject: "AIRC Mentor Program | Host Guide",
+      includeChecklistStates: true
+    };
+
+    function v(id){ return (document.getElementById(id)?.value || "").trim(); }
+
+    function checkedLabels(containerId){
+      const root = document.getElementById(containerId);
+      if (!root) return [];
+      const items = Array.from(root.querySelectorAll('input[type="checkbox"]'));
+      return items.map(cb => ({
+        label: cb.getAttribute("data-label") || "Item",
+        checked: !!cb.checked
+      }));
+    }
+
+    function formatChecklist(title, items){
+      if (!items.length) return "";
+      const lines = [];
+      lines.push(title);
+      items.forEach(it => lines.push(`${it.checked ? "☑" : "☐"} ${it.label}`));
+      lines.push("");
+      return lines.join("\n");
+    }
+
+    function buildExportText(){
+      const lines = [];
+      lines.push("AIRC Mentor Program — Interview Script & Host Guide");
+      lines.push("--------------------------------------------------");
+      lines.push(`Session Title: ${v("sessionTitle")}`);
+      lines.push(`Date: ${v("date")}`);
+      lines.push(`Time: ${v("time")}`);
+      lines.push(`Platform: ${v("platform")}`);
+      lines.push(`Host (Volunteer): ${v("hostName")}`);
+      lines.push(`Guest Speaker: ${v("guestSpeaker")}`);
+      lines.push("");
+
+      if (CONFIG.includeChecklistStates){
+        lines.push(formatChecklist("Pre-Session Checklist:", checkedLabels("preChecklist")));
+      }
+
+      lines.push("Opening Script:");
+      lines.push(v("openingScript"));
+      lines.push("");
+
+      lines.push("Speaker Introduction (Prepared Bio):");
+      lines.push(v("bio"));
+      lines.push("");
+
+      lines.push("Core Interview Questions (Question Set):");
+      lines.push(v("questionSet"));
+      lines.push("");
+
+      lines.push("Follow-Up Prompts:");
+      lines.push(v("followUps"));
+      lines.push("");
+
+      lines.push("Time Management Notes:");
+      lines.push(`Intro (2 min): ${v("tmIntro")}`);
+      lines.push(`Background (5 min): ${v("tmBg")}`);
+      lines.push(`Main Content (25 min): ${v("tmMain")}`);
+      lines.push(`Advice (8 min): ${v("tmAdvice")}`);
+      lines.push(`Q&A (8 min): ${v("tmQA")}`);
+      lines.push(`Closing (2 min): ${v("tmClose")}`);
+      lines.push("");
+
+      lines.push("Audience Q&A (Questions Asked):");
+      lines.push(v("qaQuestions"));
+      lines.push("");
+
+      lines.push("Closing Script:");
+      lines.push(v("closingScript"));
+      lines.push("");
+
+      if (CONFIG.includeChecklistStates){
+        lines.push(formatChecklist("Post-Session Checklist:", checkedLabels("postChecklist")));
+      }
+
+      lines.push("Host Notes (After Session):");
+      lines.push("Observations:");
+      lines.push(v("observations"));
+      lines.push("");
+      lines.push("Improvements for next time:");
+      lines.push(v("improvements"));
+      lines.push("");
+
+      return lines.join("\n");
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    const previewBox = document.getElementById("exportPreview");
+
+    document.getElementById("copyTextBtn").addEventListener("click", async () => {
+      const text = buildExportText();
+      previewBox.style.display = "block";
+      previewBox.textContent = text;
+      await copyToClipboard(text);
+    });
+
+    document.getElementById("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildExportText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo || "");
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Clear all fields and checkboxes?")) {
+        document.getElementById("hostForm").reset();
+        previewBox.style.display = "none";
+        previewBox.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
