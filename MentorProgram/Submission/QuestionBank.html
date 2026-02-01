@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Question Bank</title>
+  <meta name="description" content="AIRC Mentor Program Question Bank: reusable interview questions for speaker sessions and mentor interviews." />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1100px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:20px 18px;
+    }
+    .kicker{color:var(--muted); font-size:13px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:28px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:85ch}
+    .pillrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+    .pill{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .pill strong{color:var(--text); font-weight:600}
+    .grid{display:grid; grid-template-columns: 1.05fr 0.95fr; gap:14px; margin-top:14px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .card{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+    }
+    .callout strong{color:var(--warn)}
+    .sectionTitle{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin:0 0 6px;
+    }
+    .tag{
+      display:inline-block;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-right:6px;
+      margin-top:6px;
+    }
+    .qgroup{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(0,0,0,0.10);
+      padding:12px 12px;
+      margin-top:10px;
+    }
+    .qgroup h3{margin:0 0 6px; font-size:15px}
+    .q{display:flex; gap:10px; align-items:flex-start; margin:8px 0}
+    .q input{width:18px; height:18px; margin-top:3px; flex:0 0 auto}
+    .q p{margin:0}
+    .q small{display:block; color:var(--muted); margin-top:2px}
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
+    .foot{margin-top:14px; color:var(--muted); font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="kicker">AI Research Corp (AIRC) • Mentor Program</div>
+      <h1>Question Bank</h1>
+      <p class="sub">
+        Select questions to build a clean interview script. Use <strong>Copy</strong> or <strong>Email</strong> to share with AIRC or your guest.
+        This page stores nothing (serverless).
+      </p>
+      <div class="pillrow">
+        <div class="pill"><strong>Use:</strong> speaker interviews + mentor sessions</div>
+        <div class="pill"><strong>Goal:</strong> practical, reusable content</div>
+        <div class="pill"><strong>Tip:</strong> 8–12 questions max</div>
+        <div class="pill"><strong>Default:</strong> 60 minutes</div>
+      </div>
+    </header>
+
+    <div class="grid">
+
+      <!-- LEFT: BUILDER -->
+      <section class="card">
+        <h2>Build Your Script</h2>
+        <p class="muted" style="margin:0 0 10px">
+          Pick a track, choose time target, then check questions below. The script auto-generates.
+        </p>
+
+        <div class="twoCol">
+          <div>
+            <label for="sessionTitle">Session title</label>
+            <input id="sessionTitle" placeholder="e.g., From GIS to AI: Real-World Lessons in Public Sector Analytics" />
+          </div>
+          <div>
+            <label for="guestName">Guest speaker</label>
+            <input id="guestName" placeholder="Name + org (optional)" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="track">Track (recommended)</label>
+            <select id="track">
+              <option value="general">General (default)</option>
+              <option value="industry">Industry / Business</option>
+              <option value="public">Government / Public Sector</option>
+              <option value="nonprofit">Nonprofit / Community</option>
+              <option value="academia">Academia / Research</option>
+              <option value="startup">Startup / Founder</option>
+              <option value="student">Student / Early-career focus</option>
+              <option value="gis">GIS / Geospatial focus</option>
+              <option value="ai">AI / ML focus</option>
+              <option value="data">Data Science focus</option>
+            </select>
+          </div>
+          <div>
+            <label for="duration">Target duration</label>
+            <select id="duration">
+              <option value="45">45 minutes</option>
+              <option value="60" selected>60 minutes</option>
+              <option value="75">75 minutes</option>
+              <option value="90">90 minutes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="audience">Audience</label>
+            <select id="audience">
+              <option value="mixed" selected>Mixed</option>
+              <option value="hs">High School</option>
+              <option value="college">College</option>
+              <option value="early">Early-career</option>
+              <option value="career">Career switchers</option>
+              <option value="general">General public</option>
+            </select>
+          </div>
+          <div>
+            <label for="level">Depth level</label>
+            <select id="level">
+              <option value="beginner">Beginner-friendly</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced / technical</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:12px">
+          <strong>Rule of thumb:</strong> For a 60-min session, aim for:
+          <span class="tag">3 min intro</span>
+          <span class="tag">7 min background</span>
+          <span class="tag">35–40 min core</span>
+          <span class="tag">10–12 min Q&A</span>
+          <span class="tag">2 min close</span>
+        </div>
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="copyBtn">Copy Script</button>
+          <button class="btn" type="button" id="emailBtn">✉️ Email Script</button>
+          <button class="btn ghost" type="button" id="printBtn">Print / Save PDF</button>
+          <button class="btn" type="button" id="clearBtn">Clear Selections</button>
+        </div>
+
+        <div class="preview" id="preview"></div>
+
+        <p class="foot">
+          Tip: If you want chapters later, keep question wording short and consistent.
+        </p>
+      </section>
+
+      <!-- RIGHT: QUICK START + CONSENT + CLOSE -->
+      <aside class="card">
+        <h2>Quick Start (Host Prompts)</h2>
+
+        <div class="qgroup">
+          <div class="sectionTitle">
+            <h3>Recording + consent (read aloud)</h3>
+          </div>
+          <p class="muted" style="margin:0">
+            “This session is being recorded and may be shared publicly by AIRC. Are you comfortable proceeding?”
+          </p>
+          <div class="hr"></div>
+          <p class="muted" style="margin:0">
+            If “no”: offer <span class="tag">unlisted</span> or <span class="tag">no recording</span> options, or stop.
+          </p>
+        </div>
+
+        <div class="qgroup">
+          <div class="sectionTitle">
+            <h3>Warm-up questions (pick 1–2)</h3>
+          </div>
+          <div class="q"><input type="checkbox" class="qb" data-group="warmup" data-q="Before we start, how do you describe your work to someone outside your field?" /><p>Describe your work simply.<small>Great for mixed audiences.</small></p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="warmup" data-q="What are you excited about right now in your work, and why?" /><p>What excites you right now?<small>Sets a positive tone.</small></p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="warmup" data-q="What’s one misconception people have about your field?" /><p>One misconception.<small>Creates instant value.</small></p></div>
+        </div>
+
+        <div class="qgroup">
+          <div class="sectionTitle">
+            <h3>Closing questions (pick 2–3)</h3>
+          </div>
+          <div class="q"><input type="checkbox" class="qb" data-group="closing" data-q="If you could give one piece of advice to someone starting today, what would it be?" /><p>One piece of advice.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="closing" data-q="What should learners focus on in the next 6–12 months to be more effective in this space?" /><p>Next 6–12 months focus.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="closing" data-q="Where can people follow your work or learn more (links, resources, communities)?" /><p>Where to follow you.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="closing" data-q="Is there anything we didn’t ask that you wish people understood about this field?" /><p>What we missed.</p></div>
+        </div>
+
+        <div class="qgroup">
+          <div class="sectionTitle">
+            <h3>Chapter prompts (optional)</h3>
+          </div>
+          <p class="muted" style="margin:0 0 8px">
+            Use these to simplify publishing (chapters/timestamps).
+          </p>
+          <div class="q"><input type="checkbox" class="qb" data-group="chapters" data-q="(Chapter) Background & origin story" /><p>Background chapter.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="chapters" data-q="(Chapter) Current projects & impact" /><p>Current work chapter.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="chapters" data-q="(Chapter) Tools, skills, and methods" /><p>Skills/tools chapter.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="chapters" data-q="(Chapter) Challenges & ethics" /><p>Challenges/ethics chapter.</p></div>
+          <div class="q"><input type="checkbox" class="qb" data-group="chapters" data-q="(Chapter) Advice & resources" /><p>Advice chapter.</p></div>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- QUESTION BANK -->
+    <section class="card" style="margin-top:14px">
+      <h2>Question Bank (Choose What Fits)</h2>
+      <p class="muted" style="margin:0 0 8px">
+        You do not need all of these. Select ~8–12 total for a 60-min session.
+      </p>
+
+      <!-- CAREER / PATH -->
+      <div class="qgroup" data-bank="core">
+        <h3>1) Career Path & Story (core)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="core" data-q="What was your path into this field? Any turning points or surprises?" /><p>Path into the field.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="core" data-q="What skills or experiences helped you most early on?" /><p>Early skills that mattered.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="core" data-q="If you could restart with today’s knowledge, what would you do differently?" /><p>What you’d do differently.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="core" data-q="How did you find mentors, communities, or opportunities that helped you grow?" /><p>Mentors & community.</p></div>
+      </div>
+
+      <!-- SKILLS / LEARNING -->
+      <div class="qgroup" data-bank="skills">
+        <h3>2) Skills, Learning & Hiring</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="skills" data-q="What are 3–5 skills you’d prioritize for someone trying to enter this space?" /><p>Top 3–5 skills.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="skills" data-q="How do you recommend people practice those skills with real projects or portfolios?" /><p>Practice + portfolio.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="skills" data-q="What do you look for when evaluating candidates (signals beyond the resume)?" /><p>Hiring signals.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="skills" data-q="What’s a common beginner mistake, and how can people avoid it?" /><p>Common mistake.</p></div>
+      </div>
+
+      <!-- DAY-TO-DAY -->
+      <div class="qgroup" data-bank="day">
+        <h3>3) Day-to-Day Work & Reality</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="day" data-q="What does a typical week look like in your role (types of tasks, meetings, deep work)?" /><p>Typical week.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="day" data-q="What constraints shape your work (time, budget, stakeholders, compliance, safety)?" /><p>Constraints.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="day" data-q="How do you measure success (metrics, outcomes, user impact)?" /><p>Success metrics.</p></div>
+      </div>
+
+      <!-- PROJECT / CASE STUDY -->
+      <div class="qgroup" data-bank="case">
+        <h3>4) Project / Case Study (high value)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="case" data-q="Can you walk us through a project you’re proud of—problem, approach, and impact?" /><p>Walkthrough a project.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="case" data-q="What tradeoffs did you have to make (quality vs speed, cost vs accuracy, simplicity vs power)?" /><p>Tradeoffs.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="case" data-q="What did you learn the hard way on that project?" /><p>Hard lessons.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="case" data-q="If you were mentoring someone to replicate that project, what steps would you give them?" /><p>Replication steps.</p></div>
+      </div>
+
+      <!-- AI / ML -->
+      <div class="qgroup" data-bank="ai">
+        <h3>5) AI / ML (if relevant)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="ai" data-q="Where does AI/ML actually add value in your work—and where does it not?" /><p>Value vs hype.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="ai" data-q="What does ‘good data’ look like in practice for your use case?" /><p>Data quality.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="ai" data-q="How do you validate models or decisions (tests, monitoring, human review)?" /><p>Validation.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="ai" data-q="What failures or risks do you watch for (bias, drift, misuse, privacy)?" /><p>Risks.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="ai" data-q="What’s one AI tool you think is genuinely helpful for learners today, and why?" /><p>Tool recommendation.</p></div>
+      </div>
+
+      <!-- GIS / GEO -->
+      <div class="qgroup" data-bank="gis">
+        <h3>6) GIS / Geospatial (if relevant)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="gis" data-q="What’s a real-world geospatial problem you work on, and why is location essential to it?" /><p>Why location matters.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="gis" data-q="What does your geospatial pipeline look like (data sources → processing → visualization → decisions)?" /><p>Pipeline overview.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="gis" data-q="How do you handle accuracy, projections, and ‘ground truth’ in your work?" /><p>Accuracy + projections.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="gis" data-q="What tools are most important (GIS platforms, databases, web mapping) and why?" /><p>Tools stack.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="gis" data-q="What’s a common misunderstanding about GIS that you wish more people knew?" /><p>GIS misconceptions.</p></div>
+      </div>
+
+      <!-- DATA SCIENCE -->
+      <div class="qgroup" data-bank="data">
+        <h3>7) Data Science & Analytics (if relevant)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="data" data-q="How do you go from messy data to trustworthy insight?" /><p>Messy → insight.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="data" data-q="What metrics or dashboards actually matter, and which ones are misleading?" /><p>Metrics that matter.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="data" data-q="How do you communicate findings to non-technical stakeholders?" /><p>Communication.</p></div>
+      </div>
+
+      <!-- ETHICS / POLICY -->
+      <div class="qgroup" data-bank="ethics">
+        <h3>8) Ethics, Policy & Responsibility</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="ethics" data-q="What ethical issues show up in your work, even if your job title isn’t ‘ethics’?" /><p>Hidden ethics.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="ethics" data-q="How do you balance transparency, privacy, and usefulness?" /><p>Transparency vs privacy.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="ethics" data-q="What are red flags you look for before deploying something into the real world?" /><p>Deployment red flags.</p></div>
+      </div>
+
+      <!-- PUBLIC SECTOR -->
+      <div class="qgroup" data-bank="public">
+        <h3>9) Public Sector / Civic Tech (if relevant)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="public" data-q="What’s different about shipping solutions in government compared to private sector?" /><p>Gov vs private.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="public" data-q="How do you navigate stakeholders, procurement, or compliance constraints?" /><p>Constraints & stakeholders.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="public" data-q="How do you ensure equity and accessibility in services or tools?" /><p>Equity & accessibility.</p></div>
+      </div>
+
+      <!-- STARTUP / LEADERSHIP -->
+      <div class="qgroup" data-bank="lead">
+        <h3>10) Leadership, Teams & Building Things</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="lead" data-q="How do you make technical decisions when information is incomplete?" /><p>Decision-making.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="lead" data-q="What makes cross-functional collaboration work (and what breaks it)?" /><p>Collaboration.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="lead" data-q="How do you prevent burnout or protect focus while still delivering?" /><p>Burnout & focus.</p></div>
+      </div>
+
+      <!-- ADVANCED TECH -->
+      <div class="qgroup" data-bank="advanced">
+        <h3>11) Advanced / Technical Deep Dive (optional)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="advanced" data-q="What is your architecture or stack (data, compute, deployment), and why did you choose it?" /><p>Architecture.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="advanced" data-q="What are the biggest performance or scaling bottlenecks you’ve faced?" /><p>Scaling bottlenecks.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="advanced" data-q="How do you handle reproducibility, versioning, and documentation?" /><p>Reproducibility.</p></div>
+      </div>
+
+      <!-- WRAP -->
+      <div class="qgroup" data-bank="wrap">
+        <h3>12) Wrap-up (high impact)</h3>
+        <div class="q"><input type="checkbox" class="qb" data-group="wrap" data-q="What resources (books, courses, communities) would you recommend to learners?" /><p>Resources.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="wrap" data-q="What’s one project idea a learner could do in 2–4 weeks to build real skill?" /><p>Project idea.</p></div>
+        <div class="q"><input type="checkbox" class="qb" data-group="wrap" data-q="What’s coming next in your field that learners should watch?" /><p>Future trends.</p></div>
+      </div>
+
+      <p class="foot">
+        © AI Research Corp (AIRC). Use as guidance; personalize to the guest and audience.
+      </p>
+    </section>
+
+  </div>
+
+  <script>
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org",
+      emailSubject: "AIRC Mentor Program | Interview Script (Question Bank)",
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const boxes = () => Array.from(document.querySelectorAll(".qb"));
+
+    function getCheckedQuestions(){
+      return boxes()
+        .filter(b => b.checked)
+        .map(b => ({ group: b.dataset.group, q: b.dataset.q }));
+    }
+
+    function groupOrder(){
+      // Controls output order
+      return ["warmup","core","skills","day","case","ai","gis","data","ethics","public","lead","advanced","closing","wrap","chapters"];
+    }
+
+    function sectionLabel(g){
+      const map = {
+        warmup: "Warm-up",
+        core: "Career Path & Story",
+        skills: "Skills & Learning",
+        day: "Day-to-Day Reality",
+        case: "Case Study Walkthrough",
+        ai: "AI / ML",
+        gis: "GIS / Geospatial",
+        data: "Data Science / Analytics",
+        ethics: "Ethics & Responsibility",
+        public: "Public Sector / Civic Tech",
+        lead: "Leadership & Building",
+        advanced: "Technical Deep Dive",
+        closing: "Closing",
+        wrap: "Wrap-up",
+        chapters: "Chapters (optional)"
+      };
+      return map[g] || g;
+    }
+
+    function recommendedCounts(duration){
+      // Soft guidance
+      if (duration === "45") return { q: 7, qa: 8 };
+      if (duration === "60") return { q: 10, qa: 10 };
+      if (duration === "75") return { q: 12, qa: 12 };
+      return { q: 14, qa: 12 };
+    }
+
+    function buildScript(){
+      const title = ($("sessionTitle").value || "").trim() || "[Session Title]";
+      const guest = ($("guestName").value || "").trim() || "[Guest]";
+      const track = $("track").value;
+      const dur = $("duration").value;
+      const audience = $("audience").value;
+      const level = $("level").value;
+
+      const picked = getCheckedQuestions();
+      const byGroup = new Map();
+      picked.forEach(item => {
+        if (!byGroup.has(item.group)) byGroup.set(item.group, []);
+        byGroup.get(item.group).push(item.q);
+      });
+
+      const rc = recommendedCounts(dur);
+
+      const lines = [];
+      lines.push("AIRC Mentor Program — Interview Script (Question Bank)");
+      lines.push("------------------------------------------------------");
+      lines.push(`Title: ${title}`);
+      lines.push(`Guest: ${guest}`);
+      lines.push(`Track: ${track}`);
+      lines.push(`Duration: ${dur} min`);
+      lines.push(`Audience: ${audience}`);
+      lines.push(`Depth: ${level}`);
+      lines.push("");
+      lines.push("Host Notes (quick):");
+      lines.push("- Confirm recording consent at the start.");
+      lines.push("- Keep questions practical; ask follow-ups.");
+      lines.push(`- Aim for ~${rc.q} questions + ~${rc.qa} minutes Q&A (adjust as needed).`);
+      lines.push("");
+
+      lines.push("Opening (read/adapt):");
+      lines.push("“Hello everyone, welcome to today’s AIRC Mentor Program session.");
+      lines.push("My name is [Host Name]. We’re excited to be joined by [Guest Name].");
+      lines.push("This session is being recorded and may be shared publicly by AIRC. Are you comfortable proceeding?”");
+      lines.push("");
+
+      // Output questions grouped
+      const order = groupOrder();
+      let qCount = 0;
+      order.forEach(g => {
+        const qs = byGroup.get(g);
+        if (!qs || !qs.length) return;
+        lines.push(`${sectionLabel(g)}:`);
+        qs.forEach((q, idx) => {
+          qCount += 1;
+          lines.push(`${qCount}. ${q}`);
+        });
+        lines.push("");
+      });
+
+      if (qCount === 0){
+        lines.push("No questions selected yet.");
+        lines.push("Tip: Start with Warm-up + Career + Case Study + Closing.");
+        lines.push("");
+      }
+
+      lines.push("Q&A (optional):");
+      lines.push("- “We’ll now open the floor for questions. Please keep questions concise and respectful.”");
+      lines.push("");
+
+      lines.push("Closing (read/adapt):");
+      lines.push("“Thank you for your time and insights. Where can people follow your work or learn more?");
+      lines.push("And if you could leave learners with one piece of advice, what would it be?”");
+      lines.push("");
+
+      return lines.join("\n");
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    function showPreview(text){
+      const p = $("preview");
+      p.style.display = "block";
+      p.textContent = text;
+    }
+
+    // Buttons
+    $("copyBtn").addEventListener("click", async () => {
+      const text = buildScript();
+      showPreview(text);
+      await copyToClipboard(text);
+    });
+
+    $("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildScript());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo);
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    $("printBtn").addEventListener("click", () => window.print());
+
+    $("clearBtn").addEventListener("click", () => {
+      if (!confirm("Clear all selected questions?")) return;
+      boxes().forEach(b => b.checked = false);
+      $("preview").style.display = "none";
+      $("preview").textContent = "";
+    });
+
+    // Optional: auto-suggest by track (light touch; does not force)
+    function autoSuggest(track){
+      // Reset only if nothing selected
+      const anyChecked = boxes().some(b => b.checked);
+      if (anyChecked) return;
+
+      const set = (qText) => {
+        const b = boxes().find(x => x.dataset.q === qText);
+        if (b) b.checked = true;
+      };
+
+      // Universal baseline
+      set("Before we start, how do you describe your work to someone outside your field?");
+      set("What was your path into this field? Any turning points or surprises?");
+      set("Can you walk us through a project you’re proud of—problem, approach, and impact?");
+      set("What tradeoffs did you have to make (quality vs speed, cost vs accuracy, simplicity vs power)?");
+      set("If you could give one piece of advice to someone starting today, what would it be?");
+      set("Where can people follow your work or learn more (links, resources, communities)?");
+
+      // Track-specific additions
+      if (track === "public"){
+        set("What’s different about shipping solutions in government compared to private sector?");
+        set("How do you navigate stakeholders, procurement, or compliance constraints?");
+      } else if (track === "gis"){
+        set("What does your geospatial pipeline look like (data sources → processing → visualization → decisions)?");
+        set("How do you handle accuracy, projections, and ‘ground truth’ in your work?");
+      } else if (track === "ai"){
+        set("Where does AI/ML actually add value in your work—and where does it not?");
+        set("How do you validate models or decisions (tests, monitoring, human review)?");
+      } else if (track === "startup"){
+        set("How do you make technical decisions when information is incomplete?");
+        set("What makes cross-functional collaboration work (and what breaks it)?");
+      } else if (track === "academia"){
+        set("What metrics or dashboards actually matter, and which ones are misleading?");
+        set("How do you handle reproducibility, versioning, and documentation?");
+      }
+    }
+
+    $("track").addEventListener("change", (e) => autoSuggest(e.target.value));
+
+    // Run once on load to suggest defaults if empty
+    autoSuggest($("track").value);
+  </script>
+</body>
+</html>
