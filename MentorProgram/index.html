@@ -100,6 +100,7 @@
       background: rgba(255,255,255,0.05);
       color:var(--text);
       font-weight:650;
+      cursor:pointer;
     }
     .btn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
     .btn.primary{
@@ -107,6 +108,7 @@
       background: rgba(125,211,252,0.12);
     }
     .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
     .muted{color:var(--muted)}
     .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
     @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
@@ -133,6 +135,17 @@
       margin-right:6px;
       margin-top:6px;
     }
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
   </style>
 </head>
 <body>
@@ -141,7 +154,7 @@
     <header>
       <div class="kicker">AI Research Corp (AIRC) • Mentor Program</div>
       <h1>Pilot Speaker Series Hub (Jan–Jun 2026)</h1>
-     
+
       <div class="pillrow">
         <div class="pill"><strong>Pilot goal:</strong> 2 sessions / volunteer</div>
         <div class="pill"><strong>Format:</strong> recorded interviews + mentor sessions</div>
@@ -158,8 +171,8 @@
         </p>
 
         <div class="btnrow">
-          <a class="btn primary" href="#" id="kickoffLink">▶ Kickoff Recording (add link)</a>
-          <a class="btn" href="https://airesearchcorps.org/MentorProgram/Submission/" id="quickGuideLink">📄 Forms (optional)</a>
+          <a class="btn primary" href="#" id="kickoffLink">▶ Kickoff Recording</a>
+          <a class="btn" href="https://airesearchcorps.org/MentorProgram/Submission/" id="formsLink">📄 Templates (optional)</a>
           <a class="btn" href="https://drive.google.com/drive/folders/18H6aBRzxRQAiATV7Udl3t8eriCF87NWI?usp=sharing" target="_blank" rel="noopener">
             📁 Procedures & Templates Folder
           </a>
@@ -218,17 +231,16 @@
                 <p class="steptitle">Close out & handoff</p>
               </div>
             </div>
-            <p class="stepdesc">Send the recording + notes back to AIRC using the “Session Plan / Handoff” template below.</p>
+            <p class="stepdesc">Use the “Session Plan / Handoff” form below (copy/email) to send basics back to AIRC.</p>
           </div>
         </div>
-
       </aside>
     </div>
 
     <section class="card" style="margin-top:14px">
       <h2>3) Procedure: Run a Successful AIRC Session (Simple + Repeatable)</h2>
       <p class="muted" style="margin:0 0 10px">
-        This is the core workflow. It mirrors the responsibilities we defined (outreach → scheduling → facilitation → follow-up → tracking). 
+        This is the core workflow. It mirrors the responsibilities we defined (outreach → scheduling → facilitation → follow-up → tracking).
       </p>
 
       <div class="steps">
@@ -240,7 +252,7 @@
             </div>
           </div>
           <p class="stepdesc">
-            Set: (a) topic theme, (b) intended audience, (c) 3–5 outcomes (what viewers should learn), (d) 30–45 min target length.
+            Set: (a) topic theme, (b) intended audience, (c) 3–5 outcomes, (d) 30–45 min target length.
           </p>
           <div class="tiny muted">Output: a 1-paragraph “session intent” you can paste into your outreach.</div>
         </div>
@@ -266,7 +278,7 @@
             </div>
           </div>
           <p class="stepdesc">
-            Collect their short bio, links (LinkedIn/site), and 3 suggested “high points.” Pick your final questions and timing.
+            Collect their short bio, links, and 3 suggested “high points.” Pick your final questions and timing.
           </p>
           <div class="tiny muted">Output: final question list + intro blurb.</div>
         </div>
@@ -313,17 +325,14 @@
             A session doesn’t need to be perfect. It needs to be <strong>useful</strong>, <strong>coherent</strong>, and <strong>repeatable</strong>.
           </p>
         </div>
-        
       </div>
     </section>
 
     <section class="card" style="margin-top:14px">
       <h2>4) Session Plan / Handoff (Send to AIRC)</h2>
       <p class="muted" style="margin:0 0 10px">
-        Use this section to send the basics back to Mohamad. 
+        Fill this in, then <strong>Copy as Text</strong> or <strong>Email</strong>. Nothing is stored.
       </p>
-
-
 
       <form id="handoffForm">
         <div class="twoCol">
@@ -352,49 +361,52 @@
         <input id="links" name="links" placeholder="Paste URLs or references (optional)" />
 
         <label for="highlights">Key highlights (5–8 bullets)</label>
-        <textarea id="highlights" name="highlights" placeholder="- Bullet 1
-- Bullet 2
-- Bullet 3"></textarea>
+        <textarea id="highlights" name="highlights" placeholder="- Bullet 1&#10;- Bullet 2&#10;- Bullet 3"></textarea>
 
         <label for="recording">Recording link (or “will upload”)</label>
         <input id="recording" name="recording" placeholder="Link to file or 'will upload to Drive'" />
 
         <div class="btnrow">
-          <button class="btn primary" type="button" id="emailSubmit">✉️ Send Handoff via Email</button>
-          <button class="btn" type="button" id="copyText">Copy as Text</button>
+          <button class="btn primary" type="button" id="copyText">Copy as Text</button>
+          <button class="btn" type="button" id="emailSubmit">✉️ Email</button>
+          <button class="btn ghost" type="button" id="printBtn">Print / Save as PDF</button>
+          <button class="btn" type="button" id="saveDraft">Save Draft</button>
+          <button class="btn" type="button" id="loadDraft">Load Draft</button>
+          <button class="btn" type="button" id="resetForm">Reset</button>
         </div>
 
+        <div class="preview" id="preview"></div>
+
         <p class="foot">
-          Tip: If your email app strips formatting, click “Copy as Text” and paste into an email.
+          Tip: If your email app strips formatting, use <strong>Copy as Text</strong> and paste into an email.
         </p>
       </form>
     </section>
 
-
     <p class="foot">
-      © AI Research Corp (AIRC). This hub is intended for the pilot cohort. Keep links minimal if you publish publicly.
+      © AI Research Corp (AIRC). This hub is intended for the pilot cohort.
     </p>
   </div>
 
   <script>
     // === Configure these without changing the rest of the page ===
     const CONFIG = {
-      kickoffRecordingUrl: "",       // add your YouTube/Drive link
-      quickGuideUrl: "",             // add your PDF/Doc link
-      handoffEmailTo: "mohamad@airesearchcorp.org", // change if needed
-      handoffEmailSubject: "AIRC Mentor Program | Session Handoff (Pilot Jan–Jun 2026)"
+      kickoffRecordingUrl: "", // add your YouTube/Drive link
+      formsUrl: "https://airesearchcorps.org/MentorProgram/Submission/",
+      handoffEmailTo: "mohamad@airesearchcorp.org",
+      handoffEmailSubject: "AIRC Mentor Program | Session Handoff (Pilot Jan–Jun 2026)",
+      draftStorageKey: "airc_mentor_hub_handoff_draft_v1"
     };
 
     // Apply links
     const kickoffLink = document.getElementById("kickoffLink");
-    const quickGuideLink = document.getElementById("quickGuideLink");
+    const formsLink = document.getElementById("formsLink");
     if (CONFIG.kickoffRecordingUrl) kickoffLink.href = CONFIG.kickoffRecordingUrl;
-    if (CONFIG.quickGuideUrl) quickGuideLink.href = CONFIG.quickGuideUrl;
+    if (CONFIG.formsUrl) formsLink.href = CONFIG.formsUrl;
 
-    // Build handoff text
+    function v(id){ return (document.getElementById(id)?.value || "").trim(); }
+
     function buildHandoffText(){
-      const v = (id) => (document.getElementById(id)?.value || "").trim();
-
       const lines = [
         "AIRC Mentor Program — Session Handoff",
         "-----------------------------------",
@@ -414,14 +426,11 @@
       return lines.join("\n");
     }
 
-    // Copy as text
-    document.getElementById("copyText").addEventListener("click", async () => {
-      const text = buildHandoffText();
+    async function copyToClipboard(text){
       try{
         await navigator.clipboard.writeText(text);
         alert("Copied to clipboard.");
       }catch(e){
-        // fallback
         const ta = document.createElement("textarea");
         ta.value = text;
         document.body.appendChild(ta);
@@ -430,14 +439,78 @@
         document.body.removeChild(ta);
         alert("Copied to clipboard.");
       }
+    }
+
+    // Copy
+    document.getElementById("copyText").addEventListener("click", async () => {
+      const text = buildHandoffText();
+      const preview = document.getElementById("preview");
+      preview.style.display = "block";
+      preview.textContent = text;
+      await copyToClipboard(text);
     });
 
-    // Mailto submit
+    // Email (mailto)
     document.getElementById("emailSubmit").addEventListener("click", () => {
       const body = encodeURIComponent(buildHandoffText());
       const subject = encodeURIComponent(CONFIG.handoffEmailSubject);
       const to = encodeURIComponent(CONFIG.handoffEmailTo);
       window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    // Print / PDF
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    // Draft save/load (optional, still serverless)
+    function currentDraft(){
+      return {
+        volName: v("volName"),
+        topic: v("topic"),
+        speaker: v("speaker"),
+        dateWin: v("dateWin"),
+        links: v("links"),
+        highlights: v("highlights"),
+        recording: v("recording"),
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    document.getElementById("saveDraft").addEventListener("click", () => {
+      try{
+        localStorage.setItem(CONFIG.draftStorageKey, JSON.stringify(currentDraft()));
+        alert("Draft saved on this device/browser.");
+      }catch(e){
+        alert("Could not save draft (storage blocked). Use Copy as Text instead.");
+      }
+    });
+
+    document.getElementById("loadDraft").addEventListener("click", () => {
+      try{
+        const raw = localStorage.getItem(CONFIG.draftStorageKey);
+        if (!raw) return alert("No saved draft found on this device/browser.");
+        const d = JSON.parse(raw);
+        document.getElementById("volName").value = d.volName || "";
+        document.getElementById("topic").value = d.topic || "";
+        document.getElementById("speaker").value = d.speaker || "";
+        document.getElementById("dateWin").value = d.dateWin || "";
+        document.getElementById("links").value = d.links || "";
+        document.getElementById("highlights").value = d.highlights || "";
+        document.getElementById("recording").value = d.recording || "";
+        alert("Draft loaded.");
+      }catch(e){
+        alert("Could not load draft (storage blocked).");
+      }
+    });
+
+    // Reset
+    document.getElementById("resetForm").addEventListener("click", () => {
+      if (!confirm("Clear all fields?")) return;
+      ["volName","topic","speaker","dateWin","links","highlights","recording"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      const preview = document.getElementById("preview");
+      preview.style.display = "none";
+      preview.textContent = "";
     });
   </script>
 </body>
