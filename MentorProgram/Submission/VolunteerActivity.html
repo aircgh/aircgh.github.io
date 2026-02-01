@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Volunteer Activity Log</title>
+  <meta name="description" content="AIRC Mentor Program — Volunteer Activity & Engagement Log. Serverless: copy as text or mailto." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:86ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    @media (max-width: 900px){
+      header{flex-direction:column; align-items:stretch}
+      .toplinks{justify-content:flex-start}
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+
+    .checkgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:10px}
+    .checkgrid.three{grid-template-columns:1fr 1fr 1fr}
+    @media (max-width: 900px){
+      .checkgrid{grid-template-columns:1fr}
+      .checkgrid.three{grid-template-columns:1fr}
+    }
+    .chk{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      padding:10px 10px;
+    }
+    .chk input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--accent);
+    }
+
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+      margin-top:10px;
+    }
+    .callout strong{color:var(--warn)}
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
+
+    .tablewrap{
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      overflow:hidden;
+      margin-top:10px;
+    }
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th,td{
+      border-bottom:1px solid var(--line);
+      padding:10px 10px;
+      vertical-align:top;
+    }
+    th{color:var(--muted); font-weight:650; text-align:left; background: rgba(255,255,255,0.03)}
+    tr:last-child td{border-bottom:none}
+
+    .rowbtns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .mini{font-size:12px; color:var(--muted)}
+
+    .pill{
+      display:inline-block;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-right:6px;
+      margin-top:6px;
+    }
+
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Volunteer Activity &amp; Engagement Log</h1>
+          <p class="sub">Serverless: nothing is stored. Use “Copy as Text” or “Send via Email” to share.</p>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Purpose of This Form</h2>
+      <div class="callout">
+        <strong>Helps:</strong> transparent expectations • prevents favoritism • supports scaling • protects relationships • supports references later
+      </div>
+
+      <div class="hr"></div>
+
+      <form id="volForm">
+
+        <!-- Section 1 -->
+        <h2 style="margin-top:0">Section 1 — Volunteer Profile</h2>
+        <div class="twoCol">
+          <div>
+            <label for="name">Name</label>
+            <input id="name" name="name" />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="phone">Phone (Optional)</label>
+            <input id="phone" name="phone" />
+          </div>
+          <div>
+            <label for="cohort">Cohort</label>
+            <input id="cohort" name="cohort" value="Jan–Jun 2026" />
+          </div>
+        </div>
+
+        <label>Primary Interest Area(s)</label>
+        <div class="checkgrid" id="interestChecks">
+          <label class="chk"><input type="checkbox" data-label="GIS" /> <span>GIS</span></label>
+          <label class="chk"><input type="checkbox" data-label="AI / ML" /> <span>AI / ML</span></label>
+          <label class="chk"><input type="checkbox" data-label="Data Science" /> <span>Data Science</span></label>
+          <label class="chk"><input type="checkbox" data-label="Biotech" /> <span>Biotech</span></label>
+          <label class="chk"><input type="checkbox" data-label="Policy" /> <span>Policy</span></label>
+          <label class="chk"><input type="checkbox" data-label="Education" /> <span>Education</span></label>
+          <label class="chk"><input type="checkbox" data-label="Industry" /> <span>Industry</span></label>
+          <label class="chk">
+            <input type="checkbox" id="interestOtherChk" data-label="Other" />
+            <span>Other</span>
+          </label>
+        </div>
+        <label for="interestOther">Other (if checked)</label>
+        <input id="interestOther" name="interestOther" placeholder="Other interest area" />
+
+        <div class="hr"></div>
+
+        <!-- Section 2 -->
+        <h2 style="margin-top:0">Section 2 — Commitment Overview</h2>
+        <label>Expected Minimum</label>
+        <div class="checkgrid" id="commitChecks">
+          <label class="chk"><input type="checkbox" data-label="2 sessions during pilot" /> <span>2 sessions during pilot</span></label>
+          <label class="chk"><input type="checkbox" data-label="Participation in onboarding" /> <span>Participation in onboarding</span></label>
+          <label class="chk"><input type="checkbox" data-label="Basic documentation" /> <span>Basic documentation</span></label>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="agrees">Volunteer Agrees</label>
+            <select id="agrees" name="agrees">
+              <option value=""></option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div>
+            <label for="agreeDate">Date</label>
+            <input id="agreeDate" name="agreeDate" placeholder="YYYY-MM-DD" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- Section 3 -->
+        <h2 style="margin-top:0">Section 3 — Activity Log</h2>
+        <p class="mini">Add rows as needed. Each row captures: date, type, description, time (hrs), and status.</p>
+
+        <div class="rowbtns">
+          <button class="btn primary" type="button" id="addRowBtn">+ Add Activity Row</button>
+          <button class="btn" type="button" id="clearRowsBtn">Clear Rows</button>
+        </div>
+
+        <div class="tablewrap">
+          <table id="activityTable">
+            <thead>
+              <tr>
+                <th style="width:14%">Date</th>
+                <th style="width:16%">Activity Type</th>
+                <th>Description</th>
+                <th style="width:10%">Time (hrs)</th>
+                <th style="width:12%">Status</th>
+                <th style="width:8%"></th>
+              </tr>
+            </thead>
+            <tbody id="activityBody">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- Section 4 -->
+        <h2 style="margin-top:0">Section 4 — Session Production Tracking</h2>
+
+        <div class="twoCol">
+          <div class="card" style="margin-top:0">
+            <h3 style="margin:0 0 8px; font-size:16px">Session #1</h3>
+            <label for="s1Role">Role</label>
+            <select id="s1Role">
+              <option value=""></option>
+              <option value="Host">Host</option>
+              <option value="Lead">Lead</option>
+              <option value="Support">Support</option>
+            </select>
+
+            <label for="s1Date">Date</label>
+            <input id="s1Date" placeholder="YYYY-MM-DD" />
+
+            <label>Status</label>
+            <div class="checkgrid" id="s1Status">
+              <label class="chk"><input type="checkbox" data-label="Planned" /> <span>Planned</span></label>
+              <label class="chk"><input type="checkbox" data-label="Recorded" /> <span>Recorded</span></label>
+              <label class="chk"><input type="checkbox" data-label="Posted" /> <span>Posted</span></label>
+            </div>
+
+            <label for="s1Published">Published</label>
+            <select id="s1Published">
+              <option value=""></option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <div class="card" style="margin-top:0">
+            <h3 style="margin:0 0 8px; font-size:16px">Session #2</h3>
+            <label for="s2Role">Role</label>
+            <select id="s2Role">
+              <option value=""></option>
+              <option value="Host">Host</option>
+              <option value="Lead">Lead</option>
+              <option value="Support">Support</option>
+            </select>
+
+            <label for="s2Date">Date</label>
+            <input id="s2Date" placeholder="YYYY-MM-DD" />
+
+            <label>Status</label>
+            <div class="checkgrid" id="s2Status">
+              <label class="chk"><input type="checkbox" data-label="Planned" /> <span>Planned</span></label>
+              <label class="chk"><input type="checkbox" data-label="Recorded" /> <span>Recorded</span></label>
+              <label class="chk"><input type="checkbox" data-label="Posted" /> <span>Posted</span></label>
+            </div>
+
+            <label for="s2Published">Published</label>
+            <select id="s2Published">
+              <option value=""></option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- Section 5 -->
+        <h2 style="margin-top:0">Section 5 — Communication &amp; Responsiveness</h2>
+        <p class="mini">Used only if needed — not micromanagement.</p>
+        <div class="checkgrid" id="commChecks">
+          <label class="chk"><input type="checkbox" data-label="Responsive" /> <span>Responsive</span></label>
+          <label class="chk"><input type="checkbox" data-label="Occasionally delayed" /> <span>Occasionally delayed</span></label>
+          <label class="chk"><input type="checkbox" data-label="Needs reminders" /> <span>Needs reminders</span></label>
+          <label class="chk"><input type="checkbox" data-label="Unresponsive" /> <span>Unresponsive</span></label>
+        </div>
+        <label for="commNotes">Notes</label>
+        <textarea id="commNotes"></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 6 -->
+        <h2 style="margin-top:0">Section 6 — Strengths &amp; Contributions</h2>
+        <label for="strengths">Key strengths observed</label>
+        <textarea id="strengths"></textarea>
+
+        <label for="contrib">Notable contributions</label>
+        <textarea id="contrib"></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 7 -->
+        <h2 style="margin-top:0">Section 7 — Support &amp; Development Needs</h2>
+        <label>Areas where support may help</label>
+        <div class="checkgrid" id="supportChecks">
+          <label class="chk"><input type="checkbox" data-label="Interview skills" /> <span>Interview skills</span></label>
+          <label class="chk"><input type="checkbox" data-label="Scheduling" /> <span>Scheduling</span></label>
+          <label class="chk"><input type="checkbox" data-label="Documentation" /> <span>Documentation</span></label>
+          <label class="chk"><input type="checkbox" data-label="Technical setup" /> <span>Technical setup</span></label>
+          <label class="chk"><input type="checkbox" data-label="Confidence" /> <span>Confidence</span></label>
+          <label class="chk"><input type="checkbox" data-label="Outreach" /> <span>Outreach</span></label>
+          <label class="chk"><input type="checkbox" data-label="Time management" /> <span>Time management</span></label>
+        </div>
+        <label for="supportNotes">Notes</label>
+        <textarea id="supportNotes"></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 8 -->
+        <h2 style="margin-top:0">Section 8 — Midpoint Check-In (Optional)</h2>
+        <div class="twoCol">
+          <div>
+            <label for="midDate">Date</label>
+            <input id="midDate" placeholder="YYYY-MM-DD" />
+          </div>
+          <div>
+            <label for="midProgress">Progress</label>
+            <select id="midProgress">
+              <option value=""></option>
+              <option value="On track">On track</option>
+              <option value="Ahead">Ahead</option>
+              <option value="Needs support">Needs support</option>
+              <option value="At risk">At risk</option>
+            </select>
+          </div>
+        </div>
+        <label for="midPlan">Action Plan (if needed)</label>
+        <textarea id="midPlan"></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 9 -->
+        <h2 style="margin-top:0">Section 9 — End-of-Pilot Summary</h2>
+        <div class="twoCol">
+          <div>
+            <label for="overall">Overall Engagement</label>
+            <select id="overall">
+              <option value=""></option>
+              <option value="High">High</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Limited">Limited</option>
+            </select>
+          </div>
+          <div>
+            <label for="minMet">Minimum Commitment Met</label>
+            <select id="minMet">
+              <option value=""></option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="futureRole">Recommended Future Role</label>
+        <select id="futureRole">
+          <option value=""></option>
+          <option value="Coordinator">Coordinator</option>
+          <option value="Mentor">Mentor</option>
+          <option value="Advisor">Advisor</option>
+          <option value="Contributor">Contributor</option>
+          <option value="Audience / Community">Audience / Community</option>
+        </select>
+
+        <label for="endComments">Comments</label>
+        <textarea id="endComments"></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 10 -->
+        <h2 style="margin-top:0">Section 10 — Recognition &amp; Certification</h2>
+        <div class="checkgrid" id="recognitionChecks">
+          <label class="chk"><input type="checkbox" data-label="Certificate issued" /> <span>Certificate issued</span></label>
+          <label class="chk"><input type="checkbox" data-label="Letter provided" /> <span>Letter provided</span></label>
+          <label class="chk"><input type="checkbox" data-label="Public acknowledgment" /> <span>Public acknowledgment</span></label>
+          <label class="chk"><input type="checkbox" data-label="Reference available" /> <span>Reference available</span></label>
+        </div>
+        <label for="recDate">Date</label>
+        <input id="recDate" placeholder="YYYY-MM-DD" />
+
+        <div class="hr"></div>
+
+        <!-- Export -->
+        <h2 style="margin-top:0">Export / Send</h2>
+        <p class="mini">Copy as text to paste into an email/doc, or open your email client with a prefilled message.</p>
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="copyBtn">Copy as Text</button>
+          <button class="btn" type="button" id="emailBtn">✉️ Send via Email</button>
+          <button class="btn ghost" type="button" id="printBtn">Print / Save as PDF</button>
+          <button class="btn" type="button" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="preview" id="preview"></div>
+
+        <p class="foot">Serverless form (no data is stored). Use Copy/Email for handoff.</p>
+      </form>
+    </section>
+
+    <p class="foot">© AI Research Corps (AIRC). Intended for internal coordinator use.</p>
+
+  </div>
+
+  <script>
+    // === Configure these without changing the rest of the page ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org", // change if needed
+      emailSubject: "AIRC Mentor Program | Volunteer Activity & Engagement Log",
+      includeCheckboxStates: true
+    };
+
+    function val(id){ return (document.getElementById(id)?.value || "").trim(); }
+
+    function checkedList(containerId){
+      const root = document.getElementById(containerId);
+      if (!root) return [];
+      return Array.from(root.querySelectorAll('input[type="checkbox"]')).map(cb => ({
+        label: cb.getAttribute("data-label") || "Item",
+        checked: !!cb.checked
+      }));
+    }
+
+    function fmtChecks(title, items){
+      if (!items.length) return "";
+      const lines = [title];
+      items.forEach(it => lines.push(`${it.checked ? "☑" : "☐"} ${it.label}`));
+      lines.push("");
+      return lines.join("\n");
+    }
+
+    // Activity rows
+    const activityBody = document.getElementById("activityBody");
+
+    function makeRow(){
+      const tr = document.createElement("tr");
+
+      const tdDate = document.createElement("td");
+      tdDate.innerHTML = `<input type="text" class="rowDate" placeholder="YYYY-MM-DD" />`;
+
+      const tdType = document.createElement("td");
+      tdType.innerHTML = `
+        <select class="rowType">
+          <option value=""></option>
+          <option>Interview</option>
+          <option>Outreach</option>
+          <option>Editing</option>
+          <option>Event Support</option>
+          <option>Mentoring</option>
+          <option>Other</option>
+        </select>
+      `;
+
+      const tdDesc = document.createElement("td");
+      tdDesc.innerHTML = `<input type="text" class="rowDesc" placeholder="Short description" />`;
+
+      const tdHrs = document.createElement("td");
+      tdHrs.innerHTML = `<input type="text" class="rowHrs" placeholder="e.g., 1.5" />`;
+
+      const tdStatus = document.createElement("td");
+      tdStatus.innerHTML = `
+        <select class="rowStatus">
+          <option value=""></option>
+          <option>Done</option>
+          <option>Pending</option>
+        </select>
+      `;
+
+      const tdDel = document.createElement("td");
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "btn";
+      delBtn.style.padding = "8px 10px";
+      delBtn.textContent = "Remove";
+      delBtn.addEventListener("click", () => tr.remove());
+      tdDel.appendChild(delBtn);
+
+      tr.appendChild(tdDate);
+      tr.appendChild(tdType);
+      tr.appendChild(tdDesc);
+      tr.appendChild(tdHrs);
+      tr.appendChild(tdStatus);
+      tr.appendChild(tdDel);
+      return tr;
+    }
+
+    document.getElementById("addRowBtn").addEventListener("click", () => {
+      activityBody.appendChild(makeRow());
+    });
+
+    document.getElementById("clearRowsBtn").addEventListener("click", () => {
+      if (confirm("Clear all activity rows?")) activityBody.innerHTML = "";
+    });
+
+    // Seed with 3 blank rows
+    for (let i=0; i<3; i++) activityBody.appendChild(makeRow());
+
+    function rowsToText(){
+      const rows = Array.from(activityBody.querySelectorAll("tr"));
+      if (!rows.length) return "[No rows]";
+      const lines = ["Date | Type | Description | Time (hrs) | Status"];
+      rows.forEach(r => {
+        const d = (r.querySelector(".rowDate")?.value || "").trim();
+        const t = (r.querySelector(".rowType")?.value || "").trim();
+        const desc = (r.querySelector(".rowDesc")?.value || "").trim();
+        const hrs = (r.querySelector(".rowHrs")?.value || "").trim();
+        const st = (r.querySelector(".rowStatus")?.value || "").trim();
+        if (!d && !t && !desc && !hrs && !st) return; // skip fully empty rows
+        lines.push(`${d} | ${t} | ${desc} | ${hrs} | ${st}`);
+      });
+      return lines.length === 1 ? "[No filled rows]" : lines.join("\n");
+    }
+
+    function buildText(){
+      const lines = [];
+      lines.push("AIRC Mentor Program — Volunteer Activity & Engagement Log");
+      lines.push("-------------------------------------------------------");
+      lines.push("");
+
+      lines.push("Section 1 — Volunteer Profile");
+      lines.push(`Name: ${val("name")}`);
+      lines.push(`Email: ${val("email")}`);
+      lines.push(`Phone (Optional): ${val("phone")}`);
+      lines.push(`Cohort: ${val("cohort")}`);
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Primary Interest Area(s):", checkedList("interestChecks")));
+      lines.push(`Other interest: ${val("interestOther")}`);
+      lines.push("");
+
+      lines.push("Section 2 — Commitment Overview");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Expected Minimum:", checkedList("commitChecks")));
+      lines.push(`Volunteer Agrees: ${val("agrees")}`);
+      lines.push(`Date: ${val("agreeDate")}`);
+      lines.push("");
+
+      lines.push("Section 3 — Activity Log");
+      lines.push(rowsToText());
+      lines.push("");
+
+      lines.push("Section 4 — Session Production Tracking");
+      lines.push(`Session #1 Role: ${val("s1Role")}`);
+      lines.push(`Session #1 Date: ${val("s1Date")}`);
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Session #1 Status:", checkedList("s1Status")));
+      lines.push(`Session #1 Published: ${val("s1Published")}`);
+      lines.push("");
+      lines.push(`Session #2 Role: ${val("s2Role")}`);
+      lines.push(`Session #2 Date: ${val("s2Date")}`);
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Session #2 Status:", checkedList("s2Status")));
+      lines.push(`Session #2 Published: ${val("s2Published")}`);
+      lines.push("");
+
+      lines.push("Section 5 — Communication & Responsiveness");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Status:", checkedList("commChecks")));
+      lines.push(`Notes: ${val("commNotes")}`);
+      lines.push("");
+
+      lines.push("Section 6 — Strengths & Contributions");
+      lines.push("Key strengths observed:");
+      lines.push(val("strengths"));
+      lines.push("");
+      lines.push("Notable contributions:");
+      lines.push(val("contrib"));
+      lines.push("");
+
+      lines.push("Section 7 — Support & Development Needs");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Areas where support may help:", checkedList("supportChecks")));
+      lines.push(`Notes: ${val("supportNotes")}`);
+      lines.push("");
+
+      lines.push("Section 8 — Midpoint Check-In (Optional)");
+      lines.push(`Date: ${val("midDate")}`);
+      lines.push(`Progress: ${val("midProgress")}`);
+      lines.push("Action Plan (if needed):");
+      lines.push(val("midPlan"));
+      lines.push("");
+
+      lines.push("Section 9 — End-of-Pilot Summary");
+      lines.push(`Overall Engagement: ${val("overall")}`);
+      lines.push(`Minimum Commitment Met: ${val("minMet")}`);
+      lines.push(`Recommended Future Role: ${val("futureRole")}`);
+      lines.push(`Comments: ${val("endComments")}`);
+      lines.push("");
+
+      lines.push("Section 10 — Recognition & Certification");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Recognition:", checkedList("recognitionChecks")));
+      lines.push(`Date: ${val("recDate")}`);
+      lines.push("");
+
+      return lines.join("\n");
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    const preview = document.getElementById("preview");
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = buildText();
+      preview.style.display = "block";
+      preview.textContent = text;
+      await copyText(text);
+    });
+
+    document.getElementById("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo || "");
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Clear all fields, checkboxes, and activity rows?")) {
+        document.getElementById("volForm").reset();
+        preview.style.display = "none";
+        preview.textContent = "";
+        activityBody.innerHTML = "";
+        for (let i=0; i<3; i++) activityBody.appendChild(makeRow());
+      }
+    });
+
+    // Optional: if "Other" interest isn't checked, keep the input still usable (no hard enforcement).
+  </script>
+</body>
+</html>
