@@ -3,136 +3,617 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mentor Program Submission | Form 01</title>
-
-  <!-- Reuse your site CSS if you want consistent styling -->
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <title>AIRC Mentor Program | Form 01 — Session Planning Sheet</title>
+  <meta name="description" content="AIRC Mentor Program — Session Planning Sheet (native form). Copy as text or send via email." />
 
   <style>
-    /* Safe defaults if your main CSS doesn't include these */
-    body { margin: 0; }
-
-    .mp-wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 16px 48px;
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
     }
-
-    .mp-head {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin: 10px 0 18px;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
     }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
 
-    .mp-head img {
-      width: 34px;
-      height: 34px;
-      object-fit: contain;
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 20px;
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
     }
-
-    .mp-title {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.2;
+    .brand{display:flex; gap:12px; align-items:center}
+    .logo{
+      width:36px; height:36px;
+      object-fit:contain;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      padding:6px;
+      flex:0 0 auto;
     }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:4px 0 0; font-size:22px; line-height:1.2}
+    .sub{color:var(--muted); margin:6px 0 0; max-width:80ch}
 
-    .mp-subtitle {
-      margin: 6px 0 0;
-      opacity: 0.85;
-    }
-
-    .mp-card {
-      border-radius: 16px;
-      padding: 16px;
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:9px 11px;
+      border-radius:12px;
+      border:1px solid var(--line);
       background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
+      color:var(--text);
+      font-weight:650;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.06); text-decoration:none}
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 8px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+
+    .groupTitle{
+      margin:0 0 6px;
+      font-size:14px;
+      font-weight:700;
+      color:var(--text);
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:650;
     }
 
-    .mp-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 10px 0 14px;
+    .checks{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:8px 10px;
+      margin-top:8px;
     }
+    @media (max-width: 700px){ .checks{grid-template-columns:1fr} }
 
-    .mp-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color: inherit;
-      text-decoration: none;
+    .check{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px 10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background: rgba(0,0,0,0.10);
     }
-    .mp-btn:hover { background: rgba(255,255,255,0.10); }
+    .check input{width:auto; margin-top:2px}
+    .check span{color:var(--text)}
+    .check small{display:block; color:var(--muted); font-size:12px; margin-top:2px}
 
-    /* Responsive iframe container */
-    .mp-iframe-wrap {
-      width: 100%;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.20);
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
     }
-    .mp-iframe {
-      width: 100%;
-      height: min(82vh, 980px);
-      border: 0;
-      display: block;
-      background: transparent;
+    .btn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
     }
-
-    .mp-note {
-      margin-top: 12px;
-      font-size: 14px;
-      opacity: 0.85;
-      line-height: 1.45;
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
     }
-
-    code { opacity: 0.95; }
+    .callout strong{color:var(--warn)}
   </style>
 </head>
 
 <body>
-  <div class="mp-wrap">
-    <div class="mp-head">
-      <img src="/assets/img/AIRC_LOGO.png" alt="AIRC logo" />
-      <div>
-        <h1 class="mp-title">Mentor Program Submission</h1>
-        <p class="mp-subtitle">Form 01 · Optional web submission</p>
-      </div>
-    </div>
+  <div class="wrap">
 
-    <div class="mp-card">
-      <div class="mp-actions">
-        <a class="mp-btn" href="/MentorProgram/Submission/" aria-label="Back to submissions hub">← Back to Submission Hub</a>
-
-        <!-- Fallback open in new tab -->
-        <a class="mp-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSewMzKV9E5IXkiPUaWr7QbopqJVJpyLWF5qXVDGEyEAuOECig/viewform"
-           target="_blank" rel="noopener">
-          Open in new tab
-        </a>
+    <header>
+      <div class="brand">
+        <img class="logo" src="/assets/img/AIRC_LOGO.png" alt="AIRC logo" />
+        <div>
+          <div class="kicker">AI Research Corp (AIRC) • Mentor Program</div>
+          <h1>Form 01 — Session Planning Sheet</h1>
+          <p class="sub">To be completed before outreach. Use “Copy as Text” or “Send via Email”.</p>
+        </div>
       </div>
 
-      <div class="mp-iframe-wrap">
-        <iframe
-          class="mp-iframe"
-          src="https://docs.google.com/forms/d/e/1FAIpQLSewMzKV9E5IXkiPUaWr7QbopqJVJpyLWF5qXVDGEyEAuOECig/viewform?embedded=true"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-        >
-        </iframe>
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Purpose of This Sheet</h2>
+      <div class="callout">
+        <strong>Goal:</strong> Clarify the session before outreach, prevent last-minute confusion, keep sessions aligned with program goals,
+        and make handoff + publishing easier.
+      </div>
+    </section>
+
+    <form id="form01" class="card" onsubmit="return false;">
+      <h2>1) Basic Session Information</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="volName">Volunteer Name</label>
+          <input id="volName" placeholder="Your name" />
+        </div>
+        <div>
+          <label for="dateCreated">Date Created</label>
+          <input id="dateCreated" placeholder="e.g., 2026-02-01" />
+        </div>
       </div>
 
-      <div class="mp-note">
-        If the form area shows a blank/sad icon: try disabling adblock/shields for this page, or use “Open in new tab”.
-        (Some privacy settings block Google Forms inside embedded frames.)
+      <div class="twoCol">
+        <div>
+          <label for="monthWindow">Proposed Session Month / Window</label>
+          <input id="monthWindow" placeholder="e.g., Feb 10–25" />
+        </div>
+        <div>
+          <label for="sessionTypeOther">Session Type</label>
+          <select id="sessionType">
+            <option value="">Select one…</option>
+            <option>Speaker Interview</option>
+            <option>Mentor Session</option>
+            <option>Panel</option>
+            <option>Workshop / Demo</option>
+            <option>Other</option>
+          </select>
+          <label for="sessionTypeOther" style="margin-top:8px">If Other</label>
+          <input id="sessionTypeOther" placeholder="Optional" />
+        </div>
       </div>
-    </div>
+
+      <div class="hr"></div>
+
+      <h2>2) Session Topic & Focus</h2>
+      <label for="workingTitle">Working Title (Draft)</label>
+      <input id="workingTitle" placeholder="Draft title" />
+
+      <div class="groupTitle" style="margin-top:12px">
+        Primary Topic Area <span class="pill">pick one</span>
+      </div>
+      <select id="primaryTopic">
+        <option value="">Select one…</option>
+        <option>AI / ML</option>
+        <option>GIS / Geospatial</option>
+        <option>Data Science</option>
+        <option>Biotech / Health</option>
+        <option>Education</option>
+        <option>Policy / Ethics</option>
+        <option>Industry / Business</option>
+        <option>Other</option>
+      </select>
+      <label for="primaryTopicOther">If Other</label>
+      <input id="primaryTopicOther" placeholder="Optional" />
+
+      <label for="whyTopic">Why This Topic Matters (1–2 sentences)</label>
+      <textarea id="whyTopic" placeholder="Why does this matter to AIRC's audience?"></textarea>
+
+      <div class="hr"></div>
+
+      <h2>3) Target Audience</h2>
+
+      <div class="twoCol">
+        <div>
+          <div class="groupTitle">Primary Audience</div>
+          <select id="primaryAudience">
+            <option value="">Select one…</option>
+            <option>High School Students</option>
+            <option>College Students</option>
+            <option>Early Career Professionals</option>
+            <option>Career Switchers</option>
+            <option>General Public</option>
+            <option>Other</option>
+          </select>
+          <label for="primaryAudienceOther">If Other</label>
+          <input id="primaryAudienceOther" placeholder="Optional" />
+        </div>
+
+        <div>
+          <div class="groupTitle">Experience Level</div>
+          <select id="experienceLevel">
+            <option value="">Select one…</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+            <option>Mixed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2>4) Potential Speaker(s)</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="speakerName">Name</label>
+          <input id="speakerName" placeholder="Speaker name" />
+        </div>
+        <div>
+          <label for="speakerOrgRole">Organization / Role</label>
+          <input id="speakerOrgRole" placeholder="Org and role/title" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="speakerContact">Email / Contact Info</label>
+          <input id="speakerContact" placeholder="Email, LinkedIn, phone, etc." />
+        </div>
+        <div>
+          <label for="howKnow">How You Know Them / Source</label>
+          <select id="howKnow">
+            <option value="">Select one…</option>
+            <option>Personal Network</option>
+            <option>LinkedIn</option>
+            <option>Referral</option>
+            <option>Prior Event</option>
+            <option>Other</option>
+          </select>
+          <label for="howKnowOther" style="margin-top:8px">If Other</label>
+          <input id="howKnowOther" placeholder="Optional" />
+        </div>
+      </div>
+
+      <label for="whySpeaker">Why This Speaker Is a Good Fit</label>
+      <textarea id="whySpeaker" placeholder="Short rationale (skills, credibility, perspective, alignment)"></textarea>
+
+      <div class="hr"></div>
+
+      <h2>5) Learning Goals</h2>
+      <p class="muted" style="margin:0 0 8px">By the end of this session, participants should:</p>
+
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="lg_usecase" /> <span>Understand a real-world use case</span></label>
+        <label class="check"><input type="checkbox" id="lg_pathways" /> <span>Learn about career pathways</span></label>
+        <label class="check"><input type="checkbox" id="lg_tools" /> <span>Learn practical tools/skills</span></label>
+        <label class="check"><input type="checkbox" id="lg_challenges" /> <span>Understand challenges/risks</span></label>
+        <label class="check"><input type="checkbox" id="lg_ethics" /> <span>Learn about ethics/impact</span></label>
+        <label class="check"><input type="checkbox" id="lg_other" /> <span>Other</span></label>
+      </div>
+
+      <label for="lgOtherText" style="margin-top:8px">If Other</label>
+      <input id="lgOtherText" placeholder="Optional" />
+
+      <label for="outcomes">Specific Outcomes (optional)</label>
+      <textarea id="outcomes" placeholder="Optional: list 2–5 outcomes viewers should walk away with"></textarea>
+
+      <div class="hr"></div>
+
+      <h2>6) Format & Logistics (Draft)</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="duration">Proposed Duration</label>
+          <select id="duration">
+            <option value="">Select one…</option>
+            <option>30 min</option>
+            <option>45 min</option>
+            <option>60 min</option>
+            <option>90 min</option>
+            <option>Other</option>
+          </select>
+          <label for="durationOther" style="margin-top:8px">If Other</label>
+          <input id="durationOther" placeholder="Optional" />
+        </div>
+
+        <div>
+          <label for="format">Proposed Format</label>
+          <select id="format">
+            <option value="">Select one…</option>
+            <option>Interview</option>
+            <option>Presentation + Q&A</option>
+            <option>Demo</option>
+            <option>Discussion</option>
+            <option>Hybrid</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="recordingRequired">Recording Required</label>
+          <select id="recordingRequired">
+            <option value="">Select one…</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div>
+          <label for="platform">Platform (if known)</label>
+          <select id="platform">
+            <option value="">Select one…</option>
+            <option>Zoom</option>
+            <option>Google Meet</option>
+            <option>Other</option>
+          </select>
+          <label for="platformOther" style="margin-top:8px">If Other</label>
+          <input id="platformOther" placeholder="Optional" />
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2>7) Readiness Check</h2>
+      <p class="muted" style="margin:0 0 8px">Before outreach, confirm:</p>
+
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="rc_topic" /> <span>Topic is clear</span></label>
+        <label class="check"><input type="checkbox" id="rc_audience" /> <span>Audience is defined</span></label>
+        <label class="check"><input type="checkbox" id="rc_speaker" /> <span>Speaker is appropriate</span></label>
+        <label class="check"><input type="checkbox" id="rc_align" /> <span>Session aligns with AIRC mission</span></label>
+        <label class="check"><input type="checkbox" id="rc_timeline" /> <span>Timeline is realistic</span></label>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2>8) Notes & Ideas</h2>
+      <textarea id="notes" placeholder="Use this space freely"></textarea>
+
+      <div class="hr"></div>
+
+      <h2>9) Status Tracking</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="st_outreach">Outreach Sent</label>
+          <select id="st_outreach">
+            <option value="">Select…</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div>
+          <label for="st_speaker">Speaker Confirmed</label>
+          <select id="st_speaker">
+            <option value="">Select…</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="st_date">Date Confirmed</label>
+          <select id="st_date">
+            <option value="">Select…</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div>
+          <label for="st_precall">Moved to Pre-Call Stage</label>
+          <select id="st_precall">
+            <option value="">Select…</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn primary" type="button" id="emailBtn">✉️ Send via Email</button>
+        <button class="btn" type="button" id="copyBtn">Copy as Text</button>
+        <button class="btn" type="button" id="clearBtn">Clear</button>
+      </div>
+
+      <p class="foot">
+        Tip: “Send via Email” opens your email app with the full sheet prefilled. If formatting is stripped, use “Copy as Text”.
+      </p>
+    </form>
+
+    <p class="foot">
+      © AI Research Corp (AIRC) • Mentor Program Submissions (native forms)
+    </p>
+
   </div>
+
+  <script>
+    // === Configure without touching the form ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org",
+      emailSubject: "AIRC Mentor Program — Form 01 | Session Planning Sheet"
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function val(id){ return ($(id)?.value || "").trim(); }
+    function yesno(id){ return val(id) || "[blank]"; }
+    function chk(id){ return $(id)?.checked ? "Yes" : "No"; }
+
+    function pickOther(selectId, otherId){
+      const s = val(selectId);
+      if(!s) return "[blank]";
+      if(s === "Other") return `Other: ${val(otherId) || "[blank]"}`;
+      return s;
+    }
+
+    function buildText(){
+      const sessionType = pickOther("sessionType","sessionTypeOther");
+      const primaryTopic = pickOther("primaryTopic","primaryTopicOther");
+      const primaryAudience = pickOther("primaryAudience","primaryAudienceOther");
+      const howKnow = pickOther("howKnow","howKnowOther");
+      const duration = pickOther("duration","durationOther");
+      const platform = pickOther("platform","platformOther");
+
+      const learningGoals = [
+        chk("lg_usecase")==="Yes" ? "Understand a real-world use case" : null,
+        chk("lg_pathways")==="Yes" ? "Learn about career pathways" : null,
+        chk("lg_tools")==="Yes" ? "Learn practical tools/skills" : null,
+        chk("lg_challenges")==="Yes" ? "Understand challenges/risks" : null,
+        chk("lg_ethics")==="Yes" ? "Learn about ethics/impact" : null,
+        chk("lg_other")==="Yes" ? `Other: ${val("lgOtherText") || "[blank]"}` : null,
+      ].filter(Boolean);
+
+      const readiness = [
+        chk("rc_topic")==="Yes" ? "Topic is clear" : null,
+        chk("rc_audience")==="Yes" ? "Audience is defined" : null,
+        chk("rc_speaker")==="Yes" ? "Speaker is appropriate" : null,
+        chk("rc_align")==="Yes" ? "Session aligns with AIRC mission" : null,
+        chk("rc_timeline")==="Yes" ? "Timeline is realistic" : null,
+      ].filter(Boolean);
+
+      return [
+        "AIRC Mentor Program — Session Planning Sheet (Form 01)",
+        "(To be completed before outreach)",
+        "=====================================================",
+        "",
+        "1. Basic Session Information",
+        `Volunteer Name: ${val("volName") || "[blank]"}`,
+        `Date Created: ${val("dateCreated") || "[blank]"}`,
+        `Proposed Session Month/Window: ${val("monthWindow") || "[blank]"}`,
+        `Session Type: ${sessionType}`,
+        "",
+        "2. Session Topic & Focus",
+        `Working Title (Draft): ${val("workingTitle") || "[blank]"}`,
+        `Primary Topic Area: ${primaryTopic}`,
+        "Why This Topic Matters (1–2 sentences):",
+        val("whyTopic") || "[blank]",
+        "",
+        "3. Target Audience",
+        `Primary Audience: ${primaryAudience}`,
+        `Experience Level: ${val("experienceLevel") || "[blank]"}`,
+        "",
+        "4. Potential Speaker(s)",
+        `Name: ${val("speakerName") || "[blank]"}`,
+        `Organization / Role: ${val("speakerOrgRole") || "[blank]"}`,
+        `Email / Contact Info: ${val("speakerContact") || "[blank]"}`,
+        `How You Know Them / Source: ${howKnow}`,
+        "Why This Speaker Is a Good Fit:",
+        val("whySpeaker") || "[blank]",
+        "",
+        "5. Learning Goals (What Participants Should Gain)",
+        (learningGoals.length ? learningGoals.map(x => `- ${x}`).join("\n") : "- [none selected]"),
+        "",
+        "Specific Outcomes (optional):",
+        val("outcomes") || "[blank]",
+        "",
+        "6. Format & Logistics (Draft)",
+        `Proposed Duration: ${duration}`,
+        `Proposed Format: ${val("format") || "[blank]"}`,
+        `Recording Required: ${val("recordingRequired") || "[blank]"}`,
+        `Platform (if known): ${platform}`,
+        "",
+        "7. Readiness Check (checked items)",
+        (readiness.length ? readiness.map(x => `- ${x}`).join("\n") : "- [none checked]"),
+        "",
+        "8. Notes & Ideas",
+        val("notes") || "[blank]",
+        "",
+        "9. Status Tracking",
+        `Outreach Sent: ${yesno("st_outreach")}`,
+        `Speaker Confirmed: ${yesno("st_speaker")}`,
+        `Date Confirmed: ${yesno("st_date")}`,
+        `Moved to Pre-Call Stage: ${yesno("st_precall")}`,
+        ""
+      ].join("\n");
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    $("copyBtn").addEventListener("click", () => copyToClipboard(buildText()));
+
+    $("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo);
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    $("clearBtn").addEventListener("click", () => {
+      if(!confirm("Clear all fields?")) return;
+      document.getElementById("form01").reset();
+    });
+
+    // Helpful default: set Date Created to today if empty
+    (function init(){
+      const dc = $("dateCreated");
+      if(dc && !dc.value){
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const dd = String(d.getDate()).padStart(2,"0");
+        dc.value = `${yyyy}-${mm}-${dd}`;
+      }
+    })();
+  </script>
 </body>
 </html>
