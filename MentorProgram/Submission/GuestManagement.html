@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Guest Management</title>
+  <meta name="description" content="AIRC Mentor Program — Speaker & Guest Management Tracker. Serverless: copy as text or mailto." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:86ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    @media (max-width: 900px){
+      header{flex-direction:column; align-items:stretch}
+      .toplinks{justify-content:flex-start}
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+
+    .checkgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:10px}
+    @media (max-width: 900px){ .checkgrid{grid-template-columns:1fr} }
+
+    .chk{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      padding:10px 10px;
+    }
+    .chk input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--accent);
+    }
+
+    .pill{
+      display:inline-block;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-right:6px;
+      margin-top:6px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background: rgba(0,0,0,0.10);
+      margin-top:10px;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      font-size:13px;
+    }
+    th{
+      text-align:left;
+      color:var(--muted);
+      font-weight:650;
+      background: rgba(255,255,255,0.03);
+    }
+    tr:last-child td{border-bottom:none}
+    .tblinput{
+      width:100%;
+      padding:8px 8px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+      font-size:13px;
+    }
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
+
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+
+    .smallnote{font-size:12px; color:var(--muted); margin-top:6px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Speaker &amp; Guest Management Tracker</h1>
+          <p class="sub">Serverless tracker: fill it out, then copy/email it back. Nothing is stored.</p>
+          <div>
+            <span class="pill">No lost contacts</span>
+            <span class="pill">Better speakers over time</span>
+            <span class="pill">Repeat collaborations</span>
+            <span class="pill">Partnership-ready</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Header</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="cohort">Cohort</label>
+          <input id="cohort" value="Jan–Jun 2026" />
+        </div>
+        <div>
+          <label for="coordinator">Coordinator</label>
+          <input id="coordinator" placeholder="Your name" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="lastUpdated">Last Updated</label>
+          <input id="lastUpdated" placeholder="YYYY-MM-DD" />
+        </div>
+        <div>
+          <label for="internalId">Internal ID (optional)</label>
+          <input id="internalId" placeholder="e.g., GUEST-001" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 1 — Speaker Profile</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="fullName">Full Name</label>
+          <input id="fullName" />
+        </div>
+        <div>
+          <label for="titleRole">Title / Role</label>
+          <input id="titleRole" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="org">Organization / Affiliation</label>
+          <input id="org" />
+        </div>
+        <div>
+          <label for="expertise">Area of Expertise</label>
+          <input id="expertise" placeholder="e.g., GIS, AI safety, biotech, education research..." />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="linkedin">LinkedIn / Website</label>
+          <input id="linkedin" placeholder="URL" />
+        </div>
+        <div>
+          <label for="location">Location (Optional)</label>
+          <input id="location" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 2 — Contact Information</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="emailPrimary">Primary Email</label>
+          <input id="emailPrimary" />
+        </div>
+        <div>
+          <label for="emailAlt">Alternate Email</label>
+          <input id="emailAlt" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="phone">Phone (Optional)</label>
+          <input id="phone" />
+        </div>
+        <div>
+          <label>Preferred Contact Method</label>
+          <div class="checkgrid" id="contactMethod">
+            <label class="chk"><input type="checkbox" data-label="Email" /> <span>Email</span></label>
+            <label class="chk"><input type="checkbox" data-label="LinkedIn" /> <span>LinkedIn</span></label>
+            <label class="chk"><input type="checkbox" data-label="Phone" /> <span>Phone</span></label>
+            <label class="chk"><input type="checkbox" data-label="Other" id="contactOtherChk" /> <span>Other</span></label>
+          </div>
+          <div id="contactOtherWrap" style="display:none">
+            <label for="contactOther">Other (specify)</label>
+            <input id="contactOther" placeholder="e.g., Twitter/X, WhatsApp, etc." />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 3 — Outreach History</h2>
+      <p class="muted" style="margin:0">Add a few outreach touches (date/method/purpose/response/notes).</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:120px">Date</th>
+            <th style="width:140px">Method</th>
+            <th>Purpose</th>
+            <th style="width:160px">Response</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="outreachBody"></tbody>
+      </table>
+      <div class="btnrow">
+        <button class="btn" type="button" id="addOutreachRow">+ Add Row</button>
+        <button class="btn ghost" type="button" id="clearOutreachRows">Clear Rows</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <label>Response Status</label>
+      <div class="checkgrid" id="responseStatus">
+        <label class="chk"><input type="checkbox" data-label="No response" /> <span>No response</span></label>
+        <label class="chk"><input type="checkbox" data-label="Interested" /> <span>Interested</span></label>
+        <label class="chk"><input type="checkbox" data-label="Declined" /> <span>Declined</span></label>
+        <label class="chk"><input type="checkbox" data-label="Scheduled" /> <span>Scheduled</span></label>
+        <label class="chk"><input type="checkbox" data-label="Completed" /> <span>Completed</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 4 — Session Participation</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="sessionTitle">Session Title</label>
+          <input id="sessionTitle" />
+        </div>
+        <div>
+          <label for="sessionDate">Session Date</label>
+          <input id="sessionDate" placeholder="YYYY-MM-DD" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="hostInterviewer">Host / Interviewer</label>
+          <input id="hostInterviewer" />
+        </div>
+        <div>
+          <label>Format</label>
+          <div class="checkgrid" id="formatChecks">
+            <label class="chk"><input type="checkbox" data-label="Interview" /> <span>Interview</span></label>
+            <label class="chk"><input type="checkbox" data-label="Panel" /> <span>Panel</span></label>
+            <label class="chk"><input type="checkbox" data-label="Workshop" /> <span>Workshop</span></label>
+            <label class="chk"><input type="checkbox" data-label="Talk" /> <span>Talk</span></label>
+            <label class="chk"><input type="checkbox" data-label="Hybrid" /> <span>Hybrid</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="recordingLink">Recording Link</label>
+          <input id="recordingLink" placeholder="URL or location reference" />
+        </div>
+        <div>
+          <label for="publishedLink">Published Link</label>
+          <input id="publishedLink" placeholder="YouTube / website URL" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 5 — Preparation &amp; Materials</h2>
+
+      <label>Provided by Speaker</label>
+      <div class="checkgrid" id="materialsChecks">
+        <label class="chk"><input type="checkbox" data-label="Bio" /> <span>Bio</span></label>
+        <label class="chk"><input type="checkbox" data-label="Headshot" /> <span>Headshot</span></label>
+        <label class="chk"><input type="checkbox" data-label="Slides" /> <span>Slides</span></label>
+        <label class="chk"><input type="checkbox" data-label="Talking Points" /> <span>Talking Points</span></label>
+        <label class="chk"><input type="checkbox" data-label="Resources" /> <span>Resources</span></label>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="receivedDate">Received Date</label>
+          <input id="receivedDate" placeholder="YYYY-MM-DD" />
+        </div>
+        <div>
+          <label for="materialsNotes">Notes</label>
+          <input id="materialsNotes" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 6 — Performance &amp; Engagement Notes (Internal)</h2>
+
+      <label for="strengths">Strengths</label>
+      <textarea id="strengths"></textarea>
+
+      <label for="areasImprove">Areas for Improvement</label>
+      <textarea id="areasImprove"></textarea>
+
+      <label>Audience Engagement Level</label>
+      <div class="checkgrid" id="engagementChecks">
+        <label class="chk"><input type="checkbox" data-label="High" /> <span>High</span></label>
+        <label class="chk"><input type="checkbox" data-label="Medium" /> <span>Medium</span></label>
+        <label class="chk"><input type="checkbox" data-label="Low" /> <span>Low</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 7 — Follow-Up &amp; Relationship Management</h2>
+
+      <label>Thank-You Sent</label>
+      <div class="checkgrid" id="thankChecks">
+        <label class="chk"><input type="checkbox" data-label="Yes" id="thankYes" /> <span>Yes</span></label>
+        <label class="chk"><input type="checkbox" data-label="No" id="thankNo" /> <span>No</span></label>
+      </div>
+      <div id="thankDateWrap" style="display:none">
+        <label for="thankDate">If Yes, Date</label>
+        <input id="thankDate" placeholder="YYYY-MM-DD" />
+      </div>
+
+      <label>Post-Session Follow-Up</label>
+      <div class="checkgrid" id="followupChecks">
+        <label class="chk"><input type="checkbox" data-label="Feedback shared" /> <span>Feedback shared</span></label>
+        <label class="chk"><input type="checkbox" data-label="Recording sent" /> <span>Recording sent</span></label>
+        <label class="chk"><input type="checkbox" data-label="Invitation to return" /> <span>Invitation to return</span></label>
+        <label class="chk"><input type="checkbox" data-label="Partnership discussion" /> <span>Partnership discussion</span></label>
+      </div>
+
+      <label for="relNotes">Notes</label>
+      <textarea id="relNotes"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Section 8 — Future Opportunities</h2>
+
+      <label>Re-Invite Potential</label>
+      <div class="checkgrid" id="reinviteChecks">
+        <label class="chk"><input type="checkbox" data-label="High" /> <span>High</span></label>
+        <label class="chk"><input type="checkbox" data-label="Medium" /> <span>Medium</span></label>
+        <label class="chk"><input type="checkbox" data-label="Low" /> <span>Low</span></label>
+      </div>
+
+      <label for="futureTopics">Suggested Future Topics</label>
+      <textarea id="futureTopics"></textarea>
+
+      <label>Potential Mentor Role</label>
+      <div class="checkgrid" id="mentorRoleChecks">
+        <label class="chk"><input type="checkbox" data-label="Yes" /> <span>Yes</span></label>
+        <label class="chk"><input type="checkbox" data-label="Maybe" /> <span>Maybe</span></label>
+        <label class="chk"><input type="checkbox" data-label="No" /> <span>No</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 9 — Tags &amp; Classification</h2>
+
+      <label>(Check all that apply)</label>
+      <div class="checkgrid" id="tagsChecks">
+        <label class="chk"><input type="checkbox" data-label="Industry" /> <span>Industry</span></label>
+        <label class="chk"><input type="checkbox" data-label="Academia" /> <span>Academia</span></label>
+        <label class="chk"><input type="checkbox" data-label="Government" /> <span>Government</span></label>
+        <label class="chk"><input type="checkbox" data-label="Nonprofit" /> <span>Nonprofit</span></label>
+        <label class="chk"><input type="checkbox" data-label="Startup" /> <span>Startup</span></label>
+        <label class="chk"><input type="checkbox" data-label="Policy" /> <span>Policy</span></label>
+        <label class="chk"><input type="checkbox" data-label="Student" /> <span>Student</span></label>
+        <label class="chk"><input type="checkbox" data-label="International" /> <span>International</span></label>
+      </div>
+
+      <div class="hr"></div>
+
+      <label>Primary Track</label>
+      <div class="checkgrid" id="trackChecks">
+        <label class="chk"><input type="checkbox" data-label="GIS" /> <span>GIS</span></label>
+        <label class="chk"><input type="checkbox" data-label="AI / ML" /> <span>AI / ML</span></label>
+        <label class="chk"><input type="checkbox" data-label="Data Science" /> <span>Data Science</span></label>
+        <label class="chk"><input type="checkbox" data-label="Biotech" /> <span>Biotech</span></label>
+        <label class="chk"><input type="checkbox" data-label="Energy" /> <span>Energy</span></label>
+        <label class="chk"><input type="checkbox" data-label="Education" /> <span>Education</span></label>
+        <label class="chk"><input type="checkbox" data-label="Other" id="trackOtherChk" /> <span>Other</span></label>
+      </div>
+
+      <div id="trackOtherWrap" style="display:none">
+        <label for="trackOther">Other (specify)</label>
+        <input id="trackOther" />
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 10 — Administrative Status</h2>
+
+      <label>Release / Consent Form</label>
+      <div class="checkgrid" id="releaseChecks">
+        <label class="chk"><input type="checkbox" data-label="Received" /> <span>Received</span></label>
+        <label class="chk"><input type="checkbox" data-label="Pending" /> <span>Pending</span></label>
+        <label class="chk"><input type="checkbox" data-label="Not Required" /> <span>Not Required</span></label>
+      </div>
+
+      <label>Content Approved for Public Use</label>
+      <div class="checkgrid" id="approvedChecks">
+        <label class="chk"><input type="checkbox" data-label="Yes" /> <span>Yes</span></label>
+        <label class="chk"><input type="checkbox" data-label="No" /> <span>No</span></label>
+      </div>
+
+      <label>Archived</label>
+      <div class="checkgrid" id="archivedChecks">
+        <label class="chk"><input type="checkbox" data-label="Yes" /> <span>Yes</span></label>
+        <label class="chk"><input type="checkbox" data-label="No" /> <span>No</span></label>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2 style="margin-top:0">Export / Send</h2>
+      <p class="muted" style="margin:0">Copy as text to paste into an email/doc, or open your email client with a prefilled message.</p>
+
+      <div class="btnrow">
+        <button class="btn primary" type="button" id="copyBtn">Copy as Text</button>
+        <button class="btn" type="button" id="emailBtn">✉️ Send via Email</button>
+        <button class="btn ghost" type="button" id="printBtn">Print / Save as PDF</button>
+        <button class="btn" type="button" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="preview" id="preview"></div>
+
+      <p class="foot">Serverless form (no data is stored). Use Copy/Email for handoff.</p>
+    </section>
+
+    <p class="foot">© AI Research Corps (AIRC). Intended for pilot cohort use.</p>
+
+  </div>
+
+  <script>
+    // === Configure these without changing the rest of the page ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org", // change if needed
+      emailSubject: "AIRC Mentor Program | Speaker & Guest Management Tracker",
+      includeCheckboxStates: true,
+      outreachRowsDefault: 6
+    };
+
+    function val(id){ return (document.getElementById(id)?.value || "").trim(); }
+
+    function checkedList(containerId){
+      const root = document.getElementById(containerId);
+      if (!root) return [];
+      return Array.from(root.querySelectorAll('input[type="checkbox"]')).map(cb => ({
+        label: cb.getAttribute("data-label") || "Item",
+        checked: !!cb.checked
+      }));
+    }
+
+    function fmtChecks(title, items){
+      if (!items.length) return "";
+      const lines = [title];
+      items.forEach(it => lines.push(`${it.checked ? "☑" : "☐"} ${it.label}`));
+      lines.push("");
+      return lines.join("\n");
+    }
+
+    function getOutreachRows(){
+      const body = document.getElementById("outreachBody");
+      const rows = [];
+      Array.from(body.querySelectorAll("tr")).forEach(tr => {
+        const inputs = tr.querySelectorAll("input");
+        rows.push({
+          date: inputs[0].value.trim(),
+          method: inputs[1].value.trim(),
+          purpose: inputs[2].value.trim(),
+          response: inputs[3].value.trim(),
+          notes: inputs[4].value.trim()
+        });
+      });
+      // keep rows that have any content
+      return rows.filter(r => Object.values(r).some(v => v));
+    }
+
+    function addOutreachRow(prefill = {}){
+      const body = document.getElementById("outreachBody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input class="tblinput" placeholder="YYYY-MM-DD" value="${(prefill.date||"").replace(/"/g,'&quot;')}" /></td>
+        <td><input class="tblinput" placeholder="Email / LinkedIn" value="${(prefill.method||"").replace(/"/g,'&quot;')}" /></td>
+        <td><input class="tblinput" placeholder="Invite / follow-up" value="${(prefill.purpose||"").replace(/"/g,'&quot;')}" /></td>
+        <td><input class="tblinput" placeholder="Interested / no reply" value="${(prefill.response||"").replace(/"/g,'&quot;')}" /></td>
+        <td><input class="tblinput" placeholder="Any notes" value="${(prefill.notes||"").replace(/"/g,'&quot;')}" /></td>
+      `;
+      body.appendChild(tr);
+    }
+
+    function buildText(){
+      const lines = [];
+      lines.push("AIRC Mentor Program — Speaker & Guest Management Tracker");
+      lines.push("------------------------------------------------------");
+      lines.push("");
+
+      lines.push("Header");
+      lines.push(`Cohort: ${val("cohort")}`);
+      lines.push(`Coordinator: ${val("coordinator")}`);
+      lines.push(`Last Updated: ${val("lastUpdated")}`);
+      lines.push(`Internal ID (optional): ${val("internalId")}`);
+      lines.push("");
+
+      lines.push("Section 1 — Speaker Profile");
+      lines.push(`Full Name: ${val("fullName")}`);
+      lines.push(`Title / Role: ${val("titleRole")}`);
+      lines.push(`Organization / Affiliation: ${val("org")}`);
+      lines.push(`Area of Expertise: ${val("expertise")}`);
+      lines.push(`LinkedIn / Website: ${val("linkedin")}`);
+      lines.push(`Location (Optional): ${val("location")}`);
+      lines.push("");
+
+      lines.push("Section 2 — Contact Information");
+      lines.push(`Primary Email: ${val("emailPrimary")}`);
+      lines.push(`Alternate Email: ${val("emailAlt")}`);
+      lines.push(`Phone (Optional): ${val("phone")}`);
+
+      if (CONFIG.includeCheckboxStates){
+        const cm = checkedList("contactMethod");
+        const other = val("contactOther");
+        if (cm.some(x => x.label === "Other" && x.checked) && other) {
+          // add details inline
+          cm.forEach(x => { if (x.label === "Other") x.label = `Other (${other})`; });
+        }
+        lines.push(fmtChecks("Preferred Contact Method:", cm));
+      } else {
+        lines.push("");
+      }
+
+      lines.push("Section 3 — Outreach History");
+      const rows = getOutreachRows();
+      if (!rows.length){
+        lines.push("(No outreach history added.)");
+      } else {
+        rows.forEach((r, i) => {
+          lines.push(`Row ${i+1}:`);
+          lines.push(`  Date: ${r.date}`);
+          lines.push(`  Method: ${r.method}`);
+          lines.push(`  Purpose: ${r.purpose}`);
+          lines.push(`  Response: ${r.response}`);
+          lines.push(`  Notes: ${r.notes}`);
+        });
+      }
+      lines.push("");
+
+      if (CONFIG.includeCheckboxStates){
+        lines.push(fmtChecks("Response Status:", checkedList("responseStatus")));
+      }
+
+      lines.push("Section 4 — Session Participation");
+      lines.push(`Session Title: ${val("sessionTitle")}`);
+      lines.push(`Session Date: ${val("sessionDate")}`);
+      lines.push(`Host / Interviewer: ${val("hostInterviewer")}`);
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Format:", checkedList("formatChecks")));
+      lines.push(`Recording Link: ${val("recordingLink")}`);
+      lines.push(`Published Link: ${val("publishedLink")}`);
+      lines.push("");
+
+      lines.push("Section 5 — Preparation & Materials");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Provided by Speaker:", checkedList("materialsChecks")));
+      lines.push(`Received Date: ${val("receivedDate")}`);
+      lines.push(`Notes: ${val("materialsNotes")}`);
+      lines.push("");
+
+      lines.push("Section 6 — Performance & Engagement Notes (Internal Use Only)");
+      lines.push("Strengths:");
+      lines.push(val("strengths"));
+      lines.push("");
+      lines.push("Areas for Improvement:");
+      lines.push(val("areasImprove"));
+      lines.push("");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Audience Engagement Level:", checkedList("engagementChecks")));
+
+      lines.push("Section 7 — Follow-Up & Relationship Management");
+      if (CONFIG.includeCheckboxStates) {
+        lines.push(fmtChecks("Thank-You Sent:", checkedList("thankChecks")));
+        const td = val("thankDate");
+        if (td) lines.push(`Thank-you date: ${td}\n`);
+        lines.push(fmtChecks("Post-Session Follow-Up:", checkedList("followupChecks")));
+      }
+      lines.push("Notes:");
+      lines.push(val("relNotes"));
+      lines.push("");
+
+      lines.push("Section 8 — Future Opportunities");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Re-Invite Potential:", checkedList("reinviteChecks")));
+      lines.push("Suggested Future Topics:");
+      lines.push(val("futureTopics"));
+      lines.push("");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Potential Mentor Role:", checkedList("mentorRoleChecks")));
+
+      lines.push("Section 9 — Tags & Classification");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Tags:", checkedList("tagsChecks")));
+      if (CONFIG.includeCheckboxStates){
+        const trk = checkedList("trackChecks");
+        const other = val("trackOther");
+        if (trk.some(x => x.label === "Other" && x.checked) && other) {
+          trk.forEach(x => { if (x.label === "Other") x.label = `Other (${other})`; });
+        }
+        lines.push(fmtChecks("Primary Track:", trk));
+      }
+
+      lines.push("Section 10 — Administrative Status");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Release / Consent Form:", checkedList("releaseChecks")));
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Content Approved for Public Use:", checkedList("approvedChecks")));
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Archived:", checkedList("archivedChecks")));
+
+      return lines.join("\n");
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    // UI toggles for "Other" fields
+    document.getElementById("contactOtherChk").addEventListener("change", (e) => {
+      document.getElementById("contactOtherWrap").style.display = e.target.checked ? "block" : "none";
+    });
+    document.getElementById("trackOtherChk").addEventListener("change", (e) => {
+      document.getElementById("trackOtherWrap").style.display = e.target.checked ? "block" : "none";
+    });
+
+    // Thank-you date logic
+    function syncThankDate(){
+      const yes = document.getElementById("thankYes").checked;
+      document.getElementById("thankDateWrap").style.display = yes ? "block" : "none";
+    }
+    document.getElementById("thankYes").addEventListener("change", syncThankDate);
+    document.getElementById("thankNo").addEventListener("change", syncThankDate);
+
+    // Outreach table controls
+    document.getElementById("addOutreachRow").addEventListener("click", () => addOutreachRow());
+    document.getElementById("clearOutreachRows").addEventListener("click", () => {
+      if (!confirm("Clear all outreach rows?")) return;
+      const body = document.getElementById("outreachBody");
+      body.innerHTML = "";
+      for (let i=0;i<CONFIG.outreachRowsDefault;i++) addOutreachRow();
+    });
+
+    // Export controls
+    const preview = document.getElementById("preview");
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = buildText();
+      preview.style.display = "block";
+      preview.textContent = text;
+      await copyText(text);
+    });
+
+    document.getElementById("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo || "");
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (!confirm("Clear all fields and checkboxes?")) return;
+      document.querySelectorAll("input, textarea, select").forEach(el => {
+        if (el.type === "checkbox") el.checked = false;
+        else el.value = "";
+      });
+      document.getElementById("cohort").value = "Jan–Jun 2026";
+      // reset table
+      const body = document.getElementById("outreachBody");
+      body.innerHTML = "";
+      for (let i=0;i<CONFIG.outreachRowsDefault;i++) addOutreachRow();
+      // hide others
+      document.getElementById("contactOtherWrap").style.display = "none";
+      document.getElementById("trackOtherWrap").style.display = "none";
+      document.getElementById("thankDateWrap").style.display = "none";
+      preview.style.display = "none";
+      preview.textContent = "";
+    });
+
+    // init default rows
+    for (let i=0;i<CONFIG.outreachRowsDefault;i++) addOutreachRow();
+  </script>
+</body>
+</html>
