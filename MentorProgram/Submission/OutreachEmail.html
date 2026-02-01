@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Speaker Outreach Email Template</title>
+  <meta name="description" content="AIRC Mentor Program — Speaker Outreach Email Template (copy/personalize/send). Serverless: copy as text or mailto." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+      --ok:#34d399;
+      --bad:#fb7185;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:86ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    @media (max-width: 900px){
+      header{flex-direction:column; align-items:stretch}
+      .toplinks{justify-content:flex-start}
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+
+    .pillrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+    .pill{
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .pill.ok{border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.10); color:var(--text)}
+    .pill.bad{border-color: rgba(251,113,133,0.25); background: rgba(251,113,133,0.10); color:var(--text)}
+    .pill strong{color:var(--text)}
+    .pill .dot{width:8px; height:8px; border-radius:999px; background: var(--accent)}
+    .pill.ok .dot{background: var(--ok)}
+    .pill.bad .dot{background: var(--bad)}
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{
+      background: transparent;
+    }
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+    .tiny{font-size:12px}
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+    }
+    .warnbox{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+    }
+    .warnbox strong{color:var(--warn)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Speaker Outreach Email Template</h1>
+          <p class="sub">Fill the fields once, then generate a clean outreach email you can copy or send. Serverless: nothing is stored.</p>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Purpose</h2>
+      <p class="muted" style="margin:0 0 8px">
+        This template supports: professional outreach, consistent AIRC voice, high response rates, and strong first impressions.
+      </p>
+
+      <div class="warnbox">
+        <strong>Internal guidance:</strong> personalize at least <strong>2 lines</strong>, reference a <strong>specific</strong> project/work, keep tone <strong>respectful + low-pressure</strong>, and <strong>do not mass-blast</strong>.
+      </div>
+
+      <div class="pillrow" aria-label="usage rules">
+        <div class="pill ok"><span class="dot"></span><strong>Do:</strong> personalize 2+ lines</div>
+        <div class="pill ok"><span class="dot"></span><strong>Do:</strong> reference specific work</div>
+        <div class="pill ok"><span class="dot"></span><strong>Do:</strong> respectful + low-pressure</div>
+        <div class="pill bad"><span class="dot"></span><strong>Don’t:</strong> mass-blast</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Form</h2>
+
+      <form id="outreachForm">
+
+        <div class="twoCol">
+          <div>
+            <label for="yourName">Your Name</label>
+            <input id="yourName" name="yourName" placeholder="e.g., Vivian Chen" />
+          </div>
+          <div>
+            <label for="yourEmail">Your Email</label>
+            <input id="yourEmail" name="yourEmail" placeholder="you@example.com" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="recipientName">Speaker Name</label>
+            <input id="recipientName" name="recipientName" placeholder="e.g., Dr. Jane Doe" />
+          </div>
+          <div>
+            <label for="timeframe">Scheduling window</label>
+            <input id="timeframe" name="timeframe" placeholder="e.g., March–April 2026" />
+          </div>
+        </div>
+
+        <label for="specificWork">Specific work you’re referencing</label>
+        <input id="specificWork" name="specificWork" placeholder="e.g., your work on ___ / talk on ___ / project ___" />
+
+        <label for="area">Speaker’s area / role</label>
+        <input id="area" name="area" placeholder="e.g., geospatial analytics in public sector" />
+
+        <div class="twoCol">
+          <div>
+            <label for="sessionLength">Session length</label>
+            <select id="sessionLength" name="sessionLength">
+              <option value="60 minutes">60 minutes</option>
+              <option value="45 minutes">45 minutes</option>
+              <option value="30 minutes">30 minutes</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="sessionLengthOther">If “Other”, specify</label>
+            <input id="sessionLengthOther" name="sessionLengthOther" placeholder="Optional" />
+          </div>
+        </div>
+
+        <label>Subject line (choose one)</label>
+        <div class="twoCol">
+          <div>
+            <select id="subjectChoice" name="subjectChoice">
+              <option value="Invitation to Share Your Work with Students & Professionals (AIRC)">Invitation to Share Your Work with Students & Professionals (AIRC)</option>
+              <option value="Invitation: AIRC Mentor Program Speaker Session">Invitation: AIRC Mentor Program Speaker Session</option>
+              <option value="Invitation to Participate in AIRC Speaker Series">Invitation to Participate in AIRC Speaker Series</option>
+              <option value="Share Your Experience with Emerging Tech Learners (AIRC)">Share Your Experience with Emerging Tech Learners (AIRC)</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div>
+            <label for="subjectCustom">If “Custom”, subject text</label>
+            <input id="subjectCustom" name="subjectCustom" placeholder="Optional" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h3 style="margin:0 0 6px; font-size:16px">Generated Email Preview</h3>
+        <p class="muted tiny" style="margin:0 0 8px">
+          This preview updates when you click “Generate Preview”. You can then copy or send.
+        </p>
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="genBtn">⚙️ Generate Preview</button>
+          <button class="btn" type="button" id="copyBtn">Copy Email (Text)</button>
+          <button class="btn" type="button" id="mailtoBtn">✉️ Send via Email</button>
+          <button class="btn ghost" type="button" id="shortToggleBtn">Use Short Version: OFF</button>
+          <button class="btn" type="button" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="preview" id="previewBox">Click “Generate Preview” to build the email…</div>
+
+        <p class="foot">
+          Note: “Send via Email” uses your mail client (<span class="muted">mailto:</span>). If formatting strips, copy and paste.
+        </p>
+      </form>
+    </section>
+
+    <p class="foot">
+      © AI Research Corps (AIRC). Serverless form (no data is stored).
+    </p>
+  </div>
+
+  <script>
+    // === Configure without changing the rest of the page ===
+    const CONFIG = {
+      // Send-to address for mailto (volunteers can leave blank to send from their own email client)
+      // If you prefer, set this to your own address to route drafts to you, e.g., "mohamad@airesearchcorp.org"
+      mailtoTo: "",
+      defaultSignatureLine: "Volunteer — AIRC Mentor Program",
+      // Optional AIRC info snippet (keep brief)
+      aboutAircOneLiner: "AI Research Corp (AIRC) is a nonprofit focused on accessible education in AI, data science, and emerging technologies."
+    };
+
+    let useShort = false;
+
+    function v(id){ return (document.getElementById(id)?.value || "").trim(); }
+    function subjectText(){
+      const choice = v("subjectChoice");
+      if (choice === "Custom") return v("subjectCustom") || "Invitation to AIRC Speaker Series";
+      return choice || "Invitation to AIRC Speaker Series";
+    }
+    function sessionLengthText(){
+      const choice = v("sessionLength");
+      if (choice === "Other") return v("sessionLengthOther") || "60 minutes";
+      return choice || "60 minutes";
+    }
+
+    function buildLongEmail(){
+      const name = v("recipientName") || "[Name]";
+      const yourName = v("yourName") || "[Your Name]";
+      const yourEmail = v("yourEmail") || "[Your Email]";
+      const area = v("area") || "[specific area / project / role]";
+      const specificWork = v("specificWork") || "[specific work you’re referencing]";
+      const timeframe = v("timeframe") || "[month / timeframe]";
+      const length = sessionLengthText();
+
+      const lines = [];
+      lines.push(`Hi ${name},`);
+      lines.push("");
+      lines.push(`I hope you’re doing well. My name is ${yourName}, and I’m a volunteer with AI Research Corp (AIRC), a nonprofit focused on accessible education in AI, data science, and emerging technologies.`);
+      lines.push("");
+      lines.push("I’m reaching out because of your work in " + area + (specificWork ? ` (especially ${specificWork})` : "") + ", and I believe your experience would be incredibly valuable to students and early-career professionals exploring this field.");
+      lines.push("");
+      lines.push("AIRC runs a public Mentor Program & Speaker Series that features recorded conversations with professionals across technology, science, and innovation. Our goal is to share real-world pathways, lessons learned, and practical insights. Sessions are shared freely with learners and community partners.");
+      lines.push("");
+      lines.push(`We would love to invite you to participate in a ${length} virtual session, structured as a friendly, guided conversation.`);
+      lines.push("Typical format:");
+      lines.push("• 40–45 minutes of discussion/interview");
+      lines.push("• 15–20 minutes Q&A (optional)");
+      lines.push("• Recorded (with your permission)");
+      lines.push("• We handle logistics, promotion, and publishing");
+      lines.push("");
+      lines.push(`We are currently scheduling sessions for ${timeframe}, but we’re happy to work around your availability.`);
+      lines.push("");
+      lines.push("If this sounds interesting, I’d be happy to share more details and explore scheduling. Would you be open to a brief follow-up conversation?");
+      lines.push("");
+      lines.push("Thank you for your time and for the work you do in this field. I appreciate your consideration and hope we can collaborate.");
+      lines.push("");
+      lines.push("Warm regards,");
+      lines.push(yourName);
+      lines.push(CONFIG.defaultSignatureLine);
+      lines.push(yourEmail);
+      lines.push("[Optional LinkedIn]");
+      return lines.join("\n");
+    }
+
+    function buildShortEmail(){
+      const name = v("recipientName") || "[Name]";
+      const yourName = v("yourName") || "[Your Name]";
+      const yourEmail = v("yourEmail") || "[Your Email]";
+      const area = v("area") || "[area]";
+      const length = sessionLengthText();
+
+      const lines = [];
+      lines.push(`Hi ${name},`);
+      lines.push("");
+      lines.push(`I’m a volunteer with AI Research Corp (AIRC), a nonprofit focused on tech education. We host recorded conversations with professionals to support students and early-career learners.`);
+      lines.push(`We’d love to invite you to join us for a ${length} virtual session to share your experience in ${area}.`);
+      lines.push("");
+      lines.push("If interested, I’d be happy to share details.");
+      lines.push("");
+      lines.push("Best,");
+      lines.push(yourName);
+      lines.push(CONFIG.defaultSignatureLine);
+      lines.push(yourEmail);
+      return lines.join("\n");
+    }
+
+    function buildEmailText(){
+      return useShort ? buildShortEmail() : buildLongEmail();
+    }
+
+    function renderPreview(){
+      const preview = buildEmailText();
+      document.getElementById("previewBox").textContent = preview;
+      return preview;
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    document.getElementById("genBtn").addEventListener("click", () => {
+      renderPreview();
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = renderPreview();
+      await copyToClipboard(text);
+    });
+
+    document.getElementById("mailtoBtn").addEventListener("click", () => {
+      const subject = encodeURIComponent(subjectText());
+      const body = encodeURIComponent(renderPreview());
+      const to = encodeURIComponent(CONFIG.mailtoTo || "");
+      // If CONFIG.mailtoTo is empty, mailto: opens compose window without a To
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("shortToggleBtn").addEventListener("click", () => {
+      useShort = !useShort;
+      document.getElementById("shortToggleBtn").textContent = `Use Short Version: ${useShort ? "ON" : "OFF"}`;
+      renderPreview();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Clear all fields?")) {
+        document.getElementById("outreachForm").reset();
+        useShort = false;
+        document.getElementById("shortToggleBtn").textContent = "Use Short Version: OFF";
+        document.getElementById("previewBox").textContent = "Click “Generate Preview” to build the email…";
+      }
+    });
+
+    // Auto-refresh preview when subject choice changes (light)
+    document.getElementById("subjectChoice").addEventListener("change", () => {
+      if (document.getElementById("previewBox").textContent !== "Click “Generate Preview” to build the email…") renderPreview();
+    });
+  </script>
+</body>
+</html>
