@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Session Submission</title>
+  <meta name="description" content="AIRC Mentor Program — Session Submission & Reporting Form. Serverless: copy as text or mailto." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:86ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    @media (max-width: 900px){
+      header{flex-direction:column; align-items:stretch}
+      .toplinks{justify-content:flex-start}
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+
+    .checkgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:10px}
+    .checkgrid.three{grid-template-columns:1fr 1fr 1fr}
+    @media (max-width: 900px){
+      .checkgrid{grid-template-columns:1fr}
+      .checkgrid.three{grid-template-columns:1fr}
+    }
+    .chk{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      padding:10px 10px;
+    }
+    .chk input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--accent);
+    }
+
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+      margin-top:10px;
+    }
+    .callout strong{color:var(--warn)}
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
+
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Session Submission &amp; Reporting Form</h1>
+          <p class="sub">Use this after a session to report details, confirm permissions, and hand off material for publishing/archiving. Serverless: copy as text or mailto.</p>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Section 1 — Volunteer Information</h2>
+
+      <form id="subForm">
+        <div class="twoCol">
+          <div>
+            <label for="volName">Name</label>
+            <input id="volName" name="volName" />
+          </div>
+          <div>
+            <label for="volEmail">Email</label>
+            <input id="volEmail" name="volEmail" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="volPhone">Phone (Optional)</label>
+            <input id="volPhone" name="volPhone" />
+          </div>
+          <div>
+            <label for="cohort">Cohort Period</label>
+            <input id="cohort" name="cohort" placeholder="e.g., Jan–Jun 2026" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 2 — Session Information</h2>
+
+        <div class="twoCol">
+          <div>
+            <label for="sessionTitle">Session Title</label>
+            <input id="sessionTitle" name="sessionTitle" />
+          </div>
+          <div>
+            <label for="speakerName">Speaker Name</label>
+            <input id="speakerName" name="speakerName" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="speakerOrg">Speaker Organization / Affiliation</label>
+            <input id="speakerOrg" name="speakerOrg" />
+          </div>
+          <div>
+            <label for="sessionDate">Date of Session</label>
+            <input id="sessionDate" name="sessionDate" placeholder="e.g., 2026-03-05" />
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="platformUsed">Platform Used</label>
+            <input id="platformUsed" name="platformUsed" placeholder="e.g., Zoom / Meet" />
+          </div>
+          <div>
+            <label for="duration">Session Duration</label>
+            <input id="duration" name="duration" placeholder="e.g., 55 min" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 3 — Recording &amp; Files</h2>
+
+        <label for="primaryLink">Primary Recording Link (Drive / Cloud / Upload)</label>
+        <input id="primaryLink" name="primaryLink" placeholder="Paste URL" />
+
+        <div class="twoCol">
+          <div>
+            <label for="backupLocation">Backup Location (If Any)</label>
+            <input id="backupLocation" name="backupLocation" placeholder="Optional" />
+          </div>
+          <div>
+            <label for="fileNames">File Name(s)</label>
+            <input id="fileNames" name="fileNames" placeholder="e.g., AIRC_Session_JaneDoe_2026-03-05.mp4" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 4 — Consent &amp; Permissions</h2>
+
+        <div class="checkgrid" id="consentChecks">
+          <label class="chk"><input type="checkbox" data-label="Speaker consent obtained" /> <span>Speaker consent obtained</span></label>
+          <label class="chk"><input type="checkbox" data-label="Recording approved for public sharing" /> <span>Recording approved for public sharing</span></label>
+          <label class="chk"><input type="checkbox" data-label="AIRC publishing rights confirmed" /> <span>AIRC publishing rights confirmed</span></label>
+          <label class="chk"><input type="checkbox" data-label="Release form completed (if applicable)" /> <span>Release form completed (if applicable)</span></label>
+        </div>
+
+        <label for="consentNotes">Notes</label>
+        <textarea id="consentNotes" name="consentNotes"></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 5 — Session Summary</h2>
+        <label for="summary">1–2 Paragraph Summary</label>
+        <textarea id="summary" name="summary" placeholder="Describe what was discussed, main themes, and key takeaways."></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 6 — Key Topics Covered</h2>
+        <p class="muted" style="margin:0 0 8px; font-size:13px">Check all that apply.</p>
+
+        <div class="checkgrid three" id="topicsCovered">
+          <label class="chk"><input type="checkbox" data-label="Artificial Intelligence" /> <span>Artificial Intelligence</span></label>
+          <label class="chk"><input type="checkbox" data-label="Data Science" /> <span>Data Science</span></label>
+          <label class="chk"><input type="checkbox" data-label="GIS / Geospatial" /> <span>GIS / Geospatial</span></label>
+          <label class="chk"><input type="checkbox" data-label="Ethics" /> <span>Ethics</span></label>
+          <label class="chk"><input type="checkbox" data-label="Industry Applications" /> <span>Industry Applications</span></label>
+          <label class="chk"><input type="checkbox" data-label="Education" /> <span>Education</span></label>
+          <label class="chk"><input type="checkbox" data-label="Research" /> <span>Research</span></label>
+          <label class="chk"><input type="checkbox" data-label="Policy" /> <span>Policy</span></label>
+          <label class="chk"><input type="checkbox" data-label="Entrepreneurship" /> <span>Entrepreneurship</span></label>
+        </div>
+
+        <label for="topicOther">Other (optional)</label>
+        <input id="topicOther" name="topicOther" placeholder="If other, specify" />
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 7 — Highlights &amp; Quotes (Optional)</h2>
+        <label for="highlights">Notable insights, moments, or quotes</label>
+        <textarea id="highlights" name="highlights"></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 8 — Technical Issues (If Any)</h2>
+        <div class="twoCol">
+          <div>
+            <label for="techLevel">Issue Level</label>
+            <select id="techLevel" name="techLevel">
+              <option value="">Select…</option>
+              <option>None</option>
+              <option>Minor (resolved)</option>
+              <option>Major (needs review)</option>
+            </select>
+          </div>
+          <div>
+            <label for="techDesc">Describe</label>
+            <input id="techDesc" name="techDesc" placeholder="Short description" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 9 — Volunteer Reflection</h2>
+        <div class="twoCol">
+          <div>
+            <label for="workedWell">What Worked Well</label>
+            <textarea id="workedWell" name="workedWell"></textarea>
+          </div>
+          <div>
+            <label for="couldImprove">What Could Improve</label>
+            <textarea id="couldImprove" name="couldImprove"></textarea>
+          </div>
+        </div>
+
+        <label for="supportNeeded">Support Needed (If Any)</label>
+        <textarea id="supportNeeded" name="supportNeeded"></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 10 — Publication Status</h2>
+        <label for="pubStatus">Select status</label>
+        <select id="pubStatus" name="pubStatus">
+          <option value="">Select…</option>
+          <option>Ready to publish</option>
+          <option>Needs editing</option>
+          <option>Needs approval</option>
+          <option>Needs re-recording</option>
+          <option>Hold</option>
+        </select>
+
+        <label for="pubReason">Reason (if Hold / needs review)</label>
+        <textarea id="pubReason" name="pubReason"></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 11 — Next Steps</h2>
+        <div class="checkgrid" id="nextSteps">
+          <label class="chk"><input type="checkbox" data-label="Follow-up with speaker" /> <span>Follow-up with speaker</span></label>
+          <label class="chk"><input type="checkbox" data-label="Prepare next session" /> <span>Prepare next session</span></label>
+          <label class="chk"><input type="checkbox" data-label="Coordinate with AIRC" /> <span>Coordinate with AIRC</span></label>
+          <label class="chk"><input type="checkbox" data-label="Submit additional materials" /> <span>Submit additional materials</span></label>
+        </div>
+
+        <label for="nextNotes">Notes</label>
+        <textarea id="nextNotes" name="nextNotes"></textarea>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Section 12 — Submission Confirmation</h2>
+        <div class="callout">
+          <strong>By submitting this form, I confirm that:</strong>
+          <div class="muted" style="margin-top:6px">
+            Information is accurate • Files are complete • Permissions are secured • AIRC may archive and publish this session
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div>
+            <label for="signature">Signature</label>
+            <input id="signature" name="signature" placeholder="Type your name" />
+          </div>
+          <div>
+            <label for="sigDate">Date</label>
+            <input id="sigDate" name="sigDate" placeholder="e.g., 2026-03-06" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2 style="margin-top:0">Export / Send</h2>
+        <p class="muted" style="margin:0 0 8px; font-size:13px">
+          Copy as text to paste into an email/doc, or open your email client with a prefilled message.
+        </p>
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="copyBtn">Copy as Text</button>
+          <button class="btn" type="button" id="emailBtn">✉️ Send via Email</button>
+          <button class="btn ghost" type="button" id="printBtn">Print / Save as PDF</button>
+          <button class="btn" type="button" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="preview" id="preview"></div>
+
+        <p class="foot">Tip: If you’re not connected to an endpoint yet, “Copy as Text” is the cleanest handoff.</p>
+      </form>
+    </section>
+
+    <p class="foot">© AI Research Corps (AIRC). Serverless form (no data is stored).</p>
+
+  </div>
+
+  <script>
+    // === Configure these without changing the rest of the page ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org", // change if needed
+      emailSubject: "AIRC Mentor Program | Session Submission",
+      includeCheckboxStates: true
+    };
+
+    function v(id){ return (document.getElementById(id)?.value || "").trim(); }
+
+    function checkedList(containerId){
+      const root = document.getElementById(containerId);
+      if (!root) return [];
+      return Array.from(root.querySelectorAll('input[type="checkbox"]')).map(cb => ({
+        label: cb.getAttribute("data-label") || "Item",
+        checked: !!cb.checked
+      }));
+    }
+
+    function fmtChecks(title, items){
+      if (!items.length) return "";
+      const lines = [title];
+      items.forEach(it => lines.push(`${it.checked ? "☑" : "☐"} ${it.label}`));
+      lines.push("");
+      return lines.join("\n");
+    }
+
+    function buildText(){
+      const lines = [];
+      lines.push("AIRC Mentor Program — Session Submission & Reporting");
+      lines.push("---------------------------------------------------");
+      lines.push("Section 1 — Volunteer Information");
+      lines.push(`Name: ${v("volName")}`);
+      lines.push(`Email: ${v("volEmail")}`);
+      lines.push(`Phone (Optional): ${v("volPhone")}`);
+      lines.push(`Cohort Period: ${v("cohort")}`);
+      lines.push("");
+
+      lines.push("Section 2 — Session Information");
+      lines.push(`Session Title: ${v("sessionTitle")}`);
+      lines.push(`Speaker Name: ${v("speakerName")}`);
+      lines.push(`Speaker Organization/Affiliation: ${v("speakerOrg")}`);
+      lines.push(`Date of Session: ${v("sessionDate")}`);
+      lines.push(`Platform Used: ${v("platformUsed")}`);
+      lines.push(`Session Duration: ${v("duration")}`);
+      lines.push("");
+
+      lines.push("Section 3 — Recording & Files");
+      lines.push(`Primary Recording Link: ${v("primaryLink")}`);
+      lines.push(`Backup Location (If Any): ${v("backupLocation")}`);
+      lines.push(`File Name(s): ${v("fileNames")}`);
+      lines.push("");
+
+      lines.push("Section 4 — Consent & Permissions");
+      if (CONFIG.includeCheckboxStates){
+        lines.push(fmtChecks("Checks:", checkedList("consentChecks")));
+      }
+      lines.push(`Notes: ${v("consentNotes")}`);
+      lines.push("");
+
+      lines.push("Section 5 — Session Summary");
+      lines.push(v("summary"));
+      lines.push("");
+
+      lines.push("Section 6 — Key Topics Covered");
+      if (CONFIG.includeCheckboxStates){
+        lines.push(fmtChecks("Topics:", checkedList("topicsCovered")));
+      }
+      lines.push(`Other: ${v("topicOther")}`);
+      lines.push("");
+
+      lines.push("Section 7 — Highlights & Quotes (Optional)");
+      lines.push(v("highlights"));
+      lines.push("");
+
+      lines.push("Section 8 — Technical Issues (If Any)");
+      lines.push(`Level: ${v("techLevel")}`);
+      lines.push(`Describe: ${v("techDesc")}`);
+      lines.push("");
+
+      lines.push("Section 9 — Volunteer Reflection");
+      lines.push("What Worked Well:");
+      lines.push(v("workedWell"));
+      lines.push("");
+      lines.push("What Could Improve:");
+      lines.push(v("couldImprove"));
+      lines.push("");
+      lines.push("Support Needed (If Any):");
+      lines.push(v("supportNeeded"));
+      lines.push("");
+
+      lines.push("Section 10 — Publication Status");
+      lines.push(`Status: ${v("pubStatus")}`);
+      lines.push(`Reason: ${v("pubReason")}`);
+      lines.push("");
+
+      lines.push("Section 11 — Next Steps");
+      if (CONFIG.includeCheckboxStates){
+        lines.push(fmtChecks("Next steps:", checkedList("nextSteps")));
+      }
+      lines.push(`Notes: ${v("nextNotes")}`);
+      lines.push("");
+
+      lines.push("Section 12 — Submission Confirmation");
+      lines.push("By submitting this form, I confirm that:");
+      lines.push("- Information is accurate");
+      lines.push("- Files are complete");
+      lines.push("- Permissions are secured");
+      lines.push("- AIRC may archive and publish this session");
+      lines.push(`Signature: ${v("signature")}`);
+      lines.push(`Date: ${v("sigDate")}`);
+      lines.push("");
+
+      return lines.join("\n");
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    const preview = document.getElementById("preview");
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = buildText();
+      preview.style.display = "block";
+      preview.textContent = text;
+      await copyText(text);
+    });
+
+    document.getElementById("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo || "");
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Clear all fields and checkboxes?")) {
+        document.getElementById("subForm").reset();
+        preview.style.display = "none";
+        preview.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
