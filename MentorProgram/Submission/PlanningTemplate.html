@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Session Planning & Outreach</title>
+  <meta name="description" content="AIRC Mentor Program — Session Planning & Speaker Outreach Template (optional web submission). Copy as text or send via email." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --accent2:#a7f3d0;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+      --ok:#34d399;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:80ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} header{flex-direction:column; align-items:stretch} .toplinks{justify-content:flex-start} }
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+    .checkgrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:8px 10px;
+      margin-top:6px;
+    }
+    @media (max-width: 700px){ .checkgrid{grid-template-columns:1fr} }
+    .chk{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:12px;
+      padding:10px 10px;
+    }
+    .chk input{width:auto; margin-top:2px}
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      border:1px solid rgba(52,211,153,0.25);
+      background: rgba(52,211,153,0.10);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--text);
+      margin:6px 8px 0 0;
+    }
+    .pill strong{color:var(--ok)}
+    .tiny{font-size:12px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Session Planning &amp; Speaker Outreach Template</h1>
+          <p class="sub">Optional web version of the template. Use the buttons below to <strong>copy</strong> or <strong>email</strong> the filled content.</p>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Purpose</h2>
+      <div>
+        <span class="pill"><strong>✅</strong> Intentional planning</span>
+        <span class="pill"><strong>✅</strong> Professional outreach</span>
+        <span class="pill"><strong>✅</strong> Consistent quality</span>
+        <span class="pill"><strong>✅</strong> Less last-minute chaos</span>
+        <span class="pill"><strong>✅</strong> Clear coordination</span>
+      </div>
+      <p class="muted tiny" style="margin-top:10px">Tip: Keep drafts rough. This is mainly for clarity + repeatability.</p>
+    </section>
+
+    <section class="card">
+      <h2>Planning Template</h2>
+
+      <form id="planningForm">
+
+        <!-- Section 1 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 1 — Volunteer Information</h3>
+        <div class="twoCol">
+          <div>
+            <label for="volName">Name</label>
+            <input id="volName" name="volName" placeholder="Your name" />
+          </div>
+          <div>
+            <label for="volEmail">Email</label>
+            <input id="volEmail" name="volEmail" placeholder="you@example.com" />
+          </div>
+        </div>
+        <div class="twoCol">
+          <div>
+            <label for="cohort">Cohort Period</label>
+            <input id="cohort" name="cohort" placeholder="e.g., Jan–Jun 2026" />
+          </div>
+          <div>
+            <label for="dateCreated">Date</label>
+            <input id="dateCreated" name="dateCreated" placeholder="e.g., 2026-02-10" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- Section 2 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 2 — Session Concept</h3>
+        <label for="sessionTitle">Proposed Session Title</label>
+        <input id="sessionTitle" name="sessionTitle" placeholder="Draft title" />
+
+        <label>Core Theme / Focus Area</label>
+        <div class="checkgrid" id="themeGrid">
+          <label class="chk"><input type="radio" name="theme" value="AI / ML"> <span>AI / ML</span></label>
+          <label class="chk"><input type="radio" name="theme" value="Data Science"> <span>Data Science</span></label>
+          <label class="chk"><input type="radio" name="theme" value="GIS / Geospatial"> <span>GIS / Geospatial</span></label>
+          <label class="chk"><input type="radio" name="theme" value="Ethics & Policy"> <span>Ethics &amp; Policy</span></label>
+          <label class="chk"><input type="radio" name="theme" value="Industry & Careers"> <span>Industry &amp; Careers</span></label>
+          <label class="chk"><input type="radio" name="theme" value="Research"> <span>Research</span></label>
+          <label class="chk"><input type="radio" name="theme" value="Education"> <span>Education</span></label>
+          <label class="chk"><input type="radio" name="theme" value="Other"> <span>Other</span></label>
+        </div>
+
+        <label for="themeOther">If “Other”, specify</label>
+        <input id="themeOther" name="themeOther" placeholder="Optional" />
+
+        <label for="whyMatters">Why This Topic Matters</label>
+        <textarea id="whyMatters" name="whyMatters" placeholder="Briefly explain relevance to students / early-career professionals."></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 3 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 3 — Target Speaker(s)</h3>
+
+        <p class="muted" style="margin:0 0 6px">Primary Speaker</p>
+        <div class="twoCol">
+          <div>
+            <label for="sp1Name">Name</label>
+            <input id="sp1Name" name="sp1Name" placeholder="Speaker name" />
+          </div>
+          <div>
+            <label for="sp1Org">Organization / Affiliation</label>
+            <input id="sp1Org" name="sp1Org" placeholder="Org" />
+          </div>
+        </div>
+        <div class="twoCol">
+          <div>
+            <label for="sp1Role">Role / Title</label>
+            <input id="sp1Role" name="sp1Role" placeholder="Role / title" />
+          </div>
+          <div>
+            <label for="sp1Email">Email / Contact</label>
+            <input id="sp1Email" name="sp1Email" placeholder="Email or contact" />
+          </div>
+        </div>
+
+        <label for="sp1Links">LinkedIn / Website (if available)</label>
+        <input id="sp1Links" name="sp1Links" placeholder="URL(s)" />
+
+        <div class="hr"></div>
+
+        <p class="muted" style="margin:0 0 6px">Backup Speaker (Optional)</p>
+        <div class="twoCol">
+          <div>
+            <label for="sp2Name">Name</label>
+            <input id="sp2Name" name="sp2Name" placeholder="Backup speaker name" />
+          </div>
+          <div>
+            <label for="sp2Org">Organization</label>
+            <input id="sp2Org" name="sp2Org" placeholder="Org" />
+          </div>
+        </div>
+        <label for="sp2Contact">Contact</label>
+        <input id="sp2Contact" name="sp2Contact" placeholder="Email / LinkedIn / other" />
+
+        <div class="hr"></div>
+
+        <!-- Section 4 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 4 — Outreach Status</h3>
+        <label>Current status</label>
+        <div class="checkgrid" id="outreachGrid">
+          <label class="chk"><input type="radio" name="outreachStatus" value="Not contacted yet"> <span>Not contacted yet</span></label>
+          <label class="chk"><input type="radio" name="outreachStatus" value="Initial outreach sent"> <span>Initial outreach sent</span></label>
+          <label class="chk"><input type="radio" name="outreachStatus" value="Follow-up sent"> <span>Follow-up sent</span></label>
+          <label class="chk"><input type="radio" name="outreachStatus" value="Interested"> <span>Interested</span></label>
+          <label class="chk"><input type="radio" name="outreachStatus" value="Confirmed"> <span>Confirmed</span></label>
+          <label class="chk"><input type="radio" name="outreachStatus" value="Declined"> <span>Declined</span></label>
+          <label class="chk"><input type="radio" name="outreachStatus" value="No response"> <span>No response</span></label>
+        </div>
+
+        <label for="datesContacted">Date(s) contacted</label>
+        <input id="datesContacted" name="datesContacted" placeholder="e.g., 2/10, 2/14 follow-up" />
+
+        <div class="hr"></div>
+
+        <!-- Section 5 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 5 — Draft Outreach Message</h3>
+        <label for="outreachMsg">Paste or write the outreach message</label>
+        <textarea id="outreachMsg" name="outreachMsg" placeholder="Paste your outreach message draft here."></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 6 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 6 — Proposed Format</h3>
+
+        <label>Session Type</label>
+        <div class="checkgrid">
+          <label class="chk"><input type="radio" name="sessionType" value="Interview"> <span>Interview</span></label>
+          <label class="chk"><input type="radio" name="sessionType" value="Panel"> <span>Panel</span></label>
+          <label class="chk"><input type="radio" name="sessionType" value="Workshop"> <span>Workshop</span></label>
+          <label class="chk"><input type="radio" name="sessionType" value="Talk + Q&A"> <span>Talk + Q&amp;A</span></label>
+          <label class="chk"><input type="radio" name="sessionType" value="Hybrid"> <span>Hybrid</span></label>
+        </div>
+
+        <label>Estimated Length</label>
+        <div class="checkgrid">
+          <label class="chk"><input type="radio" name="length" value="30 min"> <span>30 min</span></label>
+          <label class="chk"><input type="radio" name="length" value="45 min"> <span>45 min</span></label>
+          <label class="chk"><input type="radio" name="length" value="60 min"> <span>60 min</span></label>
+          <label class="chk"><input type="radio" name="length" value="Other"> <span>Other</span></label>
+        </div>
+
+        <label for="lengthOther">If “Other”, specify</label>
+        <input id="lengthOther" name="lengthOther" placeholder="Optional" />
+
+        <label>Platform Preference</label>
+        <div class="checkgrid">
+          <label class="chk"><input type="radio" name="platform" value="Zoom"> <span>Zoom</span></label>
+          <label class="chk"><input type="radio" name="platform" value="Google Meet"> <span>Google Meet</span></label>
+          <label class="chk"><input type="radio" name="platform" value="Microsoft Teams"> <span>Microsoft Teams</span></label>
+          <label class="chk"><input type="radio" name="platform" value="Other"> <span>Other</span></label>
+        </div>
+
+        <label for="platformOther">If “Other”, specify</label>
+        <input id="platformOther" name="platformOther" placeholder="Optional" />
+
+        <div class="hr"></div>
+
+        <!-- Section 7 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 7 — Draft Question Outline</h3>
+        <label for="questions">List 5–8 draft questions</label>
+        <textarea id="questions" name="questions" placeholder="- Question 1
+- Question 2
+- Question 3"></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 8 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 8 — Scheduling</h3>
+        <label for="speakerAvail">Availability (Speaker)</label>
+        <textarea id="speakerAvail" name="speakerAvail" placeholder="Days/times windows, time zone, constraints"></textarea>
+
+        <label for="volAvail">Availability (Volunteer)</label>
+        <textarea id="volAvail" name="volAvail" placeholder="Your availability windows"></textarea>
+
+        <label for="targetDate">Target Date</label>
+        <input id="targetDate" name="targetDate" placeholder="e.g., Feb 20 (tentative)" />
+
+        <div class="hr"></div>
+
+        <!-- Section 9 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 9 — Risk Check</h3>
+
+        <label>Potential risks or concerns</label>
+        <div class="checkgrid">
+          <label class="chk"><input type="checkbox" id="riskSchedule" /> <span>Scheduling conflict</span></label>
+          <label class="chk"><input type="checkbox" id="riskConsent" /> <span>Consent issues</span></label>
+          <label class="chk"><input type="checkbox" id="riskTech" /> <span>Technical concerns</span></label>
+          <label class="chk"><input type="checkbox" id="riskSensitivity" /> <span>Topic sensitivity</span></label>
+          <label class="chk"><input type="checkbox" id="riskUncertain" /> <span>Availability uncertainty</span></label>
+        </div>
+
+        <label for="riskNotes">Notes</label>
+        <textarea id="riskNotes" name="riskNotes" placeholder="Optional notes on concerns and mitigation."></textarea>
+
+        <div class="hr"></div>
+
+        <!-- Section 10 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 10 — Internal Review (Optional)</h3>
+        <div class="checkgrid">
+          <label class="chk"><input type="checkbox" id="reviewed" /> <span>Reviewed by AIRC</span></label>
+          <label class="chk"><input type="checkbox" id="approved" /> <span>Approved</span></label>
+          <label class="chk"><input type="checkbox" id="needsRevision" /> <span>Needs revision</span></label>
+        </div>
+        <div class="twoCol">
+          <div>
+            <label for="reviewer">Reviewer</label>
+            <input id="reviewer" name="reviewer" placeholder="Name (optional)" />
+          </div>
+          <div>
+            <label for="reviewDate">Date</label>
+            <input id="reviewDate" name="reviewDate" placeholder="e.g., 2026-02-12" />
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- Section 11 -->
+        <h3 style="margin:0 0 6px; font-size:16px">Section 11 — Status Tracker</h3>
+        <label>Current stage</label>
+        <div class="checkgrid">
+          <label class="chk"><input type="radio" name="stage" value="Planning"> <span>Planning</span></label>
+          <label class="chk"><input type="radio" name="stage" value="Outreach"> <span>Outreach</span></label>
+          <label class="chk"><input type="radio" name="stage" value="Confirmed"> <span>Confirmed</span></label>
+          <label class="chk"><input type="radio" name="stage" value="Scheduled"> <span>Scheduled</span></label>
+          <label class="chk"><input type="radio" name="stage" value="Completed"> <span>Completed</span></label>
+          <label class="chk"><input type="radio" name="stage" value="Submitted"> <span>Submitted</span></label>
+        </div>
+
+        <div class="btnrow">
+          <button class="btn primary" type="button" id="emailSubmit">✉️ Send via Email</button>
+          <button class="btn" type="button" id="copyText">Copy as Text</button>
+          <button class="btn" type="button" id="resetBtn">Reset</button>
+        </div>
+
+        <p class="foot">
+          Tip: If your email app strips formatting, click “Copy as Text” and paste into an email.
+        </p>
+      </form>
+    </section>
+
+    <p class="foot">
+      © AI Research Corps (AIRC). Serverless form (no data is stored). Email uses your mail client via <span class="muted">mailto:</span>.
+    </p>
+  </div>
+
+  <script>
+    // === Configure without changing the rest of the page ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org",
+      emailSubject: "AIRC Mentor Program — Session Planning & Speaker Outreach Template"
+    };
+
+    function getRadio(name){
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : "";
+    }
+    function getText(id){
+      return (document.getElementById(id)?.value || "").trim();
+    }
+    function getCheck(id){
+      const el = document.getElementById(id);
+      return !!(el && el.checked);
+    }
+
+    function buildText(){
+      const theme = getRadio("theme");
+      const outreachStatus = getRadio("outreachStatus");
+      const sessionType = getRadio("sessionType");
+      const length = getRadio("length");
+      const platform = getRadio("platform");
+      const stage = getRadio("stage");
+
+      const riskList = [];
+      if (getCheck("riskSchedule")) riskList.push("Scheduling conflict");
+      if (getCheck("riskConsent")) riskList.push("Consent issues");
+      if (getCheck("riskTech")) riskList.push("Technical concerns");
+      if (getCheck("riskSensitivity")) riskList.push("Topic sensitivity");
+      if (getCheck("riskUncertain")) riskList.push("Availability uncertainty");
+
+      const reviewFlags = [];
+      if (getCheck("reviewed")) reviewFlags.push("Reviewed by AIRC");
+      if (getCheck("approved")) reviewFlags.push("Approved");
+      if (getCheck("needsRevision")) reviewFlags.push("Needs revision");
+
+      const lines = [
+        "AIRC Mentor Program — Session Planning & Speaker Outreach Template",
+        "===============================================================",
+        "",
+        "Section 1 — Volunteer Information",
+        `Name: ${getText("volName") || ""}`,
+        `Email: ${getText("volEmail") || ""}`,
+        `Cohort Period: ${getText("cohort") || ""}`,
+        `Date: ${getText("dateCreated") || ""}`,
+        "",
+        "Section 2 — Session Concept",
+        `Proposed Session Title: ${getText("sessionTitle") || ""}`,
+        `Core Theme / Focus Area: ${theme || ""}`,
+        (theme === "Other" ? `Theme (Other): ${getText("themeOther") || ""}` : `Theme (Other): ${getText("themeOther") || ""}`),
+        "",
+        "Why This Topic Matters:",
+        getText("whyMatters") || "",
+        "",
+        "Section 3 — Target Speaker(s)",
+        "Primary Speaker",
+        `Name: ${getText("sp1Name") || ""}`,
+        `Organization / Affiliation: ${getText("sp1Org") || ""}`,
+        `Role / Title: ${getText("sp1Role") || ""}`,
+        `Email / Contact: ${getText("sp1Email") || ""}`,
+        `LinkedIn / Website: ${getText("sp1Links") || ""}`,
+        "",
+        "Backup Speaker (Optional)",
+        `Name: ${getText("sp2Name") || ""}`,
+        `Organization: ${getText("sp2Org") || ""}`,
+        `Contact: ${getText("sp2Contact") || ""}`,
+        "",
+        "Section 4 — Outreach Status",
+        `Status: ${outreachStatus || ""}`,
+        `Date(s) contacted: ${getText("datesContacted") || ""}`,
+        "",
+        "Section 5 — Draft Outreach Message",
+        getText("outreachMsg") || "",
+        "",
+        "Section 6 — Proposed Format",
+        `Session Type: ${sessionType || ""}`,
+        `Estimated Length: ${length || ""}`,
+        `Length (Other): ${getText("lengthOther") || ""}`,
+        `Platform Preference: ${platform || ""}`,
+        `Platform (Other): ${getText("platformOther") || ""}`,
+        "",
+        "Section 7 — Draft Question Outline",
+        getText("questions") || "",
+        "",
+        "Section 8 — Scheduling",
+        "Availability (Speaker):",
+        getText("speakerAvail") || "",
+        "",
+        "Availability (Volunteer):",
+        getText("volAvail") || "",
+        "",
+        `Target Date: ${getText("targetDate") || ""}`,
+        "",
+        "Section 9 — Risk Check",
+        `Risks: ${riskList.length ? riskList.join(", ") : ""}`,
+        "Notes:",
+        getText("riskNotes") || "",
+        "",
+        "Section 10 — Internal Review (Optional)",
+        `Flags: ${reviewFlags.length ? reviewFlags.join(", ") : ""}`,
+        `Reviewer: ${getText("reviewer") || ""}`,
+        `Date: ${getText("reviewDate") || ""}`,
+        "",
+        "Section 11 — Status Tracker",
+        `Stage: ${stage || ""}`,
+        ""
+      ];
+      return lines.join("\n");
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    document.getElementById("copyText").addEventListener("click", async () => {
+      await copyToClipboard(buildText());
+    });
+
+    document.getElementById("emailSubmit").addEventListener("click", () => {
+      const body = encodeURIComponent(buildText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo);
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Clear all fields?")) document.getElementById("planningForm").reset();
+    });
+  </script>
+</body>
+</html>
