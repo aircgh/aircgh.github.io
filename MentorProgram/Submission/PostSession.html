@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC Mentor Program | Post-Session Checklist</title>
+  <meta name="description" content="AIRC Mentor Program — Post-Session Processing & Publishing Checklist. Serverless: copy as text or mailto." />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#98a2b3;
+      --text:#e6e9ef;
+      --accent:#7dd3fc;
+      --line:rgba(255,255,255,0.10);
+      --warn:#fbbf24;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(125,211,252,0.18), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(167,243,208,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{max-width:1050px; margin:0 auto; padding:22px 18px 70px}
+    header{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:18px;
+      padding:18px 18px;
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    }
+    .brand{display:flex; gap:12px; align-items:flex-start}
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--accent);
+      flex:0 0 auto;
+    }
+    .kicker{color:var(--muted); font-size:12px; letter-spacing:0.08em; text-transform:uppercase}
+    h1{margin:6px 0 6px; font-size:24px; line-height:1.2}
+    .sub{color:var(--muted); margin:0; max-width:86ch; font-size:13px}
+    .toplinks{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .linkbtn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      font-weight:650;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{background: rgba(255,255,255,0.07); text-decoration:none}
+    @media (max-width: 900px){
+      header{flex-direction:column; align-items:stretch}
+      .toplinks{justify-content:flex-start}
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      border-radius:16px;
+      padding:16px 16px;
+    }
+    .card h2{margin:0 0 10px; font-size:18px}
+    .muted{color:var(--muted)}
+    .hr{height:1px; background:var(--line); margin:12px 0}
+    .twoCol{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width: 900px){ .twoCol{grid-template-columns:1fr} }
+
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:120px; resize:vertical}
+
+    .checkgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:10px}
+    @media (max-width: 900px){ .checkgrid{grid-template-columns:1fr} }
+
+    .chk{
+      display:flex; gap:10px; align-items:flex-start;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.10);
+      border-radius:14px;
+      padding:10px 10px;
+    }
+    .chk input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--accent);
+    }
+
+    .callout{
+      border:1px solid rgba(251,191,36,0.25);
+      background: rgba(251,191,36,0.10);
+      border-radius:14px;
+      padding:12px 12px;
+      color: var(--text);
+      margin-top:10px;
+    }
+    .callout strong{color:var(--warn)}
+
+    .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color:var(--text);
+      font-weight:650;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,0.07)}
+    .btn.primary{
+      border:1px solid rgba(125,211,252,0.35);
+      background: rgba(125,211,252,0.12);
+    }
+    .btn.primary:hover{background: rgba(125,211,252,0.18)}
+    .btn.ghost{background: transparent}
+
+    .pill{
+      display:inline-block;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-right:6px;
+      margin-top:6px;
+    }
+
+    .preview{
+      white-space:pre-wrap;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,0.16);
+      border-radius:14px;
+      padding:12px 12px;
+      font-size:13px;
+      color:var(--text);
+      margin-top:10px;
+      display:none;
+    }
+    .foot{margin-top:12px; color:var(--muted); font-size:12px}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo">AIRC</div>
+        <div>
+          <div class="kicker">AI Research Corps (AIRC) • Mentor Program</div>
+          <h1>Post-Session Processing &amp; Publishing Checklist</h1>
+          <p class="sub">Serverless: nothing is stored. Use “Copy as Text” or “Send via Email” to share.</p>
+          <div>
+            <span class="pill">Professional archive</span>
+            <span class="pill">Reusable content</span>
+            <span class="pill">Consistent branding</span>
+            <span class="pill">Institutional memory</span>
+            <span class="pill">Long-term impact</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toplinks">
+        <a class="linkbtn" href="/MentorProgram/Submission/">← Back to Submissions</a>
+        <a class="linkbtn" href="/MentorProgram/">MentorProgram Hub</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Section 1 — Session Identification</h2>
+
+      <div class="twoCol">
+        <div>
+          <label for="sessionTitle">Session Title</label>
+          <input id="sessionTitle" />
+        </div>
+        <div>
+          <label for="speakerName">Speaker Name</label>
+          <input id="speakerName" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="hostName">Host</label>
+          <input id="hostName" />
+        </div>
+        <div>
+          <label for="sessionDate">Date</label>
+          <input id="sessionDate" placeholder="YYYY-MM-DD" />
+        </div>
+      </div>
+
+      <div class="twoCol">
+        <div>
+          <label for="platform">Platform</label>
+          <input id="platform" placeholder="Zoom / Google Meet / etc." />
+        </div>
+        <div>
+          <label for="recordingFile">Recording File Name</label>
+          <input id="recordingFile" placeholder="AIRC_YYYYMMDD_LastName_Topic.mp4 (recommended)" />
+        </div>
+      </div>
+
+      <label for="folderLoc">Folder Location</label>
+      <input id="folderLoc" placeholder="Drive folder path or link" />
+    </section>
+
+    <section class="card">
+      <h2>Section 2 — File Management (Within 24 Hours)</h2>
+
+      <div class="checkgrid" id="fileMgmtChecks">
+        <label class="chk"><input type="checkbox" data-label="Download original recording" /> <span>Download original recording</span></label>
+        <label class="chk"><input type="checkbox" data-label="Save backup copy (local/cloud)" /> <span>Save backup copy (local/cloud)</span></label>
+        <label class="chk"><input type="checkbox" data-label="Rename file using standard format" /> <span>Rename file using standard format</span></label>
+        <label class="chk"><input type="checkbox" data-label="Upload to shared Drive" /> <span>Upload to shared Drive</span></label>
+        <label class="chk"><input type="checkbox" data-label="Verify file opens correctly" /> <span>Verify file opens correctly</span></label>
+      </div>
+
+      <div class="callout">
+        <strong>Standard file name format:</strong><br/>
+        <div style="margin-top:6px">
+          <code style="color:var(--text)">AIRC_YYYYMMDD_Speaker_LastName_Topic.mp4</code><br/>
+          <span class="muted">Example:</span>
+          <code style="color:var(--text)">AIRC_20260314_Smith_AI_Ethics.mp4</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Section 3 — Audio / Video Quality Review</h2>
+      <p class="muted" style="margin:0">Check first 5 minutes + random middle segment.</p>
+
+      <div class="checkgrid" id="avChecks">
+        <label class="chk"><input type="checkbox" data-label="Audio clear" /> <span>Audio clear</span></label>
+        <label class="chk"><input type="checkbox" data-label="No major echo" /> <span>No major echo</span></label>
+        <label class="chk"><input type="checkbox" data-label="No missing segments" /> <span>No missing segments</span></label>
+        <label class="chk"><input type="checkbox" data-label="Video stable" /> <span>Video stable</span></label>
+        <label class="chk"><input type="checkbox" data-label="Slides visible (if used)" /> <span>Slides visible (if used)</span></label>
+      </div>
+
+      <label for="issuesNoted">Issues Noted</label>
+      <textarea id="issuesNoted"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Section 4 — Content Review (Light Editorial Pass)</h2>
+
+      <div class="checkgrid" id="contentChecks">
+        <label class="chk"><input type="checkbox" data-label="No sensitive/confidential info" /> <span>No sensitive/confidential info</span></label>
+        <label class="chk"><input type="checkbox" data-label="No inappropriate content" /> <span>No inappropriate content</span></label>
+        <label class="chk"><input type="checkbox" data-label="No accidental disclosures" /> <span>No accidental disclosures</span></label>
+        <label class="chk"><input type="checkbox" data-label="Consent confirmed" /> <span>Consent confirmed</span></label>
+        <label class="chk"><input type="checkbox" data-label="Public-safe content" /> <span>Public-safe content</span></label>
+      </div>
+
+      <label for="contentNotes">Notes</label>
+      <textarea id="contentNotes"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Section 5 — Basic Editing (Optional / Light Touch)</h2>
+      <p class="muted" style="margin:0">(Only if needed — keep simple)</p>
+
+      <div class="checkgrid" id="editChecks">
+        <label class="chk"><input type="checkbox" data-label="Trim dead time at start/end" /> <span>Trim dead time at start/end</span></label>
+        <label class="chk"><input type="checkbox" data-label="Remove long silence" /> <span>Remove long silence</span></label>
+        <label class="chk"><input type="checkbox" data-label="Normalize audio (if possible)" /> <span>Normalize audio (if possible)</span></label>
+        <label class="chk"><input type="checkbox" data-label="Add title card (optional)" /> <span>Add title card (optional)</span></label>
+      </div>
+
+      <label for="toolsUsed">Tools Used</label>
+      <input id="toolsUsed" placeholder="e.g., iMovie / CapCut / Audacity / ffmpeg" />
+    </section>
+
+    <section class="card">
+      <h2>Section 6 — Metadata &amp; Description Draft</h2>
+
+      <label for="metaTitle">Title</label>
+      <input id="metaTitle" />
+
+      <label for="metaDesc">Description (2–3 Paragraphs)</label>
+      <textarea id="metaDesc" placeholder="Draft description here..."></textarea>
+
+      <label for="metaTags">Tags / Keywords</label>
+      <input id="metaTags" placeholder="Comma-separated tags" />
+    </section>
+
+    <section class="card">
+      <h2>Section 7 — Publishing Workflow</h2>
+
+      <div class="checkgrid" id="publishChecks">
+        <label class="chk"><input type="checkbox" data-label="Upload to AIRC YouTube / Platform" /> <span>Upload to AIRC YouTube / Platform</span></label>
+        <label class="chk"><input type="checkbox" data-label="Set visibility (Public/Unlisted)" /> <span>Set visibility (Public/Unlisted)</span></label>
+        <label class="chk"><input type="checkbox" data-label="Add description" /> <span>Add description</span></label>
+        <label class="chk"><input type="checkbox" data-label="Add tags" /> <span>Add tags</span></label>
+        <label class="chk"><input type="checkbox" data-label="Add thumbnail (if available)" /> <span>Add thumbnail (if available)</span></label>
+        <label class="chk"><input type="checkbox" data-label="Add to playlist" /> <span>Add to playlist</span></label>
+      </div>
+
+      <label for="platformLink">Platform Link</label>
+      <input id="platformLink" placeholder="YouTube/Platform URL" />
+    </section>
+
+    <section class="card">
+      <h2>Section 8 — Documentation &amp; Tracking</h2>
+
+      <div class="checkgrid" id="docChecks">
+        <label class="chk"><input type="checkbox" data-label="Update session tracker" /> <span>Update session tracker</span></label>
+        <label class="chk"><input type="checkbox" data-label="Log publication date" /> <span>Log publication date</span></label>
+        <label class="chk"><input type="checkbox" data-label="Save link in records" /> <span>Save link in records</span></label>
+        <label class="chk"><input type="checkbox" data-label="Attach forms/notes" /> <span>Attach forms/notes</span></label>
+        <label class="chk"><input type="checkbox" data-label="Archive raw files" /> <span>Archive raw files</span></label>
+      </div>
+
+      <label for="trackerLoc">Tracker Location</label>
+      <input id="trackerLoc" placeholder="Link or location reference" />
+    </section>
+
+    <section class="card">
+      <h2>Section 9 — Speaker Follow-Up</h2>
+      <p class="muted" style="margin:0">Send within 48 hours.</p>
+
+      <div class="checkgrid" id="followChecks">
+        <label class="chk"><input type="checkbox" data-label="Thank-you email sent" /> <span>Thank-you email sent</span></label>
+        <label class="chk"><input type="checkbox" data-label="Link shared" /> <span>Link shared</span></label>
+        <label class="chk"><input type="checkbox" data-label="Permission reconfirmed" /> <span>Permission reconfirmed</span></label>
+        <label class="chk"><input type="checkbox" data-label="Future interest noted" /> <span>Future interest noted</span></label>
+      </div>
+
+      <label for="dateSent">Date Sent</label>
+      <input id="dateSent" placeholder="YYYY-MM-DD" />
+    </section>
+
+    <section class="card">
+      <h2>Section 10 — Outreach (Optional)</h2>
+
+      <div class="checkgrid" id="outreachChecks">
+        <label class="chk"><input type="checkbox" data-label="Share on social media" /> <span>Share on social media</span></label>
+        <label class="chk"><input type="checkbox" data-label="Newsletter inclusion" /> <span>Newsletter inclusion</span></label>
+        <label class="chk"><input type="checkbox" data-label="Partner sharing" /> <span>Partner sharing</span></label>
+        <label class="chk"><input type="checkbox" data-label="Website embed" /> <span>Website embed</span></label>
+      </div>
+
+      <label for="channelsUsed">Channels Used</label>
+      <input id="channelsUsed" placeholder="e.g., LinkedIn, Email, Website, Partner org" />
+    </section>
+
+    <section class="card">
+      <h2>Section 11 — Internal Review</h2>
+
+      <label for="wentWell">What went well</label>
+      <textarea id="wentWell"></textarea>
+
+      <label for="improve">What to improve</label>
+      <textarea id="improve"></textarea>
+
+      <label for="nextIdeas">Next session ideas</label>
+      <textarea id="nextIdeas"></textarea>
+
+      <div class="hr"></div>
+
+      <h2 style="margin-top:0">Export / Send</h2>
+      <p class="muted" style="margin:0">Copy as text to paste into an email/doc, or open your email client with a prefilled message.</p>
+
+      <div class="btnrow">
+        <button class="btn primary" type="button" id="copyBtn">Copy as Text</button>
+        <button class="btn" type="button" id="emailBtn">✉️ Send via Email</button>
+        <button class="btn ghost" type="button" id="printBtn">Print / Save as PDF</button>
+        <button class="btn" type="button" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="preview" id="preview"></div>
+
+      <p class="foot">Serverless form (no data is stored). Use Copy/Email for handoff.</p>
+    </section>
+
+    <p class="foot">© AI Research Corps (AIRC). Intended for pilot cohort use.</p>
+
+  </div>
+
+  <script>
+    // === Configure these without changing the rest of the page ===
+    const CONFIG = {
+      emailTo: "mohamad@airesearchcorp.org", // change if needed
+      emailSubject: "AIRC Mentor Program | Post-Session Processing & Publishing Checklist",
+      includeCheckboxStates: true
+    };
+
+    function val(id){ return (document.getElementById(id)?.value || "").trim(); }
+
+    function checkedList(containerId){
+      const root = document.getElementById(containerId);
+      if (!root) return [];
+      return Array.from(root.querySelectorAll('input[type="checkbox"]')).map(cb => ({
+        label: cb.getAttribute("data-label") || "Item",
+        checked: !!cb.checked
+      }));
+    }
+
+    function fmtChecks(title, items){
+      if (!items.length) return "";
+      const lines = [title];
+      items.forEach(it => lines.push(`${it.checked ? "☑" : "☐"} ${it.label}`));
+      lines.push("");
+      return lines.join("\n");
+    }
+
+    function buildText(){
+      const lines = [];
+      lines.push("AIRC Mentor Program — Post-Session Processing & Publishing Checklist");
+      lines.push("---------------------------------------------------------------");
+      lines.push("");
+
+      lines.push("Section 1 — Session Identification");
+      lines.push(`Session Title: ${val("sessionTitle")}`);
+      lines.push(`Speaker Name: ${val("speakerName")}`);
+      lines.push(`Host: ${val("hostName")}`);
+      lines.push(`Date: ${val("sessionDate")}`);
+      lines.push(`Platform: ${val("platform")}`);
+      lines.push(`Recording File Name: ${val("recordingFile")}`);
+      lines.push(`Folder Location: ${val("folderLoc")}`);
+      lines.push("");
+
+      lines.push("Section 2 — File Management (Within 24 Hours)");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checklist:", checkedList("fileMgmtChecks")));
+      lines.push("");
+
+      lines.push("Standard Format:");
+      lines.push("AIRC_YYYYMMDD_Speaker_LastName_Topic.mp4");
+      lines.push("Example:");
+      lines.push("AIRC_20260314_Smith_AI_Ethics.mp4");
+      lines.push("");
+
+      lines.push("Section 3 — Audio / Video Quality Review");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checks:", checkedList("avChecks")));
+      lines.push(`Issues Noted: ${val("issuesNoted")}`);
+      lines.push("");
+
+      lines.push("Section 4 — Content Review (Light Editorial Pass)");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checks:", checkedList("contentChecks")));
+      lines.push(`Notes: ${val("contentNotes")}`);
+      lines.push("");
+
+      lines.push("Section 5 — Basic Editing (Optional / Light Touch)");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Edits:", checkedList("editChecks")));
+      lines.push(`Tools Used: ${val("toolsUsed")}`);
+      lines.push("");
+
+      lines.push("Section 6 — Metadata & Description Draft");
+      lines.push(`Title: ${val("metaTitle")}`);
+      lines.push("Description (2–3 Paragraphs):");
+      lines.push(val("metaDesc"));
+      lines.push("");
+      lines.push(`Tags / Keywords: ${val("metaTags")}`);
+      lines.push("");
+
+      lines.push("Section 7 — Publishing Workflow");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checklist:", checkedList("publishChecks")));
+      lines.push(`Platform Link: ${val("platformLink")}`);
+      lines.push("");
+
+      lines.push("Section 8 — Documentation & Tracking");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checklist:", checkedList("docChecks")));
+      lines.push(`Tracker Location: ${val("trackerLoc")}`);
+      lines.push("");
+
+      lines.push("Section 9 — Speaker Follow-Up (Within 48 hours)");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checklist:", checkedList("followChecks")));
+      lines.push(`Date Sent: ${val("dateSent")}`);
+      lines.push("");
+
+      lines.push("Section 10 — Outreach (Optional)");
+      if (CONFIG.includeCheckboxStates) lines.push(fmtChecks("Checklist:", checkedList("outreachChecks")));
+      lines.push(`Channels Used: ${val("channelsUsed")}`);
+      lines.push("");
+
+      lines.push("Section 11 — Internal Review");
+      lines.push("What went well:");
+      lines.push(val("wentWell"));
+      lines.push("");
+      lines.push("What to improve:");
+      lines.push(val("improve"));
+      lines.push("");
+      lines.push("Next session ideas:");
+      lines.push(val("nextIdeas"));
+      lines.push("");
+
+      return lines.join("\n");
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("Copied to clipboard.");
+      }catch(e){
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied to clipboard.");
+      }
+    }
+
+    const preview = document.getElementById("preview");
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = buildText();
+      preview.style.display = "block";
+      preview.textContent = text;
+      await copyText(text);
+    });
+
+    document.getElementById("emailBtn").addEventListener("click", () => {
+      const body = encodeURIComponent(buildText());
+      const subject = encodeURIComponent(CONFIG.emailSubject);
+      const to = encodeURIComponent(CONFIG.emailTo || "");
+      window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Clear all fields and checkboxes?")) {
+        document.querySelectorAll("input, textarea, select").forEach(el => {
+          if (el.type === "checkbox") el.checked = false;
+          else if (el.tagName === "SELECT") el.value = "";
+          else el.value = "";
+        });
+        document.getElementById("cohort").value = "Jan–Jun 2026";
+        preview.style.display = "none";
+        preview.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
