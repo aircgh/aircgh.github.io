@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AIRC OpenData • ISTAC</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+
+<body>
+  <main class="container">
+    <h1>AIRC OpenData — ISTAC</h1>
+
+    <p>
+      Serverless, immutable, versioned STAC catalogs with STAC GeoParquet mirrors for fast spatial + temporal queries
+      (DuckDB / Python) and browser-based exploration.
+    </p>
+
+    <section>
+      <h2>Browse</h2>
+      <ul>
+        <li><a href="./catalog.json">ISTAC root catalog.json</a></li>
+        <li><a href="./browser/">Open the ISTAC Browser</a> <em>(after we deploy it)</em></li>
+        <li><a href="./v/">Browse immutable snapshots</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Query with DuckDB</h2>
+      <p>Example (Python):</p>
+
+      <pre><code>import duckdb
+
+con = duckdb.connect()
+con.execute("INSTALL spatial;")
+con.execute("LOAD spatial;")
+
+url = "https://airesearchcorps.org/OpenData/istac/v/2026-02-27_1200/collections/sentinel-2-l2a/geoparquet/items.parquet"
+
+df = con.execute("""
+  SELECT id, datetime
+  FROM read_parquet(url)
+  WHERE datetime &gt;= TIMESTAMP '2026-02-13'
+    AND datetime &lt;  TIMESTAMP '2026-02-27'
+    AND ST_Intersects(
+      geometry,
+      ST_MakeEnvelope(-117.30, 32.60, -117.00, 32.95)
+    )
+  LIMIT 50
+""").df()
+
+print(df.head())</code></pre>
+
+      <p>
+        Notes:
+      </p>
+      <ul>
+        <li>
+          This collection is a snapshot under <code>/v/2026-02-27_1200/</code>. Future snapshots will appear under <code>/v/</code>.
+        </li>
+        <li>
+          The query uses DuckDB’s spatial extension and reads the GeoParquet mirror directly over HTTP.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Official resources (credit)</h2>
+      <ul>
+        <li><a href="https://www.ogc.org/standards/stac/">OGC STAC Standard</a></li>
+        <li><a href="https://github.com/radiantearth/stac-spec">STAC Spec (Radiant Earth)</a></li>
+        <li><a href="https://stac-utils.github.io/stac-geoparquet/latest/spec/stac-geoparquet-spec/">STAC GeoParquet Spec (stac-utils)</a></li>
+        <li><a href="https://geoparquet.org/releases/v1.1.0/">GeoParquet Spec (v1.1)</a></li>
+        <li><a href="https://duckdb.org/docs/stable/core_extensions/spatial/functions.html">DuckDB Spatial Functions</a></li>
+        <li><a href="https://github.com/radiantearth/stac-browser">STAC Browser</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Overture Maps (vector open data)</h2>
+      <ul>
+        <li><a href="https://docs.overturemaps.org/blog/2026/02/11/stac/">Overture: STAC announcement</a></li>
+        <li><a href="https://stac.overturemaps.org">Overture STAC endpoint</a></li>
+        <li><a href="https://docs.overturemaps.org/guides/buildings/">Overture Buildings guide</a></li>
+        <li><a href="https://docs.overturemaps.org/guides/duckdb/">Overture DuckDB guide</a></li>
+        <li><a href="https://www.youtube.com/watch?v=FWQz7H99qEs">Ben Clark talk (YouTube)</a></li>
+      </ul>
+    </section>
+
+    <footer style="margin-top: 2rem; opacity: 0.85;">
+      <p>
+        © AIRC Open Data Program — ISTAC (static, serverless STAC + GeoParquet).
+      </p>
+    </footer>
+  </main>
+</body>
+</html>

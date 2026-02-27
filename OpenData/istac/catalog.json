@@ -1,0 +1,14 @@
+{
+  "type": "Catalog",
+  "stac_version": "1.0.0",
+  "id": "airc-istac",
+  "title": "AIRC ISTAC",
+  "description": "Immutable, versioned, serverless STAC catalogs with STAC GeoParquet mirrors for fast bbox/time querying.",
+  "links": [
+    {
+      "rel": "self",
+      "href": "./catalog.json",
+      "type": "application/json"
+    }
+  ]
+}
