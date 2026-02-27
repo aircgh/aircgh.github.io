@@ -1,81 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>AIRC • Open Data</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="logo-title">
-      <img src="/assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo">
+      <img src="/assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" />
       <div>
         <h1>Open Data</h1>
-        <p class="tagline">Curated datasets · STAC · GeoParquet · DuckDB</p>
+        <p class="tagline">Catalogs · GeoParquet · DuckDB · Serverless publishing</p>
       </div>
     </div>
+
     <nav class="nav">
       <a href="/">Home</a>
       <a href="#start">Start</a>
       <a href="#datasets">Datasets</a>
-      <a href="#tools">Tools</a>
+      <a href="#query">Query</a>
       <a href="#resources">Resources</a>
     </nav>
   </header>
 
   <main>
+    <!-- START -->
     <section id="start" class="section">
-      <h3 class="section-title">Browse and query open data without servers</h3>
+      <h3 class="section-title">AIRC Open Data Hub</h3>
       <p class="section-intro">
-        This page is the hub for AIRC’s Open Data Program. Browse catalogs in the browser,
-        or query GeoParquet directly using DuckDB (bbox + time).
+        This page is the entry point for AIRC’s Open Data Program. Browse published catalogs,
+        query GeoParquet directly with DuckDB, and access official documentation for the standards and tools we use.
       </p>
 
       <div class="card-grid">
         <article class="card">
-          <h4>ISTAC</h4>
-          <p>Immutable, versioned STAC catalogs with GeoParquet item mirrors.</p>
+          <h4>ISTAC (AIRC Catalogs)</h4>
+          <p>
+            Immutable, versioned STAC catalogs with GeoParquet item mirrors for bbox/time queries.
+          </p>
           <ul>
             <li><a class="text-link" href="/OpenData/istac/">ISTAC landing</a></li>
             <li><a class="text-link" href="/OpenData/istac/catalog.json">ISTAC catalog.json</a></li>
-            <li><a class="text-link" href="/OpenData/istac/v/">ISTAC versions</a></li>
+            <li><a class="text-link" href="/OpenData/istac/v/">Snapshot versions</a></li>
           </ul>
         </article>
 
         <article class="card">
           <h4>ISTAC Browser</h4>
-          <p>Visual catalog browsing (enabled after we deploy the browser build).</p>
+          <p>
+            Visual browsing of the catalog (we’ll enable this after deployment).
+          </p>
           <a class="text-link" href="/OpenData/istac/browser/">Open browser (coming soon)</a>
         </article>
 
         <article class="card">
-          <h4>Query Examples</h4>
-          <p>DuckDB + spatial extension; read GeoParquet over HTTP.</p>
-          <a class="text-link" href="#tools">Jump to DuckDB snippet →</a>
+          <h4>What you can do</h4>
+          <p>
+            Use a bounding box + time window to discover items, then load assets directly (COGs, GeoTIFFs, etc.) in your tools.
+          </p>
+          <a class="text-link" href="#query">See query example →</a>
         </article>
       </div>
     </section>
 
+    <!-- DATASETS -->
     <section id="datasets" class="section alt">
       <h3 class="section-title">Datasets</h3>
       <p class="section-intro">
-        We’ll expand this list as we add more collections and vector datasets.
+        AIRC will expand this list over time. We’re starting with one working ISTAC collection and adding more.
       </p>
 
       <div class="card-grid">
         <article class="card">
           <h4>Sentinel-2 L2A (ISTAC snapshot)</h4>
-          <p>STAC items mirrored to GeoParquet for fast bbox/time querying.</p>
+          <p>
+            STAC items mirrored to GeoParquet for fast bbox/time filtering with DuckDB.
+          </p>
           <ul>
             <li><a class="text-link" href="/OpenData/istac/catalog.json">Browse via ISTAC catalog</a></li>
-            <li><a class="text-link" href="/OpenData/istac/v/">Browse snapshot folders</a></li>
+            <li><a class="text-link" href="/OpenData/istac/v/">Browse snapshots</a></li>
           </ul>
         </article>
 
         <article class="card">
           <h4>Overture Maps (Vector GeoParquet)</h4>
-          <p>Global open vector themes (including buildings), queryable with DuckDB.</p>
+          <p>
+            Global open vector themes (including buildings) distributed as GeoParquet and queryable with DuckDB.
+          </p>
           <ul>
             <li><a class="text-link" href="https://stac.overturemaps.org">Overture STAC endpoint</a></li>
             <li><a class="text-link" href="https://docs.overturemaps.org/guides/buildings/">Buildings guide</a></li>
@@ -85,15 +98,16 @@
       </div>
     </section>
 
-    <section id="tools" class="section">
-      <h3 class="section-title">Tools</h3>
+    <!-- QUERY -->
+    <section id="query" class="section">
+      <h3 class="section-title">Query (DuckDB)</h3>
       <p class="section-intro">
-        Query GeoParquet directly (local file or HTTP URL).
+        Example: query a published GeoParquet “item mirror” directly over HTTP using a bounding box and datetime window.
       </p>
 
       <div class="card-grid">
         <article class="card">
-          <h4>DuckDB (Python)</h4>
+          <h4>Python snippet</h4>
           <pre><code>import duckdb
 
 con = duckdb.connect()
@@ -118,27 +132,30 @@ print(df.head())</code></pre>
         </article>
 
         <article class="card">
-          <h4>STAC entrypoints</h4>
+          <h4>Entry points</h4>
           <ul>
             <li><a class="text-link" href="/OpenData/istac/catalog.json">AIRC ISTAC catalog.json</a></li>
-            <li><a class="text-link" href="https://stac.overturemaps.org">Overture STAC</a></li>
+            <li><a class="text-link" href="/OpenData/istac/v/">AIRC ISTAC snapshots</a></li>
           </ul>
         </article>
       </div>
     </section>
 
+    <!-- RESOURCES -->
     <section id="resources" class="section alt">
       <h3 class="section-title">Resources</h3>
-      <p class="section-intro">Standards, formats, and tools used across AIRC Open Data.</p>
+      <p class="section-intro">
+        Official documentation and references for standards, formats, and tools used by the Open Data Program.
+      </p>
 
       <div class="card-grid">
         <article class="card">
           <h4>STAC</h4>
           <ul>
-            <li><a class="text-link" href="https://www.ogc.org/standards/stac/">OGC STAC standard</a></li>
+            <li><a class="text-link" href="https://www.ogc.org/standards/stac/">OGC STAC</a></li>
             <li><a class="text-link" href="https://github.com/radiantearth/stac-spec">STAC spec (GitHub)</a></li>
             <li><a class="text-link" href="https://github.com/radiantearth/stac-api-spec">STAC API spec (GitHub)</a></li>
-            <li><a class="text-link" href="https://github.com/radiantearth/stac-browser">STAC Browser (GitHub)</a></li>
+            <li><a class="text-link" href="https://github.com/radiantearth/stac-browser">STAC Browser</a></li>
           </ul>
         </article>
 
@@ -147,7 +164,7 @@ print(df.head())</code></pre>
           <ul>
             <li><a class="text-link" href="https://geoparquet.org/releases/v1.1.0/">GeoParquet spec v1.1</a></li>
             <li><a class="text-link" href="https://github.com/opengeospatial/geoparquet">GeoParquet (GitHub)</a></li>
-            <li><a class="text-link" href="https://gdal.org/en/stable/drivers/vector/parquet.html">GDAL Parquet/GeoParquet driver</a></li>
+            <li><a class="text-link" href="https://gdal.org/en/stable/drivers/vector/parquet.html">GDAL Parquet/GeoParquet</a></li>
           </ul>
         </article>
 
@@ -161,21 +178,20 @@ print(df.head())</code></pre>
         </article>
 
         <article class="card">
-          <h4>Overture</h4>
-          <ul>
-            <li><a class="text-link" href="https://docs.overturemaps.org/blog/2026/02/11/stac/">Overture STAC blog post</a></li>
-            <li><a class="text-link" href="https://stac.overturemaps.org">Overture STAC endpoint</a></li>
-            <li><a class="text-link" href="https://docs.overturemaps.org/guides/buildings/">Buildings guide</a></li>
-            <li><a class="text-link" href="https://docs.overturemaps.org/guides/duckdb/">DuckDB guide</a></li>
-            <li><a class="text-link" href="https://www.youtube.com/watch?v=FWQz7H99qEs">Ben Clark talk (YouTube)</a></li>
-          </ul>
-        </article>
-
-        <article class="card">
           <h4>DuckDB</h4>
           <ul>
             <li><a class="text-link" href="https://duckdb.org/docs/stable/core_extensions/spatial/functions.html">Spatial functions</a></li>
             <li><a class="text-link" href="https://duckdb.org/docs/stable/data/parquet/overview.html">Parquet overview</a></li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h4>Overture Maps</h4>
+          <ul>
+            <li><a class="text-link" href="https://docs.overturemaps.org/blog/2026/02/11/stac/">Overture STAC blog post</a></li>
+            <li><a class="text-link" href="https://stac.overturemaps.org">Overture STAC endpoint</a></li>
+            <li><a class="text-link" href="https://docs.overturemaps.org/guides/buildings/">Buildings</a></li>
+            <li><a class="text-link" href="https://docs.overturemaps.org/guides/duckdb/">DuckDB guide</a></li>
           </ul>
         </article>
       </div>
