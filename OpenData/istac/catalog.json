@@ -1,14 +1,20 @@
 {
-  "type": "Catalog",
-  "stac_version": "1.0.0",
-  "id": "airc-istac",
-  "title": "AIRC ISTAC",
-  "description": "Immutable, versioned, serverless STAC catalogs with STAC GeoParquet mirrors for fast bbox/time querying.",
-  "links": [
-    {
-      "rel": "self",
-      "href": "./catalog.json",
-      "type": "application/json"
-    }
-  ]
-}
+    "type": "Catalog",
+    "stac_version": "1.0.0",
+    "id": "airc-istac",
+    "title": "AIRC ISTAC",
+    "description": "Immutable, versioned, serverless STAC catalogs with STAC GeoParquet mirrors for fast bbox/time querying.",
+    "links": [
+      {
+        "rel": "self",
+        "href": "https://airesearchcorps.org/OpenData/istac/catalog.json",
+        "type": "application/json"
+      },
+      {
+        "rel": "child",
+        "href": "./v/2026-02-27_1200/collections/sentinel-2-l2a/collection.json",
+        "type": "application/json",
+        "title": "sentinel-2-l2a (2026-02-27_1200)"
+      }
+    ]
+  }
