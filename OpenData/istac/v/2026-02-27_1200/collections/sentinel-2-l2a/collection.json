@@ -1,0 +1,63 @@
+{
+  "type": "Collection",
+  "stac_version": "1.0.0",
+  "id": "sentinel-2-l2a",
+  "title": "Sentinel-2 L2A (AIRC ISTAC snapshot)",
+  "description": "AIRC ISTAC snapshot index for Sentinel-2 L2A items (subset by AOI/time) published as a STAC GeoParquet collection mirror for fast bbox/time queries.",
+  "license": "various",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -117.3,
+          32.6,
+          -117.0,
+          32.95
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2026-02-13 10:35:13.862000-08:00",
+          "2026-02-26 10:45:15.312000-08:00"
+        ]
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../../../../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json"
+    }
+  ],
+  "assets": {
+    "items_geoparquet": {
+      "href": "./geoparquet/items.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "collection-mirror"
+      ],
+      "title": "STAC GeoParquet mirror of Items"
+    },
+    "items_ndjson": {
+      "href": "./items.ndjson",
+      "type": "application/x-ndjson",
+      "roles": [
+        "metadata"
+      ],
+      "title": "Items as NDJSON"
+    }
+  }
+}
