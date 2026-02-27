@@ -4,24 +4,20 @@
   <meta charset="UTF-8">
   <title>AI Research Corps (AIRC)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
   <header class="site-header">
     <div class="logo-title">
-      <img src="assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo">
+      <img src="/assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo">
       <div>
         <h1>AI Research Corps</h1>
-        <p class="tagline">Nonprofit science & technology research institute · 501(c)(3)</p>
+        <p class="tagline">Nonprofit science &amp; technology research institute · 501(c)(3)</p>
       </div>
     </div>
     <nav class="nav">
       <a href="#programs">Programs</a>
-
-      <!-- UPDATED: direct page link + in-page anchor -->
-      <a href="/OpenData/istac/">ISTAC</a>
       <a href="/OpenData/">Open Data</a>
-
       <a href="#library">Library</a>
       <a href="#events">Events</a>
       <a href="#team">Team</a>
@@ -30,26 +26,38 @@
   </header>
 
   <main>
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero-bg"></div>
-      <div class="hero-content">
-        <h2>Building the talent, tools, and bridges for an AI-shaped world.</h2>
-        <p>
-          AI Research Corps (AIRC) is a 501(c)(3) nonprofit working at the intersection of
-          artificial intelligence, GIS, data science, and public-sector innovation.
-          We design low-barrier, high-impact programs in mentorship, policy, innovation,
-          and open data so learners and professionals can explore, experiment, and grow.
-        </p>
-        <div class="hero-buttons">
-          <a href="#programs" class="btn">Explore Programs</a>
-          <a href="#get-involved" class="btn btn-outline">Get Involved</a>
-        </div>
+    <!-- INTRO (no hero background image) -->
+    <section class="section">
+      <h3 class="section-title">Building the talent, tools, and bridges for an AI-shaped world.</h3>
+      <p class="section-intro">
+        AI Research Corps (AIRC) is a 501(c)(3) nonprofit working at the intersection of
+        artificial intelligence, GIS, data science, and public-sector innovation.
+        We design low-barrier, high-impact programs in mentorship, policy, innovation,
+        and open data so learners and professionals can explore, experiment, and grow.
+      </p>
+
+      <div class="card-grid">
+        <article class="card">
+          <h4>Open Data</h4>
+          <p>
+            Browse curated datasets and query large GeoParquet collections with DuckDB
+            using spatial bounds and time windows—no servers required.
+          </p>
+          <a href="/OpenData/" class="text-link">Go to Open Data →</a>
+        </article>
+
+        <article class="card">
+          <h4>Programs</h4>
+          <p>
+            Mentorship, policy research, innovation pilots, and open data—designed for learners and professionals.
+          </p>
+          <a href="#programs" class="text-link">Explore programs →</a>
+        </article>
       </div>
     </section>
 
     <!-- PROGRAMS -->
-    <section id="programs" class="section">
+    <section id="programs" class="section alt">
       <h3 class="section-title">Programs</h3>
       <p class="section-intro">
         Our work is organized around four connected programs. The initial pilot for the
@@ -60,8 +68,7 @@
           <h4>Mentor &amp; Speaker Series</h4>
           <p>
             Structured interviews with professional leaders and innovators across AI, GIS,
-            data science, and public-sector innovation. Each guest is asked a common core
-            set of questions so their stories can be compared and re-used for teaching.
+            data science, and public-sector innovation.
           </p>
           <p class="card-meta">
             Sessions are recorded and shared via the AIRC website, YouTube, and social media.
@@ -71,9 +78,7 @@
         <article class="card">
           <h4>Policy Program</h4>
           <p>
-            Focused on policy research, public comment, and consortium-building around
-            responsible and inclusive AI adoption. Students and volunteers contribute to
-            research sprints, comment letters, and practical guidance.
+            Policy research, public comment, and consortium-building around responsible and inclusive AI adoption.
           </p>
           <p class="card-meta">Details and pilot projects: coming soon.</p>
         </article>
@@ -81,90 +86,43 @@
         <article class="card">
           <h4>Innovation Program</h4>
           <p>
-            Coding projects, pilots, hackathons, and student challenges that use real-world
-            datasets and open tools. This is where we prototype ideas, test pilots, and
-            share open-source examples.
+            Coding projects, pilots, hackathons, and student challenges using real-world datasets and open tools.
           </p>
-          <p class="card-meta">
-            Includes collaborations with professionals, students, and partner organizations.
-          </p>
+          <p class="card-meta">Prototype, test, publish, repeat.</p>
         </article>
 
         <article class="card">
           <h4>Open Data Program</h4>
           <p>
-            A curated collection of large, well-documented datasets made available for
-            learners, professionals, and researchers. Designed to support coursework,
-            independent research, and portfolio-building.
+            Curated datasets with explainers, examples, and query-ready formats (GeoParquet + DuckDB).
           </p>
-          <p class="card-meta">
-            Paired with example notebooks, explainers, and interactive apps.
-          </p>
+          <a href="/OpenData/" class="text-link">Open Data landing →</a>
         </article>
       </div>
     </section>
 
-    <!-- OPEN DATA & APPS (STREAMLIT) -->
-    <section id="open-data" class="section alt">
-      <h3 class="section-title">Open Data &amp; Apps</h3>
-      <p class="section-intro">
-        AIRC hosts interactive tools and examples built with open data. These are implemented
-        using Streamlit and related open-source libraries.
-      </p>
-      <div class="card-grid">
-        <article class="card">
-          <h4>Open Data Explorer</h4>
-          <p>
-            Browse and filter large datasets curated by AIRC. Designed for students and
-            practitioners who want to explore data without needing to install anything locally.
-          </p>
-          <!-- UPDATED -->
-          <a href="/OpenData/istac/" class="text-link">Open ISTAC catalog &amp; GeoParquet explorer</a>
-        </article>
-
-        <article class="card">
-          <h4>Innovation Demos</h4>
-          <p>
-            Prototype tools showcasing geospatial analytics, AI-assisted workflows, and
-            civic-tech use cases. Ideal for workshops, hackathons, and student projects.
-          </p>
-          <a href="#" class="text-link">View demo gallery (coming soon)</a>
-        </article>
-      </div>
-    </section>
-
-    <!-- LIBRARY (MYST / PUBLICATIONS) -->
+    <!-- LIBRARY -->
     <section id="library" class="section">
       <h3 class="section-title">Library &amp; Publications</h3>
       <p class="section-intro">
-        All long-form content is published using MyST (Markedly Structured Text) to keep
-        reports, briefs, and event notes consistent and easy to reuse.
+        Long-form content is published using MyST to keep reports, briefs, and notes consistent and reusable.
       </p>
       <div class="card-grid">
         <article class="card">
           <h4>Policy Notes</h4>
-          <p>
-            Short, accessible explainers and public comments on AI, data governance, and
-            related topics. Written to bridge technical and non-technical audiences.
-          </p>
+          <p>Short explainers and public comments on AI, data governance, and related topics.</p>
           <a href="#" class="text-link">View policy library (coming soon)</a>
         </article>
 
         <article class="card">
           <h4>Innovation &amp; Methods</h4>
-          <p>
-            Walkthroughs of pilots, methods, and technical experiments, including GIS,
-            data science, and AI workflows that can be replicated by others.
-          </p>
+          <p>Walkthroughs of pilots, methods, and technical experiments that others can replicate.</p>
           <a href="#" class="text-link">Explore methods &amp; reports (coming soon)</a>
         </article>
 
         <article class="card">
           <h4>Events &amp; Sessions</h4>
-          <p>
-            Summaries of Mentor Sessions, Speaker Series events, and special programs such
-            as GIS Day at Cabrillo National Monument with Ecologik.
-          </p>
+          <p>Summaries of mentor sessions, speaker series, and special programs.</p>
           <a href="#" class="text-link">Browse event summaries (coming soon)</a>
         </article>
       </div>
@@ -178,16 +136,10 @@
           <h4>GIS Day 2025 @ Cabrillo National Monument (with Ecologik)</h4>
           <p>
             Planning is underway for our second GIS Day in collaboration with Ecologik.
-            This year’s event will be hosted online, tentatively on a Sunday in mid-to-late
-            November (e.g., 11/16 or 11/23).
-          </p>
-          <p>
-            The event will feature live talks, student and volunteer projects, and
-            demonstrations of open tools for geospatial and AI-driven analysis.
+            This year’s event will be hosted online, tentatively on a Sunday in mid-to-late November.
           </p>
           <p class="card-meta">
-            If you are interested in attending, presenting, or supporting the event,
-            please reach out using the contact information below.
+            If you are interested in attending, presenting, or supporting the event, reach out below.
           </p>
         </article>
       </div>
@@ -197,18 +149,17 @@
     <section id="team" class="section">
       <h3 class="section-title">Board &amp; Volunteers</h3>
       <p class="section-intro">
-        AIRC is powered by a small board, a growing network of volunteers, and mentors who
-        contribute their time and expertise.
+        AIRC is powered by a small board, a growing network of volunteers, and mentors who contribute their time and expertise.
       </p>
+
       <h4 class="subheading">Board &amp; Leadership</h4>
       <div class="card-grid">
         <article class="card person">
-          <img src="assets/img/team/mohamad.jpg" alt="Photo of Mohamad Alsheikh Yassin">
+          <img src="/assets/img/team/mohamad.jpg" alt="Photo of Mohamad Alsheikh Yassin">
           <h5>Mohamad Alsheikh Yassin</h5>
           <p class="role">Founder &amp; Executive Director</p>
           <p class="bio">
-            Leads AIRC’s programs at the intersection of AI, GIS, and public-sector
-            innovation, with a focus on practical, community-centered applications.
+            Leads AIRC’s programs at the intersection of AI, GIS, and public-sector innovation.
           </p>
         </article>
       </div>
@@ -219,9 +170,8 @@
           <h5>Mentor Program Coordinators</h5>
           <p class="role">Volunteer role</p>
           <p class="bio">
-            A small team of volunteers coordinating the Mentor &amp; Speaker Series pilot
-            (Jan–Jun 2026). Each coordinator recruits subject-matter experts and conducts
-            structured interviews for publication.
+            Coordinating the Mentor &amp; Speaker Series pilot (Jan–Jun 2026): recruiting guests, scheduling,
+            and publishing sessions.
           </p>
         </article>
       </div>
@@ -234,21 +184,15 @@
         <article class="card">
           <h4>Volunteer: Mentor Program Coordinator (Unpaid)</h4>
           <p>
-            Help coordinate AIRC’s Mentor Sessions &amp; Speaker Series — from inviting
-            speakers, to scheduling virtual sessions, to sharing recordings on our website
-            and social media channels.
+            Help coordinate AIRC’s Mentor Sessions &amp; Speaker Series — from inviting speakers to sharing recordings.
           </p>
           <ul>
             <li>Approx. 4–6 hours per month (flexible)</li>
             <li>Remote (U.S.-based preferred)</li>
             <li>6-month minimum commitment (Jan–Jun 2026 pilot)</li>
           </ul>
-          <p class="card-meta">
-            Full role description available on volunteer listings (LinkedIn, Idealist, UCSD, etc.).
-          </p>
           <p>
-            To learn more, express interest, or propose a new collaboration (policy, innovation,
-            open data, or events), please email:
+            To learn more or propose a collaboration (policy, innovation, open data, or events), email:
             <strong>info@airesearchcorps.org</strong>
           </p>
         </article>

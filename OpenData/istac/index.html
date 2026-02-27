@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <title>AIRC • ISTAC</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
   <header class="site-header">
     <div class="logo-title">
-      <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo">
+      <img src="/assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo">
       <div>
-        <h1>AI Research Corps</h1>
-        <p class="tagline">ISTAC · Serverless STAC + GeoParquet</p>
+        <h1>ISTAC</h1>
+        <p class="tagline">Versioned STAC catalogs · GeoParquet mirrors</p>
       </div>
     </div>
     <nav class="nav">
@@ -26,31 +26,28 @@
 
   <main>
     <section class="section">
-      <h3 class="section-title">ISTAC</h3>
+      <h3 class="section-title">ISTAC entrypoints</h3>
       <p class="section-intro">
-        ISTAC is AIRC’s immutable, versioned STAC structure. Collections include STAC GeoParquet mirrors so users can run
-        fast bbox/time queries in DuckDB without a server-side API.
+        Use the root catalog to browse collections, or query GeoParquet directly with DuckDB.
       </p>
 
       <div class="card-grid">
         <article class="card">
-          <h4>Browse (STAC)</h4>
-          <p>Root catalog and versioned snapshots.</p>
+          <h4>Browse</h4>
           <ul>
             <li><a class="text-link" href="./catalog.json">Open catalog.json</a></li>
-            <li><a class="text-link" href="./v/">Browse /v/ snapshots</a></li>
+            <li><a class="text-link" href="./v/">Browse immutable snapshots</a></li>
           </ul>
         </article>
 
         <article class="card">
           <h4>Browser UI</h4>
-          <p>Visual explorer for the static catalog (enabled after deployment).</p>
+          <p>Visual browsing will work after we deploy the browser build.</p>
           <a class="text-link" href="./browser/">Open ISTAC Browser (coming soon)</a>
         </article>
 
         <article class="card">
-          <h4>Query (DuckDB)</h4>
-          <p>Example query against the current published GeoParquet mirror.</p>
+          <h4>DuckDB query example</h4>
           <pre><code>import duckdb
 
 con = duckdb.connect()
@@ -69,7 +66,9 @@ df = con.execute("""
       ST_MakeEnvelope(-117.30, 32.60, -117.00, 32.95)
     )
   LIMIT 50
-""").df()</code></pre>
+""").df()
+
+print(df.head())</code></pre>
         </article>
       </div>
     </section>
