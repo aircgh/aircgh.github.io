@@ -5,36 +5,37 @@
   <title>Setup Guide — opentrash Course</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Step-by-step setup for the opentrash course: dev environment, repository, MkDocs skeleton, and publishing the package name.">
-  <link rel="stylesheet" href="assets/css/hub.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
   <header class="site-header">
-    <div class="logo-title">
-      <img src="assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo"
-           onerror="this.style.display='none'">
-      <div>
-        <h1>Setup Guide</h1>
-        <p class="tagline">opentrash course · get your machine and repo ready</p>
+    <div class="bar">
+      <div class="brand">
+        <img src="../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Setup Guide</span>
+          <span class="brand-sub">opentrash course · get your machine &amp; repo ready</span>
+        </div>
       </div>
+      <nav>
+        <a href="index.html">&larr; Home</a>
+        <a href="#env">Environment</a>
+        <a href="#repo">Repository</a>
+        <a href="#mkdocs">Skeleton</a>
+        <a href="#pypi">PyPI name</a>
+      </nav>
     </div>
-    <nav class="nav">
-      <a href="index.html">&larr; Hub home</a>
-      <a href="#env">Environment</a>
-      <a href="#repo">Repository</a>
-      <a href="#mkdocs">MkDocs</a>
-      <a href="#pypi">PyPI name</a>
-    </nav>
   </header>
 
   <main>
 
     <section class="hero">
-      <div class="hero-content">
+      <div class="wrap">
         <span class="eyebrow">Phase 0 · One-time setup</span>
-        <h2>Get your machine and your repository ready.</h2>
-        <p>
-          By the end of this guide you&rsquo;ll have a working development environment, the
+        <h1>Get your machine and your repository ready.</h1>
+        <p class="lede">
+          By the end you&rsquo;ll have a working development environment, the
           <code>opentrash</code> repository created and cloned, an empty documentation site
           skeleton ready to grow, and the package name claimed. Works on macOS, Windows, and
           Linux. Plan about 90 minutes the first time.
@@ -42,180 +43,134 @@
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-wrap">
+    <section>
+      <div class="wrap">
 
         <div class="callout">
           <strong>Naming note:</strong> this guide uses <code>opentrash</code> as the package
-          and repository name throughout. You can name yours anything &mdash; wherever you see
+          and repository name throughout. Name yours anything &mdash; wherever you see
           <code>opentrash</code>, substitute your own name. Just be consistent.
         </div>
 
-        <!-- ============ PART 1: ENVIRONMENT ============ -->
-        <h3 class="section-title" id="env">Part 1 &mdash; Development environment</h3>
-        <p class="section-intro">
+        <!-- PART 1 -->
+        <h2 id="env"><span class="sec-num">1</span> Development environment</h2>
+        <p class="intro">
           Five tools: Python (via miniforge), VS Code, git, the GitHub CLI, and UV. If you
-          already have any of them, skip that step.
+          already have any, skip that step.
         </p>
 
-        <!-- STEP 1: miniforge -->
         <div class="step-block">
           <h3><span class="step-pill">1</span> Install miniforge (Python 3.11)</h3>
-          <p>Miniforge is a minimal Python distribution that uses <code>conda-forge</code> by default &mdash; lighter and cleaner than full Anaconda.</p>
-
+          <p>Miniforge is a minimal Python distribution using <code>conda-forge</code> by default &mdash; lighter and cleaner than full Anaconda.</p>
           <div class="platform-label">macOS (Apple Silicon)</div>
           <pre><code>curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh"
 bash Miniforge3-MacOSX-arm64.sh</code></pre>
-          <p class="note">When prompted: accept the license (<code>yes</code>), accept the default install location, and answer <code>yes</code> to &ldquo;initialize.&rdquo; Then close and reopen Terminal.</p>
-
+          <p class="note">When prompted: accept the license (<code>yes</code>), accept the default location, answer <code>yes</code> to initialize. Then close and reopen Terminal.</p>
           <div class="platform-label">macOS (Intel)</div>
           <pre><code>curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-x86_64.sh"
 bash Miniforge3-MacOSX-x86_64.sh</code></pre>
-
           <div class="platform-label">Windows</div>
-          <p>Download <code>Miniforge3-Windows-x86_64.exe</code> from the <a class="inline-link" href="https://github.com/conda-forge/miniforge/releases/latest" target="_blank" rel="noopener">miniforge releases page</a> and run it. Choose <strong>Just Me</strong>, and on Advanced Options <strong>check</strong> &ldquo;Add Miniforge3 to my PATH.&rdquo; Afterwards use the <strong>Miniforge Prompt</strong> from the Start menu for all commands.</p>
-
+          <p>Download <code>Miniforge3-Windows-x86_64.exe</code> from the <a class="inline" href="https://github.com/conda-forge/miniforge/releases/latest" target="_blank" rel="noopener">miniforge releases page</a> and run it. Choose <strong>Just Me</strong>, and on Advanced Options <strong>check</strong> &ldquo;Add Miniforge3 to my PATH.&rdquo; Afterwards use the <strong>Miniforge Prompt</strong> from the Start menu.</p>
           <div class="platform-label">Linux</div>
           <pre><code>curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"
 bash Miniforge3-Linux-x86_64.sh</code></pre>
-
           <div class="platform-label">Verify (all platforms)</div>
           <pre><code>conda --version</code></pre>
-          <p class="note">Shows <code>conda 24.x.x</code> or similar. If you see &ldquo;command not found,&rdquo; close the terminal completely and reopen it.</p>
+          <p class="note">Shows <code>conda 24.x.x</code> or similar. &ldquo;Command not found&rdquo; means the terminal didn&rsquo;t reload &mdash; close it completely and reopen.</p>
         </div>
 
-        <!-- STEP 2: VS Code -->
         <div class="step-block">
           <h3><span class="step-pill">2</span> Install VS Code</h3>
-          <p>Download from <a class="inline-link" href="https://code.visualstudio.com/" target="_blank" rel="noopener">code.visualstudio.com</a> and install. Then open the Extensions panel (left sidebar) and install:</p>
+          <p>Download from <a class="inline" href="https://code.visualstudio.com/" target="_blank" rel="noopener">code.visualstudio.com</a> and install. Open the Extensions panel and install:</p>
           <ul>
             <li><strong>Python</strong> (Microsoft)</li>
             <li><strong>Jupyter</strong> (Microsoft)</li>
             <li><strong>GitLens</strong> (GitKraken) &mdash; optional but helpful</li>
           </ul>
-          <p class="note"><strong>macOS:</strong> make the <code>code</code> command available &mdash; in VS Code press <code>Cmd+Shift+P</code>, run &ldquo;Shell Command: Install 'code' command in PATH.&rdquo; On Windows/Linux the installer handles this.</p>
+          <p class="note"><strong>macOS:</strong> make the <code>code</code> command available &mdash; press <code>Cmd+Shift+P</code>, run &ldquo;Shell Command: Install 'code' command in PATH.&rdquo; Windows/Linux installers handle this.</p>
           <pre><code>code --version</code></pre>
         </div>
 
-        <!-- STEP 3: Homebrew + git -->
         <div class="step-block">
           <h3><span class="step-pill">3</span> Install git (and Homebrew on macOS)</h3>
-
           <div class="platform-label">macOS &mdash; Homebrew first, then git</div>
           <p>Homebrew is the standard macOS package manager and makes the rest easy.</p>
           <pre><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
-          <p class="note">After install, follow the on-screen instructions to add Homebrew to your PATH (the installer prints the exact two lines for your shell). Then:</p>
+          <p class="note">Follow the on-screen instructions to add Homebrew to your PATH (the installer prints the exact lines). Then:</p>
           <pre><code>brew install git</code></pre>
-
           <div class="platform-label">Windows</div>
-          <p>Download from <a class="inline-link" href="https://git-scm.com/download/win" target="_blank" rel="noopener">git-scm.com</a>. During install, choose VS Code as the default editor if offered, and &ldquo;Git from the command line and also from 3rd-party software&rdquo; for PATH.</p>
-
+          <p>Download from <a class="inline" href="https://git-scm.com/download/win" target="_blank" rel="noopener">git-scm.com</a>. Choose VS Code as default editor if offered, and &ldquo;Git from the command line and also from 3rd-party software&rdquo; for PATH.</p>
           <div class="platform-label">Linux</div>
           <pre><code>sudo apt install git</code></pre>
-
           <div class="platform-label">Configure your identity (all platforms)</div>
           <pre><code>git config --global user.name "Your Name"
 git config --global user.email "you@example.com"</code></pre>
           <pre><code>git --version</code></pre>
         </div>
 
-        <!-- STEP 4: GitHub CLI -->
         <div class="step-block">
           <h3><span class="step-pill">4</span> Install the GitHub CLI and sign in</h3>
-          <p>
-            The GitHub CLI (<code>gh</code>) is the fastest way to authenticate &mdash; no manual
-            SSH keys needed. It handles credentials through a quick browser login.
-          </p>
-
+          <p>The GitHub CLI (<code>gh</code>) is the fastest way to authenticate &mdash; no manual SSH keys. It handles credentials through a quick browser login.</p>
           <div class="platform-label">macOS</div>
           <pre><code>brew install gh</code></pre>
-
           <div class="platform-label">Windows</div>
           <pre><code>winget install --id GitHub.cli</code></pre>
-          <p class="note">Or download the installer from <a class="inline-link" href="https://cli.github.com/" target="_blank" rel="noopener">cli.github.com</a>.</p>
-
+          <p class="note">Or download from <a class="inline" href="https://cli.github.com/" target="_blank" rel="noopener">cli.github.com</a>.</p>
           <div class="platform-label">Linux</div>
-          <p>Follow the install steps at <a class="inline-link" href="https://github.com/cli/cli/blob/trunk/docs/install_linux.md" target="_blank" rel="noopener">cli/cli install guide</a>.</p>
-
+          <p>Follow the steps at <a class="inline" href="https://github.com/cli/cli/blob/trunk/docs/install_linux.md" target="_blank" rel="noopener">cli/cli install guide</a>.</p>
           <div class="platform-label">Sign in (all platforms)</div>
           <pre><code>gh auth login</code></pre>
-          <p class="note">
-            Choose <strong>GitHub.com</strong> &rarr; <strong>HTTPS</strong> &rarr;
-            <strong>Yes</strong> (authenticate Git) &rarr; <strong>Login with a web browser</strong>.
-            Copy the one-time code, press Enter, and approve in your browser. Done &mdash; far
-            simpler than SSH keys.
-          </p>
-
-          <div class="note">
-            <strong>Prefer SSH?</strong> If you&rsquo;d rather use SSH keys (advanced), generate
-            one with <code>ssh-keygen -t ed25519 -C "you@example.com"</code>, add the public key
-            at <a class="inline-link" href="https://github.com/settings/keys" target="_blank" rel="noopener">github.com/settings/keys</a>,
-            and verify with <code>ssh -T git@github.com</code>. The <code>gh</code> HTTPS path
-            above is recommended for most people.
-          </div>
+          <p class="note">Choose <strong>GitHub.com</strong> &rarr; <strong>HTTPS</strong> &rarr; <strong>Yes</strong> (authenticate Git) &rarr; <strong>Login with a web browser</strong>. Copy the one-time code, press Enter, approve in your browser. Far simpler than SSH keys.</p>
+          <div class="note"><strong>Prefer SSH?</strong> Generate a key with <code>ssh-keygen -t ed25519 -C "you@example.com"</code>, add the public key at <a class="inline" href="https://github.com/settings/keys" target="_blank" rel="noopener">github.com/settings/keys</a>, verify with <code>ssh -T git@github.com</code>. The <code>gh</code> HTTPS path is recommended for most people.</div>
           <pre><code>gh auth status</code></pre>
         </div>
 
-        <!-- STEP 5: UV -->
         <div class="step-block">
           <h3><span class="step-pill">5</span> Install UV</h3>
-          <p>UV is a fast Python package manager we use for project dependencies.</p>
-
+          <p>UV is a fast Python package manager for project dependencies.</p>
           <div class="platform-label">macOS / Linux</div>
           <pre><code>curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
-
           <div class="platform-label">Windows (PowerShell)</div>
           <pre><code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code></pre>
-
           <p class="note">Restart your terminal, then verify:</p>
           <pre><code>uv --version</code></pre>
         </div>
 
-        <!-- ============ PART 2: REPOSITORY ============ -->
-        <h3 class="section-title" id="repo">Part 2 &mdash; Create the repository</h3>
-        <p class="section-intro">
-          The <code>opentrash</code> package lives in its <strong>own</strong> repository (separate
-          from any personal or org website repo). This keeps the package clean, independently
-          versioned, and ready for PyPI &mdash; the standard layout for a real Python package.
+        <!-- PART 2 -->
+        <h2 id="repo"><span class="sec-num">2</span> Create the repository</h2>
+        <p class="intro">
+          The <code>opentrash</code> package lives in its <strong>own</strong> repository,
+          separate from any website repo. This keeps it clean, independently versioned, and
+          ready for PyPI &mdash; the standard layout for a real Python package.
         </p>
 
         <div class="step-block">
           <h3><span class="step-pill">6</span> Create and clone the repo</h3>
-          <p>Create the repo on GitHub using the CLI (replace <code>opentrash</code> with your chosen name, and set the owner to your user or org):</p>
-          <pre><code>gh repo create opentrash --public --description "Cloud-native geospatial tools for residential waste operations" --clone</code></pre>
-          <p class="note">
-            Use <code>--public</code> for the eventual open release, or <code>--private</code>
-            while you work. To create under an organization, use
-            <code>gh repo create YOUR-ORG/opentrash ...</code>. The <code>--clone</code> flag
-            downloads it to your current folder.
-          </p>
-
-          <p>Move into a sensible projects directory first if you like:</p>
+          <p>Create it on GitHub with the CLI (replace <code>opentrash</code> with your chosen name; set the owner to your user or org):</p>
           <div class="platform-label">macOS / Linux</div>
           <pre><code>mkdir -p ~/Projects && cd ~/Projects
-gh repo create opentrash --public --clone</code></pre>
+gh repo create opentrash --public --description "Cloud-native geospatial tools for residential waste operations" --clone</code></pre>
           <div class="platform-label">Windows</div>
           <pre><code>mkdir %USERPROFILE%\Projects
 cd %USERPROFILE%\Projects
-gh repo create opentrash --public --clone</code></pre>
-
+gh repo create opentrash --public --description "Cloud-native geospatial tools for residential waste operations" --clone</code></pre>
+          <p class="note">Use <code>--private</code> instead of <code>--public</code> while you work. For an org repo: <code>gh repo create YOUR-ORG/opentrash ...</code>. <code>--clone</code> downloads it locally.</p>
           <p>Then enter the repo and open it in VS Code:</p>
           <pre><code>cd opentrash
 code .</code></pre>
         </div>
 
-        <!-- ============ PART 3: MKDOCS SKELETON ============ -->
-        <h3 class="section-title" id="mkdocs">Part 3 &mdash; The package skeleton + docs site</h3>
-        <p class="section-intro">
-          We create a minimal but complete skeleton now: the Python package folder, a
-          documentation site (MkDocs with the Material theme), packaging config, and a workflow
-          that auto-builds the docs to GitHub Pages. Every later lesson grows this.
+        <!-- PART 3 -->
+        <h2 id="mkdocs"><span class="sec-num">3</span> The package skeleton + docs site</h2>
+        <p class="intro">
+          Create a minimal but complete skeleton: the Python package folder, a documentation
+          site (MkDocs Material), packaging config, and a workflow that auto-builds the docs to
+          GitHub Pages. Every later lesson grows this.
         </p>
 
         <div class="step-block">
           <h3><span class="step-pill">7</span> Build the skeleton structure</h3>
-          <p>This is the target layout. The starter files are provided with the course materials &mdash; drop them into your freshly cloned repo so it looks like this:</p>
-
+          <p>This is the target layout. Starter files are provided with the course materials &mdash; drop them into your cloned repo so it looks like this:</p>
           <div class="tree"><span class="dir">opentrash/</span>
 ├── <span class="dir">opentrash/</span>            <span class="comment"># the Python package (code goes here)</span>
 │   └── __init__.py     <span class="comment"># marks it a package; holds __version__</span>
@@ -229,102 +184,66 @@ code .</code></pre>
 ├── README.md           <span class="comment"># repo front page</span>
 ├── LICENSE             <span class="comment"># add your chosen license text</span>
 └── .gitignore          <span class="comment"># Python ignores + project-specific</span></div>
-
-          <p class="note">
-            <strong>Where things go, in plain terms:</strong> your <em>code</em> lives in
-            <code>opentrash/</code>. Your <em>docs pages</em> live in <code>docs/</code>.
-            Configuration sits at the root. The <code>.github/workflows/docs.yml</code> file is
-            what publishes the docs site automatically every time you push.
-          </p>
+          <p class="note"><strong>In plain terms:</strong> your <em>code</em> lives in <code>opentrash/</code>. Your <em>docs pages</em> live in <code>docs/</code>. Config sits at the root. The <code>.github/workflows/docs.yml</code> file publishes the docs site automatically on every push.</p>
         </div>
 
         <div class="step-block">
           <h3><span class="step-pill">8</span> Create the environment and install tools</h3>
-          <p>Create a dedicated conda environment for the project, then install MkDocs Material and the build tooling:</p>
+          <p>Create a dedicated conda environment, then install MkDocs Material and build tooling:</p>
           <pre><code>conda create -n opentrash python=3.11 -y
 conda activate opentrash
 pip install mkdocs-material build twine</code></pre>
-          <p class="note">
-            <code>mkdocs-material</code> is the documentation theme, <code>build</code> creates
-            the package distribution, and <code>twine</code> uploads it to PyPI (Part 4).
-          </p>
+          <p class="note"><code>mkdocs-material</code> is the docs theme, <code>build</code> creates the package distribution, <code>twine</code> uploads to PyPI (Part 4).</p>
         </div>
 
         <div class="step-block">
           <h3><span class="step-pill">9</span> Preview the docs site locally</h3>
-          <p>From the repo root, start the MkDocs live preview:</p>
+          <p>From the repo root:</p>
           <pre><code>mkdocs serve</code></pre>
-          <p class="note">
-            Open <code>http://127.0.0.1:8000</code> in your browser. You&rsquo;ll see the
-            skeleton docs homepage. Edits to anything in <code>docs/</code> reload live. Press
-            <code>Ctrl+C</code> to stop.
-          </p>
+          <p class="note">Open <code>http://127.0.0.1:8000</code>. You&rsquo;ll see the skeleton docs homepage. Edits to anything in <code>docs/</code> reload live. <code>Ctrl+C</code> stops it.</p>
         </div>
 
         <div class="step-block">
           <h3><span class="step-pill">10</span> Enable GitHub Pages for the docs</h3>
-          <p>
-            The included <code>docs.yml</code> workflow builds the site and pushes it to a branch
-            called <code>gh-pages</code> on every commit to <code>main</code>. After your first
-            push (Step 12), enable Pages:
-          </p>
+          <p>The included <code>docs.yml</code> workflow builds the site and pushes it to a <code>gh-pages</code> branch on every commit to <code>main</code>. After your first push (Step 12), enable Pages:</p>
           <ol class="plain-list">
-            <li>On GitHub, open the repo &rarr; <strong>Settings</strong> &rarr; <strong>Pages</strong>.</li>
+            <li>Repo &rarr; <strong>Settings</strong> &rarr; <strong>Pages</strong>.</li>
             <li>Under <strong>Build and deployment</strong>, set <strong>Source</strong> to &ldquo;Deploy from a branch.&rdquo;</li>
-            <li>Set the branch to <code>gh-pages</code> and folder to <code>/ (root)</code>. Save.</li>
+            <li>Branch <code>gh-pages</code>, folder <code>/ (root)</code>. Save.</li>
           </ol>
-
           <div class="platform-label">Default URL (no custom domain)</div>
-          <p>Your docs will be live at <code>https://&lt;owner&gt;.github.io/opentrash/</code>. Nothing else to do.</p>
-
+          <p>Docs go live at <code>https://&lt;owner&gt;.github.io/opentrash/</code>. Nothing else to do.</p>
           <div class="platform-label">Optional: custom domain</div>
-          <p>
-            If you own a domain (for example <code>opentrash.app</code>), you can point it at this
-            repo&rsquo;s Pages site. Each repository supports <strong>one</strong> custom domain,
-            so a dedicated package repo can use its own domain independently of any other site you
-            host.
-          </p>
+          <p>If you own a domain (e.g. <code>opentrash.app</code>), point it at this repo&rsquo;s Pages site. Each repo supports <strong>one</strong> custom domain, so a dedicated package repo can use its own independently of any other site you host.</p>
           <ol class="plain-list">
-            <li>In Settings &rarr; Pages &rarr; <strong>Custom domain</strong>, enter your domain and Save. This writes a <code>CNAME</code> file to the repo.</li>
-            <li>At your DNS provider, add the records GitHub specifies &mdash; typically a <code>CNAME</code> record pointing your domain to <code>&lt;owner&gt;.github.io</code> (and/or <code>A</code> records for an apex domain). GitHub&rsquo;s Pages settings page shows exactly which records to add.</li>
-            <li>Wait for DNS to propagate, then enable &ldquo;Enforce HTTPS.&rdquo;</li>
+            <li>Settings &rarr; Pages &rarr; <strong>Custom domain</strong>: enter the domain, Save (writes a <code>CNAME</code> file).</li>
+            <li>At your DNS provider, add the records GitHub specifies &mdash; a <code>CNAME</code> pointing to <code>&lt;owner&gt;.github.io</code> (and/or <code>A</code> records for an apex domain).</li>
+            <li>After DNS propagates, enable &ldquo;Enforce HTTPS.&rdquo;</li>
           </ol>
-          <p class="note">
-            You can switch between the default URL and a custom domain at any time &mdash; this is
-            a setting, not a one-way door. Start with the default if you&rsquo;re unsure.
-          </p>
+          <p class="note">You can switch between default URL and custom domain any time &mdash; it&rsquo;s a setting, not a one-way door. Start with the default if unsure.</p>
         </div>
 
-        <!-- ============ PART 4: PYPI NAME ============ -->
-        <h3 class="section-title" id="pypi">Part 4 &mdash; Claim the package name on PyPI</h3>
-        <p class="section-intro">
-          Package names on PyPI are first-come, first-served, and claimed by uploading a release.
-          Publishing a tiny <code>0.0.0</code> placeholder now reserves your name while it&rsquo;s
-          available. (You&rsquo;ll learn the full publishing workflow properly in Lesson 12 &mdash;
-          this is just to hold the name.)
+        <!-- PART 4 -->
+        <h2 id="pypi"><span class="sec-num">4</span> Claim the package name on PyPI</h2>
+        <p class="intro">
+          PyPI names are first-come, first-served, claimed by uploading a release. Publishing a
+          tiny <code>0.0.0</code> placeholder now reserves your name while it&rsquo;s available.
+          (You&rsquo;ll learn the full publishing workflow in Lesson 12 &mdash; this just holds
+          the name.)
         </p>
 
         <div class="step-block">
           <h3><span class="step-pill">11</span> Build and upload a placeholder release</h3>
-          <p>First, create a free account at <a class="inline-link" href="https://pypi.org/account/register/" target="_blank" rel="noopener">pypi.org</a> and check your name is available at <code>https://pypi.org/project/opentrash/</code>.</p>
+          <p>Create a free account at <a class="inline" href="https://pypi.org/account/register/" target="_blank" rel="noopener">pypi.org</a> and check your name is free at <code>https://pypi.org/project/opentrash/</code>.</p>
           <p>With <code>pyproject.toml</code> set to <code>name = "opentrash"</code> and <code>version = "0.0.0"</code>, from the repo root:</p>
           <pre><code>python -m build
 twine upload dist/*</code></pre>
-          <p class="note">
-            <code>twine</code> will prompt for your PyPI credentials (use an API token from your
-            PyPI account settings). Once uploaded, the name is yours. Verify at
-            <code>https://pypi.org/project/opentrash/</code>.
-          </p>
-          <div class="note">
-            <strong>Naming reminder:</strong> if you chose a different package name, make sure
-            <code>pyproject.toml</code>, the repo, and the folder all match it. Consistency now
-            saves confusion later.
-          </div>
+          <p class="note"><code>twine</code> prompts for PyPI credentials (use an API token from your account settings). Once uploaded, the name is yours. Verify at <code>https://pypi.org/project/opentrash/</code>.</p>
+          <div class="note"><strong>Naming reminder:</strong> if you chose a different name, make sure <code>pyproject.toml</code>, the repo, and the package folder all match it.</div>
         </div>
 
-        <!-- ============ PART 5: COMMIT ============ -->
-        <h3 class="section-title">Part 5 &mdash; Commit and verify</h3>
-
+        <!-- PART 5 -->
+        <h2><span class="sec-num">5</span> Commit and verify</h2>
         <div class="step-block">
           <h3><span class="step-pill">12</span> First commit and push</h3>
           <pre><code>git add .
@@ -333,10 +252,9 @@ git push origin main</code></pre>
           <p class="note">If your default branch is <code>master</code>, use that instead of <code>main</code>.</p>
         </div>
 
-        <!-- ============ CHECKLIST ============ -->
-        <h3 class="section-title">Final checklist</h3>
+        <h2>Final checklist</h2>
         <ul class="checklist">
-          <li><code>conda --version</code>, <code>code --version</code>, <code>git --version</code>, <code>gh --version</code>, <code>uv --version</code> all work</li>
+          <li><code>conda</code>, <code>code</code>, <code>git</code>, <code>gh</code>, <code>uv</code> all report a version</li>
           <li><code>gh auth status</code> shows you signed in</li>
           <li>Repo created and cloned locally</li>
           <li>Skeleton structure in place (package folder, docs, mkdocs.yml, pyproject.toml, workflow)</li>
@@ -345,21 +263,20 @@ git push origin main</code></pre>
           <li>Package name claimed on PyPI</li>
         </ul>
 
-        <div class="callout gold">
+        <div class="callout">
           When every box is checked, Phase 0 is complete. You have a working machine, a live
-          (or ready-to-go-live) docs site, and your package name secured. Lesson 1 picks up from
+          (or ready-to-go-live) docs site, and your package name secured. Lesson 1 picks up
           here &mdash; turning this skeleton into a real package.
         </div>
 
-        <!-- ============ TROUBLESHOOTING ============ -->
-        <h3 class="section-title">Troubleshooting</h3>
+        <h2>Troubleshooting</h2>
         <ul class="plain-list">
-          <li><strong><code>conda: command not found</code></strong> &mdash; the terminal didn&rsquo;t reload after install. Close it completely and open a fresh one.</li>
+          <li><strong><code>conda: command not found</code></strong> &mdash; the terminal didn&rsquo;t reload. Close it completely and open a fresh one.</li>
           <li><strong><code>gh: command not found</code></strong> &mdash; reopen the terminal; on macOS confirm <code>brew</code> finished and is on your PATH.</li>
-          <li><strong>Auth fails in browser</strong> &mdash; rerun <code>gh auth login</code> and make sure you copy the full one-time code.</li>
-          <li><strong>Pages shows 404</strong> &mdash; check Settings &rarr; Pages: source should be the <code>gh-pages</code> branch, root folder. The first build can take a couple of minutes.</li>
-          <li><strong><code>twine</code> rejects upload</strong> &mdash; the name may already be taken, or your version already exists. Bump the version or pick another name.</li>
-          <li><strong>Anything else</strong> &mdash; capture the exact error text and ask. Don&rsquo;t suffer silently; a clear question is half the fix.</li>
+          <li><strong>Auth fails in browser</strong> &mdash; rerun <code>gh auth login</code> and copy the full one-time code.</li>
+          <li><strong>Pages shows 404</strong> &mdash; check Settings &rarr; Pages: source is the <code>gh-pages</code> branch, root folder. First build takes a couple minutes.</li>
+          <li><strong><code>twine</code> rejects upload</strong> &mdash; the name may be taken, or that version already exists. Bump the version or pick another name.</li>
+          <li><strong>Anything else</strong> &mdash; capture the exact error text and ask. A clear question is half the fix.</li>
         </ul>
 
       </div>
@@ -368,15 +285,13 @@ git push origin main</code></pre>
   </main>
 
   <footer class="site-footer">
-    <p>
-      <a href="index.html">&larr; Back to the hub</a> &nbsp;·&nbsp;
+    <div class="wrap">
+      <a href="index.html">&larr; Back to the course home</a> &nbsp;·&nbsp;
       A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
       &nbsp;·&nbsp; &copy; <span id="year"></span>
-    </p>
+    </div>
   </footer>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
