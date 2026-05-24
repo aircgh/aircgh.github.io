@@ -1,0 +1,69 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+wheels/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints
+
+# MkDocs build output
+site/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ============================================
+# opentrash — project-specific
+# ============================================
+
+# Local data — never commit raw operational data
+data/raw/
+data/cache/
+data/local/
+*.parquet
+*.csv
+*.xlsx
+*.geojson
+# allow small sample data if explicitly placed here:
+!data/samples/
+!data/samples/**
+
+# Generated outputs
+outputs/
+exports/
+
+# Secrets / credentials — never commit
+*.key
+*.pem
+secrets/
+credentials/
+.geotab/
+.pypirc

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>opentrash — Build the Package (Course Hub)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn to build opentrash, an open source cloud-native geospatial package for residential waste operations. A course by AI Research Corps.">
+  <link rel="stylesheet" href="assets/css/hub.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="logo-title">
+      <!-- Place AIRC_LOGO.png in assets/img/ or point to the AIRC-hosted logo -->
+      <img src="assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo"
+           onerror="this.style.display='none'">
+      <div>
+        <h1>opentrash &mdash; Build the Package</h1>
+        <p class="tagline">A course by AI Research Corps (AIRC) · 501(c)(3)</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#products">Products</a>
+      <a href="#start">Get Started</a>
+      <a href="#lessons">Lessons</a>
+      <a href="#resources">Resources</a>
+      <a href="setup.html">Setup Guide</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">Open Source · Cloud-Native Geospatial</span>
+        <h2>Learn to build <code>opentrash</code>, one lesson at a time.</h2>
+        <p>
+          A hands-on course that walks you through building a real open source Python
+          package for residential waste operations &mdash; from an empty repository to a
+          published, documented, installable tool. You watch each lesson, then build that
+          slice of the package yourself.
+        </p>
+        <div class="hero-buttons">
+          <a href="#start" class="btn">Start here</a>
+          <a href="setup.html" class="btn btn-outline">Set up your machine</a>
+        </div>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Stack:</strong> Python · DuckDB · GeoPandas · MapLibre</span>
+          <span class="hero-chip"><strong>Output:</strong> a package + its docs site</span>
+          <span class="hero-chip"><strong>Ships to:</strong> PyPI · conda-forge</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. WHAT YOU'LL BUILD -->
+    <section id="products" class="section">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">1</span>What you&rsquo;ll build</h3>
+        <p class="section-intro">
+          <code>opentrash</code> is an open source Python package for analyzing residential
+          solid waste collection operations using GPS telematics, enterprise waste-management
+          data, and municipal parcel layers. By the end of this course you&rsquo;ll have built
+          two working products and published the package.
+        </p>
+
+        <div class="card-grid two-col">
+          <article class="card">
+            <span class="card-badge">A</span>
+            <h4>RouteView</h4>
+            <p>
+              Given one route and one day, produce a polished interactive HTML map showing
+              the route polygon, the serving vehicle&rsquo;s GPS trail, landfill tips,
+              parcels served vs missed, and tonnage delivered. Runs in seconds. Embeddable
+              in apps, notebooks, or a batch job that writes hundreds of HTMLs to a folder.
+            </p>
+          </article>
+
+          <article class="card">
+            <span class="card-badge">B</span>
+            <h4>Patterns</h4>
+            <p>
+              Given a long GPS history, detect each parcel&rsquo;s <em>weekly</em> and
+              <em>biweekly</em> service signature &mdash; typical day, hour, vehicle,
+              regularity. Produces a portable parquet file that RouteView can optionally
+              consume to compare today&rsquo;s operation against the yearly pattern.
+            </p>
+          </article>
+        </div>
+
+        <div class="callout">
+          The same tools enterprise fleet software sells for six figures &mdash; built on
+          open standards and open data, runnable on a laptop. The goal is to package years of
+          operational practice cleanly, teach it, and let any agency benefit without starting
+          from scratch.
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ROADMAP -->
+    <section id="roadmap" class="section alt">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">2</span>Roadmap</h3>
+        <p class="section-intro">
+          Where the project is heading after the core release. None of these are built in the
+          current run &mdash; they&rsquo;re named so you know the direction of travel.
+        </p>
+
+        <div class="card-grid">
+          <article class="card card-roadmap">
+            <span class="card-badge future">Future</span>
+            <h4>RouteEdit</h4>
+            <p>
+              A third sister product alongside RouteView and Patterns. An interactive HTML map
+              for editing routes &mdash; selection tools (click, lasso, polygon), a side panel
+              listing selected parcels and route assignments, and an audit trail of every move.
+              The open source counterpart to enterprise tools like EasyRoute.
+            </p>
+            <p class="card-meta">Sister module: <code>routeedit/</code>. Peer to <code>routeview/</code>.</p>
+          </article>
+
+          <article class="card card-roadmap">
+            <span class="card-badge future">Future</span>
+            <h4>Sample synthetic data</h4>
+            <p>
+              A small, redistributable synthetic dataset so anyone can clone the repo and run
+              RouteView and Patterns end-to-end without operational data. Critical for tutorials,
+              onboarding, and reproducibility.
+            </p>
+          </article>
+
+          <article class="card card-roadmap">
+            <span class="card-badge future">Future</span>
+            <h4>Cloud-hosted demo</h4>
+            <p>
+              A live, publicly browsable RouteView instance running on the synthetic dataset,
+              deployed via Streamlit or a similar framework. Lets evaluators try it before
+              installing anything.
+            </p>
+          </article>
+
+          <article class="card card-roadmap">
+            <span class="card-badge future">Future</span>
+            <h4>Hardware integrations</h4>
+            <p>
+              Experimental: an ESP32 + RFID reader prototype to read container tags, and a
+              low-cost vehicle-mounted LiDAR (Raspberry Pi) to measure alley widths for routing
+              safety. Surfaced from real operational pain points.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. WHO THIS IS FOR -->
+    <section class="section">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">3</span>Who this course is for</h3>
+        <ul class="plain-list section-intro">
+          <li><strong>Learners and students</strong> who want to learn applied geospatial software engineering by building something real.</li>
+          <li><strong>Contributors</strong> &mdash; engineers, data scientists, GIS folks who want to build on a working foundation.</li>
+          <li><strong>Public-sector and civic-tech folks</strong> curious how a cloud-native waste-ops tool comes together.</li>
+        </ul>
+        <p class="section-intro">
+          Just want to <em>use</em> the package rather than build it? You&rsquo;ll want the
+          <code>opentrash</code> package documentation site instead &mdash; this hub is about
+          learning to build it from scratch.
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. GET STARTED -->
+    <section id="start" class="section alt">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">4</span>Before you start</h3>
+        <p class="section-intro">
+          Three things get you grounded before Lesson 1. Plan roughly 75 minutes of focused
+          time, spread across the week.
+        </p>
+
+        <ol class="procedure">
+          <li>
+            <div class="step-num">1</div>
+            <div>
+              <h4>Understand the domain <span class="time">~15 min</span></h4>
+              <p>
+                Watch
+                <a class="inline-link" href="https://www.youtube.com/watch?v=idNEOk3xzw8" target="_blank" rel="noopener">&ldquo;GIS for Solid Waste Management&rdquo; (GIS Day 2024)</a>.
+                You&rsquo;ll learn what a residential pickup operation actually looks like, the
+                three-tier GIS data taxonomy (operational, support, strategic), and the auto vs
+                manual vehicle distinction. Short, dense, no fluff.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div>
+              <h4>See the product in action <span class="time">~15 min</span></h4>
+              <p>
+                Watch the RouteView live demo segment (first ~17 min) of
+                <a class="inline-link" href="https://www.youtube.com/watch?v=QTQCfywuUJY" target="_blank" rel="noopener">the ASPRS SDSU Chapter presentation on cloud-native geospatial integration</a>.
+                You&rsquo;ll see the actual tool running on real data &mdash; parquet compression,
+                DuckDB speed, MapLibre HTML output, GitHub Pages deployment. This is what
+                you&rsquo;ll be building.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div>
+              <h4>Set up your development environment <span class="time">~45 min</span></h4>
+              <p>
+                Follow the <a class="inline-link" href="setup.html">Setup Guide</a> &mdash; a
+                step-by-step walkthrough for macOS, Windows, and Linux that gets your machine
+                ready and your repository created. If you prefer watching to reading, Dr. Wu&rsquo;s
+                Geographic Software Design lectures 2 and 3 (linked in Resources) cover the same
+                ground visually.
+              </p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout gold">
+          That&rsquo;s the prep. Everything deeper, you&rsquo;ll build through the lessons. You
+          don&rsquo;t need to understand the code before you start &mdash; building it
+          <em>is</em> how you understand it.
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. LESSON SERIES -->
+    <section id="lessons" class="section">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">5</span>Lesson series</h3>
+        <p class="section-intro">
+          Each lesson is a recorded screencast. You watch it, then build that layer of the
+          package yourself. Lessons unlock as the series progresses. Companion resources are
+          listed per lesson when available &mdash; they&rsquo;re optional supporting material;
+          the lessons are self-contained.
+        </p>
+
+        <div class="table-scroll">
+          <table class="lessons">
+            <thead>
+              <tr><th>#</th><th>Lesson</th><th>Core concepts</th><th>Companion</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Orientation &mdash; repo, environment, package anatomy</td><td>pyproject.toml, editable installs, MkDocs skeleton, CLI</td><td>TBD</td><td><span class="pill pill-next">Up next</span></td></tr>
+              <tr><td>2</td><td>The foundation &mdash; CRS, parcels, DuckDB spatial</td><td>EPSG codes, bbox prefilters, spatial prep</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>3</td><td>Sites data &mdash; cleaning, encoding business rules</td><td>Progressive cleaning, rules-as-data, nullable dtypes</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>4</td><td>Excel &rarr; Parquet &mdash; idempotent upserts</td><td>Registry pattern, hash keys, partitioned parquets</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>5</td><td>Packaging basics &mdash; notebook to module</td><td>Classes, dataclasses, type hints, protocols</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>6</td><td>GPS &amp; spatial joins &mdash; fetch, cache, rank</td><td>Cache-first design, rate limiting, bbox then intersect</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>7</td><td>Operational analytics &mdash; shifts, tips, segments</td><td>Motion vs activity, event-boundary segmentation</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>8</td><td>Parcels served &mdash; dwell logic, completion</td><td>Spatial join attribution, service-point clustering</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>9</td><td>RouteView HTML &mdash; MapLibre, layering, theming</td><td>Self-contained artifacts, embedded GeoJSON, styling</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>10</td><td>Pattern detection &mdash; the DuckDB masterclass</td><td>CTAS pipelines, window functions, composite scoring</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>11</td><td>Integration &mdash; patterns into RouteView</td><td>Optional enrichment, feature flags, graceful fallback</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+              <tr><td>12</td><td>Publishing &mdash; PyPI, conda-forge, docs</td><td>Versioning, CI, MkDocs deploy, release workflow</td><td>TBD</td><td><span class="pill">TBD</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. RESOURCES -->
+    <section id="resources" class="section alt">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">6</span>Resources</h3>
+
+        <h4 class="tier-heading tier-a">Required for the course</h4>
+        <div class="card-grid two-col">
+          <article class="card">
+            <h4>Domain &amp; product context</h4>
+            <ul>
+              <li><a class="inline-link" href="https://www.youtube.com/watch?v=idNEOk3xzw8" target="_blank" rel="noopener"><strong>GIS for Solid Waste Management</strong></a> (GIS Day 2024) &mdash; 11 min operational overview: three-tier layer taxonomy, auto vs manual vehicles, ARTS/RAD tonnage. <em>Prep #1.</em></li>
+              <li><a class="inline-link" href="https://www.youtube.com/watch?v=QTQCfywuUJY" target="_blank" rel="noopener"><strong>Cloud-Native Geospatial Integration &amp; Lightweight Decision Tools</strong></a> (ASPRS SDSU Chapter presentation) &mdash; first ~17 min is the RouteView demo; full video adds an audit tool, pattern work, and intern lightning talks on OGC standards. <em>Prep #2.</em></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>Development environment</h4>
+            <ul>
+              <li><a class="inline-link" href="setup.html"><strong>Setup Guide</strong></a> &mdash; step-by-step for macOS, Windows, Linux.</li>
+              <li><strong>Dr. Wu &mdash; Geographic Software Design, Lecture 2</strong> (software setup) <span class="card-meta">link to be added</span></li>
+              <li><strong>Dr. Wu &mdash; Geographic Software Design, Lecture 3</strong> (Python environments) <span class="card-meta">link to be added</span></li>
+            </ul>
+          </article>
+        </div>
+
+        <h4 class="tier-heading tier-b">Recommended if you want to go deeper</h4>
+        <div class="card-grid two-col">
+          <article class="card">
+            <h4>Project architecture &amp; history</h4>
+            <ul>
+              <li><a class="inline-link" href="https://www.youtube.com/watch?v=w4CSijizYbs" target="_blank" rel="noopener"><strong>Optimizing Solid Waste Operations with Routing and GIS</strong></a> (25 min) &mdash; four-generation history of route optimization, the dispatch problem, and the Gen 4 architecture vision behind <code>opentrash</code>.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>Dr. Wu &mdash; Open Science Workshop Series</h4>
+            <ul>
+              <li><strong>Open Code</strong> &mdash; Git, GitHub, VS Code, UV <span class="card-meta">link to be added</span></li>
+              <li><a class="inline-link" href="https://www.youtube.com/watch?v=_Bul-qradAs" target="_blank" rel="noopener"><strong>Open Data</strong></a> &mdash; FAIR principles; GitHub Releases &amp; Hugging Face</li>
+              <li><a class="inline-link" href="https://www.youtube.com/watch?v=X0LLFfkhQ2Y" target="_blank" rel="noopener"><strong>Open Results</strong></a> &mdash; MkDocs templates, notebook-driven sites, GitHub Pages</li>
+              <li><a class="inline-link" href="https://www.youtube.com/watch?v=BxoEM5x4EfQ" target="_blank" rel="noopener"><strong>Open Publishing</strong></a> &mdash; MyST markdown for tutorials, papers, books</li>
+            </ul>
+          </article>
+        </div>
+
+        <h4 class="tier-heading tier-c">The full courses</h4>
+        <ul class="full-courses">
+          <li><strong>Geographic Software Design</strong> (Dr. Qiusheng Wu, UTK) &mdash; 38-lecture course on Python packaging, GeoPandas, mapping libraries, widgets, conda-forge publishing. <span class="card-meta">playlist link to be added</span></li>
+          <li><strong>DuckDB for Geospatial</strong> (Dr. Qiusheng Wu, UTK) &mdash; 12-lecture course on DuckDB fundamentals, SQL, spatial extensions, cloud-native analytics. <span class="card-meta">playlist link to be added</span></li>
+          <li><strong>Open Science Workshop Series</strong> (Dr. Qiusheng Wu, UTK) &mdash; the four workshops above. <span class="card-meta">playlist link to be added</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 7. HOW WE WORK -->
+    <section class="section">
+      <div class="section-wrap">
+        <h3 class="section-title"><span class="section-num">7</span>How we work</h3>
+        <div class="pill-row">
+          <span class="pill-good">Be curious</span>
+          <span class="pill-good">Ask early</span>
+          <span class="pill-good">Ship small</span>
+          <span class="pill-good">Write it down</span>
+          <span class="pill-good">Help each other</span>
+        </div>
+        <ul class="plain-list">
+          <li><strong>Cadence:</strong> work through lessons at the pace set for your cohort or your own schedule.</li>
+          <li><strong>Preparation matters.</strong> Show up having tried the thing. It&rsquo;s fine to be stuck; it&rsquo;s not fine to be absent from your own learning.</li>
+          <li><strong>Honor code.</strong> Credit your sources. Attribute code you adapt. Be honest about what you built and what you borrowed. This is an open source project &mdash; the ethics are the craft.</li>
+          <li><strong>Expect change.</strong> This is a working product being shaped in real time. Specs will shift. That&rsquo;s engineering.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a> · 501(c)(3)
+      &nbsp;·&nbsp; &copy; <span id="year"></span>
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
