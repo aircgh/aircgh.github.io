@@ -160,6 +160,41 @@ git push origin main</code></pre>
       </div>
     </section>
 
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives in the <code>opentrash</code> repo now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>            <span class="comment"># the repo root</span>
+├── <span class="dir">.github/workflows/</span>
+│   ├── docs.yml         <span class="comment"># MkDocs -> Pages deploy</span>
+│   └── tests.yml        <span class="comment"># [new] CI: ruff + pytest</span>
+├── <span class="dir">docs/</span>
+│   ├── CNAME            <span class="comment"># custom domain</span>
+│   ├── architecture.md  <span class="comment"># [new] module map + dataflow</span>
+│   └── index.md
+├── <span class="dir">opentrash/</span>            <span class="comment"># the package</span>
+│   ├── __init__.py      <span class="comment"># version 0.1.0.dev0</span>
+│   ├── cli.py           <span class="comment"># [new] argparse CLI, stubbed subcommands</span>
+│   ├── <span class="dir">adapters/</span>        <span class="comment"># [new] scaffolded</span>
+│   │   ├── __init__.py
+│   │   └── <span class="dir">gps/</span>__init__.py
+│   ├── <span class="dir">core/</span>__init__.py  <span class="comment"># [new] scaffolded</span>
+│   ├── <span class="dir">patterns/</span>__init__.py  <span class="comment"># [new]</span>
+│   ├── <span class="dir">prep/</span>__init__.py  <span class="comment"># [new]</span>
+│   ├── <span class="dir">routeview/</span>__init__.py  <span class="comment"># [new]</span>
+│   └── <span class="dir">tonnage/</span>__init__.py  <span class="comment"># [new]</span>
+├── <span class="dir">tests/</span>
+│   ├── __init__.py      <span class="comment"># [new]</span>
+│   └── test_smoke.py    <span class="comment"># [new] 3 smoke tests</span>
+├── .gitignore
+├── LICENSE
+├── README.md
+├── mkdocs.yml
+└── pyproject.toml       <span class="comment"># [now has] CLI entry point, pytest config</span></div>
+      </div>
+    </section>
+
     <!-- RECAP -->
     <section id="recap">
       <div class="wrap">

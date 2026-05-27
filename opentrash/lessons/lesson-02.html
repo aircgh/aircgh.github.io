@@ -158,6 +158,36 @@ git push origin main</code></pre>
       </div>
     </section>
 
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── <span class="dir">.github/workflows/</span>  <span class="comment"># docs.yml, tests.yml</span>
+├── <span class="dir">docs/</span>                <span class="comment"># CNAME, architecture.md, index.md</span>
+├── <span class="dir">opentrash/</span>            <span class="comment"># the package</span>
+│   ├── __init__.py
+│   ├── cli.py
+│   ├── <span class="dir">adapters/gps/</span>
+│   ├── <span class="dir">core/</span>
+│   │   ├── __init__.py
+│   │   ├── crs.py             <span class="comment"># [new] EPSG:2230 working, 4326 web, to_working/to_web</span>
+│   │   └── duckdb_session.py  <span class="comment"># [new] connect() + spatial extension</span>
+│   ├── <span class="dir">patterns/</span>
+│   ├── <span class="dir">prep/</span>
+│   │   ├── __init__.py
+│   │   └── parcels.py         <span class="comment"># [new] load_parcels, bbox_filter</span>
+│   ├── <span class="dir">routeview/</span>
+│   └── <span class="dir">tonnage/</span>
+├── <span class="dir">tests/</span>
+│   ├── test_smoke.py
+│   ├── test_crs.py            <span class="comment"># [new]</span>
+│   └── test_parcels.py        <span class="comment"># [new]</span>
+└── pyproject.toml             <span class="comment"># [now has] geopandas, shapely, pyproj, duckdb</span></div>
+      </div>
+    </section>
+
     <!-- RECAP -->
     <section id="recap">
       <div class="wrap">
