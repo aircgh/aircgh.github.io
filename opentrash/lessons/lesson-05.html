@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Lesson 5 — Packaging Basics · opentrash Course</title>
+  <title>Lesson 5 — GPS &amp; Caching · opentrash Course</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Lesson 5 of the opentrash course: turn notebook code into proper modules — dataclasses, type hints, and Protocols.">
+  <meta name="description" content="Lesson 5 of the opentrash course: pull GPS traces through a vendor-neutral adapter Protocol, with a cache-first layer.">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
       <div class="brand">
         <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
         <div class="brand-text">
-          <span class="brand-name">Lesson 5 · Packaging Basics</span>
+          <span class="brand-name">Lesson 5 · GPS &amp; Caching</span>
           <span class="brand-sub">opentrash course</span>
         </div>
       </div>
@@ -33,20 +33,20 @@
     <!-- HERO -->
     <section class="hero">
       <div class="wrap">
-        <span class="eyebrow">Lesson 5 of 12 · Packaging Basics</span>
-        <h1>Notebook code &rarr; library code: dataclasses, types, and Protocols.</h1>
+        <span class="eyebrow">Lesson 5 of 12 · GPS &amp; Caching</span>
+        <h1>Pull GPS traces &mdash; behind a Protocol, and cached so you pull once.</h1>
         <p class="lede">
-          A notebook is a great place to <em>figure something out</em>. It&rsquo;s a terrible
-          place to <em>keep</em> something that others depend on. In this lesson you&rsquo;ll add
-          two small pieces of new code that demonstrate the patterns every later lesson leans
-          on: a <strong>dataclass</strong> for structured values, <strong>type hints</strong>
-          everywhere, and a <strong>Protocol</strong> that lets the package swap implementations
-          without changing the consumers.
+          Now the package reaches out to the world. Every collection truck carries a GPS unit;
+          we pull its trace for a given day from the vendor&rsquo;s API. But we do it the
+          <em>right</em> way: behind a <strong>vendor-neutral adapter</strong> (so Geotab can be
+          swapped for anything later) and a <strong>cache-first layer</strong> (so a day already
+          pulled is read from disk, never re-fetched). You&rsquo;ll put the <code>VehicleId</code>
+          from Lesson 4 to work here.
         </p>
         <div class="hero-meta">
-          <span class="hero-chip"><strong>Time:</strong> ~60 min</span>
-          <span class="hero-chip"><strong>You'll touch:</strong> core/vehicle_ids · adapters/gps/base</span>
-          <span class="hero-chip"><strong>Result:</strong> the packaging idioms in place</span>
+          <span class="hero-chip"><strong>Time:</strong> ~75 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> adapters/gps/{base,geotab} · routeview/gps_cache</span>
+          <span class="hero-chip"><strong>Result:</strong> cached GPS pulls, one file per vehicle per day</span>
         </div>
       </div>
     </section>
@@ -56,20 +56,19 @@
       <div class="wrap">
         <h2><span class="sec-num">&middot;</span> Objective</h2>
         <p class="intro">
-          Build two small, real-code pieces that introduce the patterns the rest of the
-          package follows. You&rsquo;re not refactoring &mdash; you&rsquo;re adding new files that
-          will be used immediately in Lesson 6.
+          Build the GPS subsystem in three layers: a Protocol that defines the shape,
+          a concrete Geotab adapter that satisfies it, and a cache that makes repeated
+          pulls free.
         </p>
         <ul class="plain-list intro">
-          <li><code>core/vehicle_ids.py</code> &mdash; a <code>VehicleId</code> dataclass + classification table as data + an <code>is_our_fleet()</code> filter.</li>
-          <li><code>adapters/gps/base.py</code> &mdash; a <code>GPSAdapter</code> Protocol defining the canonical GPS data shape every vendor implementation must satisfy.</li>
-          <li>Tests for both: parse / classify / filter behavior, and structural-typing assertions for the Protocol.</li>
+          <li><code>adapters/gps/base.py</code> &mdash; the <code>GPSAdapter</code> Protocol + the canonical output schema every adapter returns.</li>
+          <li><code>adapters/gps/geotab.py</code> &mdash; <code>GeotabAdapter</code>: pulls LogRecords, converts local-day &harr; UTC, normalizes to the canonical schema. <strong>Credentials are arguments, never hardcoded.</strong></li>
+          <li><code>routeview/gps_cache.py</code> &mdash; cache-first retrieval, stored as <code>cache/YYYYMMDD/&lt;vehicle&gt;.parquet</code>.</li>
         </ul>
         <div class="callout">
-          The theme is <strong>vendor-independence and editable knobs</strong>. A real package
-          can&rsquo;t hardcode one GPS provider, and operational rules (which fleet prefixes mean
-          what) belong in a table you can edit &mdash; not in scattered <code>if</code>
-          statements. These two files demonstrate both.
+          Two patterns carry this lesson: <strong>the adapter Protocol</strong> (decouple the
+          package from any one GPS vendor) and <strong>cache-first I/O</strong> (never pay for
+          the same slow, rate-limited pull twice). Both are everywhere in production data work.
         </div>
       </div>
     </section>
@@ -79,9 +78,9 @@
       <div class="wrap">
         <h2><span class="sec-num">&middot;</span> Before you begin</h2>
         <ul class="plain-list">
-          <li>You&rsquo;ve completed <a class="inline" href="lesson-04.html">Lesson 4</a> &mdash; tonnage ingest works.</li>
-          <li>Environment active.</li>
-          <li>No new dependencies. Everything in this lesson uses the standard library plus pandas (which is already installed).</li>
+          <li>You&rsquo;ve completed <a class="inline" href="lesson-04.html">Lesson 4</a> &mdash; you have <code>VehicleId</code> and the fleet filter.</li>
+          <li>Install the optional GPS extras: <code>pip install -e ".[geotab]"</code> (pulls in <code>mygeotab</code> and <code>pytz</code>).</li>
+          <li>Geotab credentials, supplied as arguments or environment variables &mdash; <strong>never committed to the repo</strong>. If you ever pasted credentials into a script, rotate them.</li>
         </ul>
       </div>
     </section>
@@ -92,39 +91,8 @@
         <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
 
         <div class="step-block">
-          <h3><span class="step-pill">1</span> Why these patterns, briefly</h3>
-          <p>Three pieces of the standard library carry a lot of weight in a real package:</p>
-          <ul>
-            <li><strong>Dataclasses</strong> &mdash; structured values with fields, equality, immutability, and a clean <code>repr()</code> for free. Replaces &ldquo;a dict with the right keys&rdquo;.</li>
-            <li><strong>Type hints</strong> &mdash; <code>x: int</code>, <code>-&gt; str</code>, etc. Free documentation; your editor catches bugs before they run; ruff and mypy enforce them. Cost: minimal.</li>
-            <li><strong>Protocols</strong> (<code>typing.Protocol</code>) &mdash; an interface defined by <em>shape</em>, not inheritance. Any class with the right methods satisfies it. The right way to plan for &ldquo;swap this vendor for another&rdquo; without writing an abstract base class hierarchy.</li>
-          </ul>
-        </div>
-
-        <div class="step-block">
-          <h3><span class="step-pill">2</span> Write <code>core/vehicle_ids.py</code></h3>
-          <p>The vehicle ID is a short numeric code: the first three digits are a <em>fleet prefix</em> identifying the truck&rsquo;s kind (automated, manual, etc.); the rest is the per-truck number. Build it:</p>
-          <ul>
-            <li><strong>Classification table as data</strong> &mdash; a plain <code>FLEET_CLASSIFICATION</code> dict mapping prefix to kind. Edit one table when ops changes; the rest of the package picks it up.</li>
-            <li><code>VehicleId</code> dataclass with <code>frozen=True, slots=True</code>: immutable, hashable, memory-tight. Three fields: <code>raw</code>, <code>prefix</code>, <code>number</code>; a <code>kind</code> property derived from the table.</li>
-            <li><code>parse_vehicle_id(value)</code> &mdash; strip Excel noise (commas, trailing <code>.0</code>, whitespace), reject NA-token strings, return a <code>VehicleId</code> or <code>None</code>. <em>Returning <code>None</code> rather than raising is deliberate</em> &mdash; callers process columns of mixed-quality data and want to skip misses, not abort.</li>
-            <li><code>is_our_fleet(value, prefixes=OUR_FLEET_PREFIXES)</code> &mdash; the filter the tonnage cleaner needs. Pass your own tuple to widen or narrow.</li>
-          </ul>
-          <p class="note">This module is &ldquo;the file to edit first&rdquo; when adapting the package to another agency. Make that obvious in the module docstring &mdash; future you, or someone forking, will appreciate it.</p>
-        </div>
-
-        <div class="step-block">
-          <h3><span class="step-pill">3</span> Write <code>adapters/gps/base.py</code></h3>
-          <p>Today GPS comes from Geotab. Next year it might be Samsara, or a CSV dump from a partner. The package shouldn&rsquo;t care. Define the shape every adapter must satisfy:</p>
-          <pre><code>@runtime_checkable
-class GPSAdapter(Protocol):
-    def fetch(
-        self,
-        vehicle: str,
-        start_date: date | str,
-        end_date: date | str,
-    ) -&gt; pd.DataFrame: ...</code></pre>
-          <p>Plus a <strong>canonical output schema</strong> the Protocol promises: a tuple of <code>(column, dtype)</code> pairs documenting exactly what every adapter returns.</p>
+          <h3><span class="step-pill">1</span> Define the Protocol &mdash; <code>adapters/gps/base.py</code></h3>
+          <p>Start with the interface, not the implementation. A <code>GPSAdapter</code> Protocol with one method, <code>fetch(vehicle, start_date, end_date) -&gt; DataFrame</code>, plus a canonical schema the Protocol promises every adapter returns:</p>
           <pre><code>GPS_SCHEMA = (
     ("vehicle_id", "string"),
     ("dt_utc",     "datetime64[ns, UTC]"),
@@ -133,22 +101,50 @@ class GPSAdapter(Protocol):
     ("lon",        "float64"),
     ("speed_mph",  "float64"),
 )</code></pre>
-          <p class="note">Note <code>@runtime_checkable</code>: it enables <code>isinstance(x, GPSAdapter)</code> as a sanity check. Adapters don&rsquo;t subclass <code>GPSAdapter</code> &mdash; <em>structural typing</em> means any class with a matching <code>fetch</code> <strong>is</strong> a <code>GPSAdapter</code>.</p>
+          <p class="note">Defining the shape first means the cache and everything downstream can be written and tested against the <em>Protocol</em>, before any real vendor code exists.</p>
         </div>
 
         <div class="step-block">
-          <h3><span class="step-pill">4</span> Tests &mdash; including a structural-typing one</h3>
-          <p>For <code>vehicle_ids</code>: confirm parse handles all the Excel noise variants, the dataclass is immutable + hashable, classification looks up the right kind, and <code>is_our_fleet</code> filters correctly with both default and custom prefixes.</p>
-          <p>For <code>adapters/gps/base</code>: write a tiny fake adapter class with a matching <code>fetch</code> and assert <code>isinstance(fake, GPSAdapter)</code> is <code>True</code>. Write another class without one and assert it&rsquo;s <code>False</code>. That&rsquo;s the Protocol working.</p>
-          <p class="note">Testing a Protocol is mostly testing the constants and the structural check. The real test of a Protocol comes when the first implementation lands &mdash; in this case, the Geotab adapter in Lesson 6.</p>
+          <h3><span class="step-pill">2</span> Implement <code>adapters/gps/geotab.py</code></h3>
+          <p>A <code>GeotabAdapter</code> dataclass that satisfies the Protocol. Faithful to the operational pull, with the rough edges handled:</p>
+          <ul>
+            <li><strong>Credentials as arguments</strong> (<code>username</code>, <code>password</code>, <code>database</code>, <code>server</code>), falling back to <code>GEOTAB_*</code> environment variables. Validated <em>before</em> any network or vendor import &mdash; a clear error if missing.</li>
+            <li><strong>Local-day &harr; UTC conversion.</strong> The caller passes local (PT) calendar days; Geotab wants a UTC instant window. Convert the local-day bounds to UTC for the query, then filter results back to the local day (a UTC window spans two local dates at the edges).</li>
+            <li><strong>Lazy import</strong> of <code>mygeotab</code> inside <code>fetch</code> &mdash; the package doesn&rsquo;t hard-depend on a vendor SDK.</li>
+            <li><strong>Normalize to the canonical schema</strong>: speed km/h &rarr; mph, datetimes to UTC + local, the 6 columns, sorted by time. Returns the DataFrame &mdash; it does <em>not</em> write a file (that&rsquo;s the cache&rsquo;s job).</li>
+          </ul>
+          <p class="note">Splitting the row-normalization into a static helper (<code>_normalize_rows</code>) means you can unit-test the parsing/filtering logic without ever touching the live API.</p>
         </div>
 
         <div class="step-block">
-          <h3><span class="step-pill">5</span> Run + commit</h3>
-          <pre><code>ruff check .
+          <h3><span class="step-pill">3</span> Build the cache &mdash; <code>routeview/gps_cache.py</code></h3>
+          <p>GPS pulls are slow, rate-limited, and historical data never changes &mdash; the perfect case for a cache. Lay it out by day, one file per vehicle:</p>
+          <pre><code>cache/
+  20250818/
+    815421.parquet
+    832111.parquet
+  20250819/
+    815421.parquet</code></pre>
+          <p>Two functions:</p>
+          <ul>
+            <li><code>get_gps_day(adapter, vehicle, day, cache_dir)</code> &mdash; cache hit &rarr; read parquet; cache miss &rarr; <code>adapter.fetch(...)</code>, write, return. A <code>refresh=True</code> flag forces a re-pull.</li>
+            <li><code>get_gps_fleet_day(adapter, vehicles, day, cache_dir)</code> &mdash; loop a fleet list, cache each independently, concatenate. A partially-cached fleet only fetches the missing trucks.</li>
+          </ul>
+          <p class="note">The cache takes <em>any</em> <code>GPSAdapter</code> &mdash; it never mentions Geotab. Swap vendors and the cache code doesn&rsquo;t change. That&rsquo;s the Protocol paying off.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Test without the network</h3>
+          <p>The live API can&rsquo;t be in the test suite. Test around it:</p>
+          <ul>
+            <li><strong>Geotab</strong>: the pure helpers (date coercion, km/h&rarr;mph), credential validation (missing creds raise), and <code>_normalize_rows</code> (raw pings &rarr; canonical schema, local-day filter) &mdash; all without a real call. Plus <code>isinstance(adapter, GPSAdapter)</code>.</li>
+            <li><strong>Cache</strong>: a stub adapter that returns a canned frame and counts calls. Prove a miss fetches + writes, a hit reads with <em>no</em> second call, <code>refresh</code> re-fetches, and the on-disk layout is <code>YYYYMMDD/&lt;vehicle&gt;.parquet</code>.</li>
+          </ul>
+          <pre><code>pip install -e ".[dev]"
+ruff check .
 pytest -v
 git add .
-git commit -m "Lesson 5: packaging basics — VehicleId dataclass + GPS adapter Protocol"
+git commit -m "Lesson 5: GPS adapter Protocol, Geotab impl, cache-first layer"
 git push origin main</code></pre>
         </div>
       </div>
@@ -160,40 +156,31 @@ git push origin main</code></pre>
         <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
         <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
         <div class="tree"><span class="dir">opentrash/</span>
-├── <span class="dir">.github/workflows/</span>
-├── <span class="dir">docs/</span>
 ├── <span class="dir">opentrash/</span>
-│   ├── __init__.py
-│   ├── cli.py
 │   ├── <span class="dir">adapters/</span>
-│   │   ├── __init__.py
 │   │   └── <span class="dir">gps/</span>
 │   │       ├── __init__.py
-│   │       └── base.py            <span class="comment"># [new] GPSAdapter Protocol + canonical schema</span>
+│   │       ├── base.py            <span class="comment"># [new] GPSAdapter Protocol + canonical schema</span>
+│   │       └── geotab.py          <span class="comment"># [new] GeotabAdapter (creds via args/env)</span>
 │   ├── <span class="dir">core/</span>
 │   │   ├── crs.py
 │   │   ├── duckdb_session.py
-│   │   └── vehicle_ids.py         <span class="comment"># [new] VehicleId dataclass + is_our_fleet</span>
+│   │   └── vehicle_ids.py
 │   ├── <span class="dir">patterns/</span>
 │   ├── <span class="dir">prep/</span>
 │   │   ├── parcels.py
 │   │   └── sites.py
 │   ├── <span class="dir">routeview/</span>
+│   │   ├── __init__.py
+│   │   └── gps_cache.py           <span class="comment"># [new] cache-first: YYYYMMDD/&lt;vehicle&gt;.parquet</span>
 │   └── <span class="dir">tonnage/</span>
-│       ├── registry.py
-│       ├── cleaners.py
-│       ├── keys.py
-│       ├── upsert.py
-│       └── pipeline.py
+│       └── (registry, cleaners, keys, upsert, pipeline)
 ├── <span class="dir">tests/</span>
-│   ├── test_smoke.py
-│   ├── test_crs.py
-│   ├── test_parcels.py
-│   ├── test_sites.py
-│   ├── test_tonnage.py
-│   ├── test_vehicle_ids.py        <span class="comment"># [new]</span>
-│   └── test_gps_adapter_base.py   <span class="comment"># [new]</span>
-└── pyproject.toml                 <span class="comment"># no new deps this lesson</span></div>
+│   ├── ... (crs, parcels, sites, tonnage, vehicle_ids)
+│   ├── test_gps_adapter_base.py   <span class="comment"># Protocol conformance</span>
+│   ├── test_geotab_adapter.py     <span class="comment"># [new] helpers, creds, normalization</span>
+│   └── test_gps_cache.py          <span class="comment"># [new] cache-first behavior</span>
+└── pyproject.toml                 <span class="comment"># [now has] optional [geotab] extra: mygeotab, pytz</span></div>
       </div>
     </section>
 
@@ -202,16 +189,15 @@ git push origin main</code></pre>
       <div class="wrap">
         <h2><span class="sec-num">&middot;</span> What you built</h2>
         <ul class="plain-list">
-          <li>A <strong>dataclass</strong> (<code>VehicleId</code>) for structured, immutable, hashable values.</li>
-          <li>A <strong>rules-as-data</strong> classification table you edit when fleet ranges change.</li>
-          <li>A <strong>Protocol</strong> defining the GPS adapter shape, with a canonical output schema.</li>
-          <li>Tests confirming structural typing actually works.</li>
+          <li>A <strong>vendor-neutral GPS Protocol</strong> &mdash; the package depends on a shape, not a vendor.</li>
+          <li>A <strong>Geotab adapter</strong> with safe credential handling and correct local/UTC time logic.</li>
+          <li>A <strong>cache-first layer</strong> storing one parquet per vehicle per day &mdash; pulls become free on repeat.</li>
+          <li>Tests that fully exercise the logic <strong>without touching the live API</strong>.</li>
         </ul>
         <div class="callout">
-          The package now has the idioms it&rsquo;ll lean on going forward. Lesson 6 implements
-          the first real GPS adapter (Geotab) against the Protocol you just defined &mdash; and
-          you&rsquo;ll see why having the canonical schema and an editable knob like
-          <code>is_our_fleet</code> matters in practice.
+          You can now assemble a day&rsquo;s GPS for a whole fleet, fast, from cache. The next
+          stretch of the course turns these traces into insight: where trucks stopped, which
+          parcels they served, and the weekly patterns hidden in the pings.
         </div>
       </div>
     </section>
@@ -222,9 +208,9 @@ git push origin main</code></pre>
         <h2><span class="sec-num">&middot;</span> Companion resources</h2>
         <p class="intro">Optional, for going deeper.</p>
         <ul class="plain-list">
-          <li><strong>Python docs:</strong> <a class="inline" href="https://docs.python.org/3/library/dataclasses.html" target="_blank" rel="noopener">dataclasses</a> &mdash; the canonical reference.</li>
-          <li><strong>Python docs:</strong> <a class="inline" href="https://docs.python.org/3/library/typing.html#typing.Protocol" target="_blank" rel="noopener">typing.Protocol</a> &mdash; structural subtyping.</li>
-          <li><strong>PEP 544:</strong> <a class="inline" href="https://peps.python.org/pep-0544/" target="_blank" rel="noopener">Protocols: Structural subtyping (static duck typing)</a> &mdash; the motivation, with examples.</li>
+          <li><strong>typing.Protocol:</strong> <a class="inline" href="https://docs.python.org/3/library/typing.html#typing.Protocol" target="_blank" rel="noopener">structural subtyping</a> &mdash; how adapters conform without inheritance.</li>
+          <li><strong>Time zones in pandas:</strong> <a class="inline" href="https://pandas.pydata.org/docs/user_guide/timeseries.html#time-zone-handling" target="_blank" rel="noopener">tz-aware timestamps</a> &mdash; the local/UTC dance.</li>
+          <li><strong>Caching:</strong> the general idea &mdash; trade disk for time on expensive, repeatable, immutable work.</li>
         </ul>
       </div>
     </section>
@@ -234,9 +220,9 @@ git push origin main</code></pre>
       <div class="wrap">
         <h2><span class="sec-num">&middot;</span> Next lesson</h2>
         <p class="intro">
-          <strong>Lesson 6 &mdash; GPS &amp; spatial joins:</strong> implement
-          <code>adapters/gps/geotab.py</code> against the Protocol from this lesson, build a
-          GPS cache, and do the first real spatial join (GPS pings &harr; parcels).
+          <strong>Lesson 6 &mdash; Operational analytics:</strong> turn raw pings into meaning
+          &mdash; distinguishing motion from activity, and segmenting a shift into its working
+          parts.
         </p>
         <div class="hero-buttons">
           <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
