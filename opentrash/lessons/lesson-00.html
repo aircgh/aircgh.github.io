@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 0 — From Notebook to Package · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 0 of the opentrash course: a gentle on-ramp from notebook code to structured Python packages — functions, classes, and the rules of engineering.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 0 · From Notebook to Package</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#why">Why</a>
+        <a href="#demo">Demo</a>
+        <a href="#classes">Classes</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 0 of 12 · Optional on-ramp</span>
+        <h1>From notebook to package: you already know how, you just follow some rules now.</h1>
+        <p class="lede">
+          Most of this course builds a real Python package, step by step. But if you live in
+          Jupyter notebooks and haven&rsquo;t done much &ldquo;software engineering,&rdquo; the
+          jump can feel intimidating. It shouldn&rsquo;t. This short lesson shows that the gap
+          between &ldquo;code that works in a notebook&rdquo; and &ldquo;code that ships as a
+          package&rdquo; is mostly a handful of conventions &mdash; not a different skill.
+        </p>
+        <div class="callout">
+          <strong>This lesson is optional.</strong> If you&rsquo;re already comfortable with
+          functions, modules, classes, and packaging, skip straight to
+          <a class="inline" href="lesson-01.html">Lesson 1</a>. If not, spend 30 minutes here
+          first &mdash; the rest of the course will feel much smoother. This is an on-ramp, not
+          a deep dive; pointers to go deeper are at the end.
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY -->
+    <section id="why">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What actually changes</h2>
+        <p class="intro">
+          A notebook is brilliant for <em>figuring things out</em>: run a cell, look at the
+          output, tweak, repeat. But notebooks are a poor place to <em>keep</em> code others
+          depend on &mdash; cells run out of order, state lingers, and there&rsquo;s no clean way
+          to import &ldquo;that function from cell 12&rdquo; into another project.
+        </p>
+        <p class="intro">
+          Turning notebook code into package code mostly means applying a few rules:
+        </p>
+        <ul class="plain-list intro">
+          <li>Put related functions in a <strong>module</strong> (a <code>.py</code> file) so they can be imported anywhere.</li>
+          <li>Give functions <strong>clear inputs and outputs</strong> &mdash; no reliance on leftover notebook state.</li>
+          <li>Add <strong>type hints</strong> and a <strong>docstring</strong> so the function documents itself.</li>
+          <li>Follow <strong>PEP 8</strong> (Python&rsquo;s style guide) &mdash; a linter like <code>ruff</code> does this for you automatically.</li>
+          <li>Write a <strong>test</strong> so you know it still works after you change it.</li>
+        </ul>
+        <p class="intro">That&rsquo;s most of it. Let&rsquo;s see it on a real example.</p>
+      </div>
+    </section>
+
+    <!-- DEMO -->
+    <section id="demo">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Demo: the same logic, two ways</h2>
+        <p class="intro">
+          We&rsquo;ll use a tiny piece of real work from later in the course: cleaning a
+          &ldquo;route&rdquo; field from the city&rsquo;s sites export. The raw values are messy
+          &mdash; <code>"2208"</code>, <code>" 81 "</code>, <code>"abc12"</code>, floats like
+          <code>"2208.0"</code>. We want the last 4 digits, zero-padded. Run each version
+          yourself as you read.
+        </p>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> How it looks in a notebook</h3>
+          <p>In a notebook you&rsquo;d probably just write the logic inline in a cell and eyeball the result:</p>
+          <pre><code># notebook cell — exploratory, runs top to bottom
+import pandas as pd
+
+s = pd.Series(["2208", " 81 ", "abc12", "2208.0", ""])
+
+# strip to digits, take last 4, pad to width 4
+clean = (
+    s.astype(str).str.strip()
+     .str.replace(r"\.0$", "", regex=True)
+     .str.replace(r"\D+", "", regex=True)
+     .replace("", pd.NA)
+     .str[-4:].str.zfill(4)
+)
+clean   # look at the output</code></pre>
+          <p>This is <em>fine</em> for figuring out the logic. The problem: it only exists in this notebook, in this cell, next to a specific variable <code>s</code>. You can&rsquo;t reuse it elsewhere without copy-pasting, and if you change it, nothing tells you whether you broke it.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> The same logic as a package function</h3>
+          <p>Now lift it into a named function in a module &mdash; this is essentially what <code>clean_route4</code> in <code>prep/sites.py</code> is:</p>
+          <pre><code># prep/sites.py — reusable, documented, testable
+import pandas as pd
+
+
+def clean_route4(series: pd.Series) -&gt; pd.Series:
+    """Normalize a raw route field to its last 4 digits, zero-padded.
+
+    Strips whitespace and non-digits; empty results become NA.
+    """
+    s = series.astype(str).str.strip()
+    s = s.str.replace(r"\.0$", "", regex=True)   # drop trailing ".0" from floats
+    s = s.str.replace(r"\D+", "", regex=True)    # keep digits only
+    s = s.replace("", pd.NA)
+    return s.str[-4:].str.zfill(4)</code></pre>
+          <p>What changed, concretely:</p>
+          <ul>
+            <li>It has a <strong>name</strong> and lives in a file &mdash; <code>from opentrash.prep.sites import clean_route4</code> works from anywhere.</li>
+            <li>It takes an <strong>explicit input</strong> (<code>series</code>) and <strong>returns</strong> a value &mdash; no dependence on a notebook variable.</li>
+            <li>The <strong>type hint</strong> (<code>series: pd.Series -&gt; pd.Series</code>) says what goes in and out.</li>
+            <li>The <strong>docstring</strong> explains it to the next person (often future you).</li>
+          </ul>
+          <p class="note">The actual computation is identical. You didn&rsquo;t learn a new algorithm &mdash; you wrapped the one you had in a few conventions.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> And a test, so it stays correct</h3>
+          <p>The final habit: a small test pinning the behavior. Now any future change that breaks it gets caught instantly.</p>
+          <pre><code># tests/test_sites.py
+from opentrash.prep.sites import clean_route4
+import pandas as pd
+
+def test_clean_route4():
+    out = clean_route4(pd.Series(["2208", "abc12", "1234567"]))
+    assert out.iloc[0] == "2208"
+    assert out.iloc[1] == "0012"   # digits only, padded
+    assert out.iloc[2] == "4567"   # last 4</code></pre>
+          <p>Run it with <code>pytest</code>. Green means it works; red means you broke something. That feedback loop is the whole point of structuring code this way.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLASSES -->
+    <section id="classes">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> A word on classes (just enough)</h2>
+        <p class="intro">
+          You&rsquo;ll see <strong>classes</strong> here and there in the course. You don&rsquo;t
+          need to master object-oriented programming to follow along, but here&rsquo;s the
+          one-paragraph version so nothing feels foreign.
+        </p>
+        <p class="intro">
+          A function is a verb &mdash; it <em>does</em> something. A class is a noun &mdash; it
+          <em>bundles related data (and the operations on it) into one named thing</em>. When you
+          have a value with several parts that travel together, a class (or its lightweight
+          cousin, a <strong>dataclass</strong>) is cleaner than juggling a loose dictionary.
+        </p>
+        <div class="step-block">
+          <h3><span class="step-pill">&middot;</span> Example: a vehicle ID</h3>
+          <p>Later, a vehicle ID like <code>"815001"</code> needs to be split into a fleet prefix (<code>"815"</code>) and a number (<code>"001"</code>), and classified (automated vs manual). Instead of passing three loose variables around, we bundle them:</p>
+          <pre><code>from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class VehicleId:
+    raw: str        # "815001"
+    prefix: str     # "815"
+    number: str     # "001"
+
+v = VehicleId(raw="815001", prefix="815", number="001")
+v.prefix     # "815"  — access fields by name</code></pre>
+          <p>A <code>@dataclass</code> writes the boilerplate for you (constructor, equality, a readable <code>repr</code>). <code>frozen=True</code> makes it immutable &mdash; you can&rsquo;t accidentally change it after creation. That&rsquo;s genuinely all you need to know to read the code in this course; we build the real <code>VehicleId</code> in Lesson 4 and use it in the GPS lesson.</p>
+        </div>
+        <p class="intro">
+          The same goes for a <strong>Protocol</strong> (an interface that says &ldquo;any class
+          with these methods counts&rdquo;) &mdash; we&rsquo;ll meet one when we make GPS data
+          vendor-independent. We&rsquo;ll explain it in context when it shows up. No need to
+          front-load the theory.
+        </p>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> The takeaway</h2>
+        <ul class="plain-list">
+          <li>Notebook code and package code run the <strong>same logic</strong> &mdash; the difference is a few conventions: modules, clear inputs/outputs, type hints, docstrings, style, tests.</li>
+          <li>You don&rsquo;t need deep OOP to follow this course. Functions carry most of the weight; classes and dataclasses show up only where they genuinely help.</li>
+          <li>The tooling (<code>ruff</code> for style, <code>pytest</code> for tests) does the tedious enforcement so you can focus on the logic.</li>
+        </ul>
+        <div class="callout">
+          This is the only lesson that&rsquo;s purely about <em>how</em> we write code rather than
+          <em>what</em> we&rsquo;re building. From Lesson 1 on, every lesson adds real
+          functionality to the package &mdash; and you&rsquo;ll be applying these conventions
+          without thinking about them.
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Go deeper (optional)</h2>
+        <p class="intro">Software engineering is a whole craft; this course only scratches the surface and stays focused on the geospatial work. If you want to build the foundations properly:</p>
+        <ul class="plain-list">
+          <li><strong>PEP 8:</strong> <a class="inline" href="https://peps.python.org/pep-0008/" target="_blank" rel="noopener">the Python style guide</a> &mdash; the conventions <code>ruff</code> enforces.</li>
+          <li><strong>Python docs:</strong> <a class="inline" href="https://docs.python.org/3/tutorial/modules.html" target="_blank" rel="noopener">Modules</a> and <a class="inline" href="https://docs.python.org/3/tutorial/classes.html" target="_blank" rel="noopener">Classes</a> &mdash; the official tutorial.</li>
+          <li><strong>Dataclasses:</strong> <a class="inline" href="https://docs.python.org/3/library/dataclasses.html" target="_blank" rel="noopener">the reference</a>, with examples.</li>
+          <li><strong>Testing:</strong> <a class="inline" href="https://docs.pytest.org/" target="_blank" rel="noopener">pytest</a> &mdash; getting started with tests.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 1 &mdash; Orientation:</strong> set up the repo and environment, and
+          meet the package skeleton you&rsquo;ll fill in over the rest of the course.
+        </p>
+        <div class="hero-buttons">
+          <a href="lesson-01.html" class="btn btn-primary">Start Lesson 1 &rarr;</a>
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;·&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;·&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -45,7 +45,7 @@
         </p>
         <div class="hero-meta">
           <span class="hero-chip"><strong>Time:</strong> ~75 min</span>
-          <span class="hero-chip"><strong>You'll touch:</strong> tonnage/{registry,cleaners,keys,upsert,pipeline}</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> tonnage/* · core/vehicle_ids</span>
           <span class="hero-chip"><strong>Result:</strong> idempotent annual parquet store</span>
         </div>
       </div>
@@ -154,8 +154,20 @@ event_dt_minute || fleet || landfill || material || tons(.3) || tran#</code></pr
         </div>
 
         <div class="step-block">
-          <h3><span class="step-pill">7</span> Test against synthetic Excel files</h3>
-          <p>Add <code>tests/test_tonnage.py</code>. Cover filename parsing, the canonical-header resolver, key stability (identical inputs &rarr; identical keys; trailing-digit jitter does <em>not</em> change keys), upsert idempotency, and a full end-to-end run that writes a few synthetic <code>.xlsx</code> files to a temp folder and runs the pipeline twice &mdash; the second run must add zero new rows.</p>
+          <h3><span class="step-pill">7</span> Add <code>core/vehicle_ids.py</code> &mdash; the fleet filter as data</h3>
+          <p>The RAD cleaner filters to <em>our</em> trucks by fleet prefix. Rather than hardcode that rule, put it in <code>core/vehicle_ids.py</code> where it belongs as reusable prep:</p>
+          <ul>
+            <li>A <code>FLEET_CLASSIFICATION</code> dict (prefix &rarr; <code>AUTO</code>/<code>MANUAL</code>/<code>OTHER</code>) &mdash; an editable knob, not scattered <code>if</code>s.</li>
+            <li>A <code>VehicleId</code> dataclass (<code>raw</code>, <code>prefix</code>, <code>number</code>) &mdash; structured, immutable.</li>
+            <li><code>parse_vehicle_id()</code>, <code>classify_fleet()</code>, and <code>is_our_fleet()</code> &mdash; the last is what the tonnage cleaner uses to keep only city trucks.</li>
+          </ul>
+          <p>Point <code>tonnage/cleaners.py</code>&rsquo;s <code>DEFAULT_FLEET_PREFIXES</code> at <code>core.vehicle_ids.OUR_FLEET_PREFIXES</code> so there&rsquo;s a single source of truth for fleet rules. We&rsquo;ll reuse the same <code>VehicleId</code> when we pull GPS in the next lesson.</p>
+          <p class="note">If you haven&rsquo;t seen dataclasses before, <a class="inline" href="lesson-00.html">Lesson 0</a> has a gentle intro. This is a good first real use of one.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">8</span> Test against synthetic Excel files</h3>
+          <p>Add <code>tests/test_tonnage.py</code> and <code>tests/test_vehicle_ids.py</code>. Cover filename parsing, the canonical-header resolver, key stability (identical inputs &rarr; identical keys; trailing-digit jitter does <em>not</em> change keys), upsert idempotency, a full end-to-end run that runs the pipeline twice (second run adds zero rows), and vehicle-ID parsing/classification/<code>is_our_fleet</code>.</p>
           <pre><code>pytest -v
 git add .
 git commit -m "Lesson 4: tonnage ingest pipeline with idempotent upsert"
@@ -178,7 +190,8 @@ git push origin main</code></pre>
 │   ├── <span class="dir">adapters/gps/</span>
 │   ├── <span class="dir">core/</span>
 │   │   ├── crs.py
-│   │   └── duckdb_session.py
+│   │   ├── duckdb_session.py
+│   │   └── vehicle_ids.py     <span class="comment"># [new] VehicleId dataclass + is_our_fleet</span>
 │   ├── <span class="dir">patterns/</span>
 │   ├── <span class="dir">prep/</span>
 │   │   ├── parcels.py
@@ -187,7 +200,7 @@ git push origin main</code></pre>
 │   └── <span class="dir">tonnage/</span>
 │       ├── __init__.py
 │       ├── registry.py        <span class="comment"># [new] scan, detect source, parse date</span>
-│       ├── cleaners.py        <span class="comment"># [new] ARTS + RAD cleaners</span>
+│       ├── cleaners.py        <span class="comment"># [new] ARTS + RAD cleaners (uses is_our_fleet)</span>
 │       ├── keys.py            <span class="comment"># [new] sha1 record_key</span>
 │       ├── upsert.py          <span class="comment"># [new] year-partitioned upsert</span>
 │       └── pipeline.py        <span class="comment"># [new] run_ingest() orchestrator</span>
@@ -196,7 +209,8 @@ git push origin main</code></pre>
 │   ├── test_crs.py
 │   ├── test_parcels.py
 │   ├── test_sites.py
-│   └── test_tonnage.py        <span class="comment"># [new]</span>
+│   ├── test_tonnage.py        <span class="comment"># [new]</span>
+│   └── test_vehicle_ids.py    <span class="comment"># [new]</span>
 └── pyproject.toml             <span class="comment"># [now has] + openpyxl</span></div>
       </div>
     </section>
@@ -213,10 +227,10 @@ git push origin main</code></pre>
           <li>A <strong>full pipeline</strong> with per-file error capture and an audit registry written alongside the data.</li>
         </ul>
         <div class="callout">
-          You now have a durable tonnage store that grows as new drops arrive. Lesson 5 turns
-          the lessons-learned-so-far into <em>real Python packaging</em>: turning ad-hoc
-          notebook code into proper modules, dataclasses, and protocols &mdash; the bridge
-          between &ldquo;works in Jupyter&rdquo; and &ldquo;works as a library.&rdquo;
+          You now have a durable tonnage store that grows as new drops arrive, plus a clean
+          <code>VehicleId</code> abstraction and fleet filter. Next lesson puts the
+          <code>VehicleId</code> to work: pulling GPS traces for those vehicles and joining them
+          to parcels in space.
         </div>
       </div>
     </section>
@@ -239,8 +253,9 @@ git push origin main</code></pre>
       <div class="wrap">
         <h2><span class="sec-num">&middot;</span> Next lesson</h2>
         <p class="intro">
-          <strong>Lesson 5 &mdash; Packaging basics:</strong> notebook code &rarr; modules,
-          dataclasses, type hints, protocols. The bridge from prototype to library.
+          <strong>Lesson 5 &mdash; GPS &amp; spatial joins:</strong> implement a Geotab adapter
+          behind a vendor-neutral Protocol, cache the pulls, and do the first real spatial join
+          (GPS pings &harr; parcels).
         </p>
         <div class="hero-buttons">
           <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
