@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 6 — Indexing &amp; Postgres · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 6 of the opentrash course: build the route + parcel + GPS indexes that make spatial queries cheap, and add the Postgres streaming adapter.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 6 · Indexing &amp; Postgres</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 6 of 12 · Indexing &amp; Postgres</span>
+        <h1>Small indexes to find big data &mdash; the central theme.</h1>
+        <p class="lede">
+          You can&rsquo;t spatial-join hundreds of millions of GPS pings against a quarter
+          million parcels by brute force &mdash; not on a laptop, not in a cloud
+          notebook, not anywhere. The trick is <strong>indexing</strong>: a few small
+          summary tables that let you find which big files to open in milliseconds.
+          This lesson builds those indexes, and adds the Postgres adapter that&rsquo;s
+          the production GPS source.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~90 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> adapters/gps/postgres &middot; prep/{static_layers,parcels_wkb} &middot; routeview/{gps_indexes,master_index}</span>
+          <span class="hero-chip"><strong>Result:</strong> &ldquo;files for route X, window Y&rdquo; in milliseconds</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Build four small indexes and one streaming adapter. Together they turn an
+          intractable spatial-join into a series of fast lookups, and connect the
+          package to the production data source.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>adapters/gps/postgres.py</code> &mdash; a second <code>GPSAdapter</code> for the streaming Postgres database (production data path).</li>
+          <li><code>prep/static_layers.py</code> &mdash; route polygons (AUTO + HTC) &rarr; buffered 4326 bboxes.</li>
+          <li><code>prep/parcels_wkb.py</code> &mdash; parcels with WKB geometry + per-route assignment + bbox columns.</li>
+          <li><code>routeview/gps_indexes.py</code> &mdash; per-day vehicle-day summaries (one row per vehicle per day).</li>
+          <li><code>routeview/master_index.py</code> &mdash; the STAC-like lookup that joins them: vehicle-day bbox &harr; route bbox.</li>
+        </ul>
+        <div class="callout">
+          The Lesson 5 Geotab adapter and this lesson&rsquo;s Postgres adapter implement
+          the <strong>same Protocol</strong>. They land pings in the same cache layout,
+          and downstream code consumes them identically. That&rsquo;s the Protocol paying
+          off &mdash; swapping vendors changes one line.
+        </div>
+      </div>
+    </section>
+
+    <!-- PREREQUISITES -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Before you begin</h2>
+        <ul class="plain-list">
+          <li>You&rsquo;ve completed <a class="inline" href="lesson-05.html">Lesson 5</a> &mdash; the GPS Protocol and cache are in place.</li>
+          <li>Install the Postgres extra: <code>pip install -e ".[postgres]"</code> (sqlalchemy + psycopg2). Skip it if you only have Geotab; the rest of the lesson runs without it.</li>
+          <li>For the indexing pieces you need <em>some</em> parcels and route polygons. The tests use tiny synthetic geometries, so you can build and verify everything before bringing in real data.</li>
+          <li><strong>Heads up &mdash; cache directory format:</strong> Lesson 5 used <code>YYYYMMDD</code>; Lesson 6 standardizes on <code>YYYY-MM-DD</code> to match real ops directories and what the Postgres adapter writes. The Lesson 5 module is updated to match.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Add the Postgres adapter &mdash; <code>adapters/gps/postgres.py</code></h3>
+          <p>Production GPS comes from a Postgres database where a streaming adapter writes pings every ~10 seconds. A <code>PostgresAdapter</code> dataclass implementing <code>GPSAdapter</code>:</p>
+          <ul>
+            <li>Connection URL passed as an argument (or <code>OPENTRASH_PG_URL</code> environment variable) &mdash; <strong>never hardcoded</strong>.</li>
+            <li>Local-day window &rarr; UTC half-open range; queries <code>LogRecords2</code> joined to <code>Devices2</code> for vehicle names.</li>
+            <li><strong>Server-side chunked fetch</strong> (<code>stream_results=True</code>, <code>fetchmany(chunksize)</code>) so memory stays flat on big windows.</li>
+            <li>Normalizes to the canonical 6-column schema (speed km/h &rarr; mph, datetimes to UTC + Pacific).</li>
+          </ul>
+          <p class="note">Override <code>devices_sql</code> / <code>pings_sql</code> on the constructor if your schema differs. The default queries match the Geotab streaming integration shape.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Route polygons &rarr; bboxes &mdash; <code>prep/static_layers.py</code></h3>
+          <p>Routes come in two flavors in this operation:</p>
+          <ul>
+            <li><strong>AUTO routes</strong> &mdash; large engulfing polygons (~1,200+ parcels each). A ping anywhere on a served street falls inside the polygon. No buffer needed.</li>
+            <li><strong>HTC routes</strong> (Hard-to-Collect / manual) &mdash; the polygons are <em>parcel-shape copies</em>, not engulfing. A ping in the street next to a parcel can fall <em>outside</em>. We compensate by buffering HTC by <strong>150 ft in the working CRS</strong> (default knob) before extracting bboxes.</li>
+          </ul>
+          <p><code>build_route_index(auto_path, htc_path, htc_buffer_ft=150)</code> handles both: AUTO takes precedence (any route in both layers uses the AUTO geometry), HTC-only routes get the buffer, all reduced to one DataFrame of <code>(route_id, rte_min_lon, rte_min_lat, rte_max_lon, rte_max_lat)</code> in EPSG:4326.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Parcels with WKB &mdash; <code>prep/parcels_wkb.py</code></h3>
+          <p>The refined-hits builder (next lesson) needs three things from each parcel: a fast bbox prefilter, the exact polygon for nearest-point distance, and the route assignments. Pack them into a single parquet:</p>
+          <pre><code>APN  UNITQTY  route_ref  route_org  route_rec
+min_lon  min_lat  max_lon  max_lat
+geom_wkb     # the polygon as WKB bytes</code></pre>
+          <p>WKB lets downstream tools open the file with plain <code>read_parquet</code> (no geo dependencies) and only pay the Shapely cost for the parcels they actually need.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Per-day vehicle-day indexes &mdash; <code>routeview/gps_indexes.py</code></h3>
+          <p>For every day in the cache, summarize each vehicle&rsquo;s parquet into one row: bounding box, time range, row count, file path. The summary is <em>tiny</em> &mdash; a year of pings becomes ~365 small index files of ~hundreds of rows each.</p>
+          <pre><code>cache/
+  2026-01-18/
+    815421.parquet            # raw pings, big
+    832111.parquet
+  indexes/
+    2026-01-18/
+      vehicle_day_index.parquet   # one row per vehicle, small</code></pre>
+          <p><code>build_all_day_indexes(cache_dir)</code> is idempotent &mdash; existing day-indexes are skipped unless you pass <code>overwrite=True</code>. Run it after each Postgres pull and the indexes always reflect what&rsquo;s on disk.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> The master index &mdash; <code>routeview/master_index.py</code></h3>
+          <p>This is the payoff. Bbox-overlap join between vehicle-day summaries and route bboxes, computed in DuckDB:</p>
+          <pre><code>SELECT v.*, r.route_id, r.rte_*
+FROM vehicle_day_indexes v
+JOIN route_bboxes r
+  ON NOT (v.lon_max &lt; r.rte_min_lon OR v.lon_min &gt; r.rte_max_lon
+       OR v.lat_max &lt; r.rte_min_lat OR v.lat_min &gt; r.rte_max_lat)</code></pre>
+          <p>Result: one row per <code>(day, vehicle, route)</code> triple where bboxes intersect &mdash; typically tens of millions of rows but well under 200 MB on disk. Now <em>"which GPS files touch route 22064 in Jan 2026"</em> is a DataFrame filter that returns in milliseconds.</p>
+          <p class="note">A vehicle can match many routes (it drove through several); a route matches many vehicle-days (the fleet covers it over time). One bbox compare, millions of pings effectively narrowed without ever opening them.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Test everything, then commit</h3>
+          <p>Tests use synthetic geometries and a fake DB result &mdash; no live Postgres needed. Verify the Postgres adapter&rsquo;s pure helpers and Protocol conformance, the bbox math (dissolve-by-route, buffer in feet, edge-buffer in degrees), the parcels-WKB round-trip, the day-index summarizer&rsquo;s idempotency, and the master-index join correctness.</p>
+          <pre><code>pip install -e ".[dev,postgres]"
+ruff check .
+pytest -v
+git add .
+git commit -m "Lesson 6: indexing infrastructure + Postgres adapter"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/</span>
+│   │   └── <span class="dir">gps/</span>
+│   │       ├── base.py
+│   │       ├── geotab.py
+│   │       └── postgres.py        <span class="comment"># [new] streaming Postgres adapter</span>
+│   ├── <span class="dir">core/</span>
+│   │   └── (crs, duckdb_session, vehicle_ids)
+│   ├── <span class="dir">patterns/</span>
+│   ├── <span class="dir">prep/</span>
+│   │   ├── parcels.py
+│   │   ├── sites.py
+│   │   ├── static_layers.py       <span class="comment"># [new] route polygons -&gt; 4326 bboxes</span>
+│   │   └── parcels_wkb.py         <span class="comment"># [new] parcels + WKB + route + bbox</span>
+│   ├── <span class="dir">routeview/</span>
+│   │   ├── gps_cache.py           <span class="comment"># [updated] YYYY-MM-DD dirs (was YYYYMMDD)</span>
+│   │   ├── gps_indexes.py         <span class="comment"># [new] per-day vehicle-day summaries</span>
+│   │   └── master_index.py        <span class="comment"># [new] STAC-like lookup table</span>
+│   └── <span class="dir">tonnage/</span>
+│       └── (registry, cleaners, keys, upsert, pipeline)
+├── <span class="dir">tests/</span>
+│   ├── ... (existing)
+│   ├── test_postgres_adapter.py   <span class="comment"># [new]</span>
+│   ├── test_static_layers.py      <span class="comment"># [new]</span>
+│   ├── test_parcels_wkb.py        <span class="comment"># [new]</span>
+│   ├── test_gps_indexes.py        <span class="comment"># [new]</span>
+│   └── test_master_index.py       <span class="comment"># [new]</span>
+└── pyproject.toml                 <span class="comment"># [now has] optional [postgres] extra</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>A <strong>Postgres adapter</strong> that satisfies the same Protocol as Geotab &mdash; production GPS streams in cleanly.</li>
+          <li><strong>Route bboxes</strong> with the AUTO vs HTC buffer convention captured as a documented knob.</li>
+          <li><strong>Parcels with WKB</strong> &mdash; one parquet that downstream tools open quickly and only Shapely-parse when needed.</li>
+          <li><strong>Per-day vehicle-day summaries</strong> that turn a cache full of big files into a queryable index.</li>
+          <li>A <strong>master GPS index</strong> that makes &ldquo;which files for route X, window Y&rdquo; instant.</li>
+          <li>Tests covering all of it, without a live database or real geometries.</li>
+        </ul>
+        <div class="callout">
+          The substrate is now in place. Next lesson uses every one of these indexes to
+          build <em>refined hits</em> &mdash; the GPS pings that actually landed on parcels
+          &mdash; without ever doing a brute-force spatial join over the full dataset.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>STAC</strong> (SpatioTemporal Asset Catalog): <a class="inline" href="https://stacspec.org/" target="_blank" rel="noopener">stacspec.org</a> &mdash; the same idea, formalized for satellite imagery.</li>
+          <li><strong>WKB</strong>: <a class="inline" href="https://libgeos.org/specifications/wkb/" target="_blank" rel="noopener">well-known binary</a> &mdash; the compact geometry encoding pandas-loves.</li>
+          <li><strong>SQLAlchemy streaming</strong>: <a class="inline" href="https://docs.sqlalchemy.org/en/20/core/connections.html#streaming-with-a-fixed-buffer-via-yield-per" target="_blank" rel="noopener">server-side cursors</a> &mdash; how to fetch huge result sets without exhausting memory.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 7 &mdash; Refined hits:</strong> use the indexes you just built
+          to compute which GPS pings actually landed on which parcels &mdash; bbox
+          prefilter, exact-edge refinement, and the merge-existing path that makes
+          re-running pattern analysis cheap.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;·&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;·&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
