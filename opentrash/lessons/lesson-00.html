@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Lesson 0 — From Notebook to Package · opentrash Course</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Lesson 0 of the opentrash course: a gentle on-ramp from notebook code to structured Python packages — functions, classes, and the rules of engineering.">
+  <meta name="description" content="Lesson 0 of the opentrash course: turn a notebook into a real Python package with the routing-engine architecture mapped out from day one.">
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
@@ -20,9 +20,9 @@
       </div>
       <nav>
         <a href="../index.html">&larr; Home</a>
-        <a href="#why">Why</a>
-        <a href="#demo">Demo</a>
-        <a href="#classes">Classes</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
         <a href="#next">Next</a>
       </nav>
     </div>
@@ -33,192 +33,172 @@
     <!-- HERO -->
     <section class="hero">
       <div class="wrap">
-        <span class="eyebrow">Lesson 0 of 12 · Optional on-ramp</span>
-        <h1>From notebook to package: you already know how, you just follow some rules now.</h1>
+        <span class="eyebrow">Lesson 0 of 12 &middot; The on-ramp</span>
+        <h1>One notebook function, a real package, and the whole map.</h1>
         <p class="lede">
-          Most of this course builds a real Python package, step by step. But if you live in
-          Jupyter notebooks and haven&rsquo;t done much &ldquo;software engineering,&rdquo; the
-          jump can feel intimidating. It shouldn&rsquo;t. This short lesson shows that the gap
-          between &ldquo;code that works in a notebook&rdquo; and &ldquo;code that ships as a
-          package&rdquo; is mostly a handful of conventions &mdash; not a different skill.
+          Most "build a Python package" tutorials stop at <code>setup.py</code>.
+          We're going to go a step further today: build a package whose
+          <em>shape</em> reflects what it will eventually do. Eight subdirectories,
+          one real module, every <code>__init__.py</code> labeled with what's
+          coming. By the end of this lesson, anyone who opens the repo can see
+          the entire course at a glance.
         </p>
-        <div class="callout">
-          <strong>This lesson is optional.</strong> If you&rsquo;re already comfortable with
-          functions, modules, classes, and packaging, skip straight to
-          <a class="inline" href="lesson-01.html">Lesson 1</a>. If not, spend 30 minutes here
-          first &mdash; the rest of the course will feel much smoother. This is an on-ramp, not
-          a deep dive; pointers to go deeper are at the end.
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~60 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> pyproject.toml &middot; prep/sites &middot; tests/ &middot; CI</span>
+          <span class="hero-chip"><strong>Result:</strong> a working installable package with the full architecture mapped</span>
         </div>
       </div>
     </section>
 
-    <!-- WHY -->
-    <section id="why">
+    <!-- OBJECTIVE -->
+    <section id="objective">
       <div class="wrap">
-        <h2><span class="sec-num">&middot;</span> What actually changes</h2>
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
         <p class="intro">
-          A notebook is brilliant for <em>figuring things out</em>: run a cell, look at the
-          output, tweak, repeat. But notebooks are a poor place to <em>keep</em> code others
-          depend on &mdash; cells run out of order, state lingers, and there&rsquo;s no clean way
-          to import &ldquo;that function from cell 12&rdquo; into another project.
-        </p>
-        <p class="intro">
-          Turning notebook code into package code mostly means applying a few rules:
+          Stand up the opentrash package skeleton, land one real working module
+          (<code>prep/sites.py</code>) translated from a notebook, and put it
+          under CI &mdash; all in one sitting.
         </p>
         <ul class="plain-list intro">
-          <li>Put related functions in a <strong>module</strong> (a <code>.py</code> file) so they can be imported anywhere.</li>
-          <li>Give functions <strong>clear inputs and outputs</strong> &mdash; no reliance on leftover notebook state.</li>
-          <li>Add <strong>type hints</strong> and a <strong>docstring</strong> so the function documents itself.</li>
-          <li>Follow <strong>PEP 8</strong> (Python&rsquo;s style guide) &mdash; a linter like <code>ruff</code> does this for you automatically.</li>
-          <li>Write a <strong>test</strong> so you know it still works after you change it.</li>
+          <li>Scaffold the package with the destination architecture. Every subdirectory has a docstring listing what's planned. The course is the map.</li>
+          <li>Translate the notebook&rsquo;s sites-cleaning logic into <code>prep/sites.py</code> with proper typed functions, docstrings, and tests.</li>
+          <li>Set up <code>pyproject.toml</code>, ruff, pytest, and a GitHub Actions CI workflow so the package is real from commit one.</li>
         </ul>
-        <p class="intro">That&rsquo;s most of it. Let&rsquo;s see it on a real example.</p>
+        <div class="callout">
+          <strong>The architectural through-line.</strong> opentrash has one
+          structural rule: the <strong>routing engine</strong> joins GPS pings to
+          GIS layers once, and every product (patterns, RouteView, future tools)
+          consumes engine output. We're not building that today &mdash; but the
+          folder for it (<code>engine/</code>) is already there, with a docstring
+          telling you what&rsquo;s coming. Lesson 0&rsquo;s job is to land the shape.
+        </div>
       </div>
     </section>
 
-    <!-- DEMO -->
-    <section id="demo">
+    <!-- PREREQUISITES -->
+    <section>
       <div class="wrap">
-        <h2><span class="sec-num">&middot;</span> Demo: the same logic, two ways</h2>
-        <p class="intro">
-          We&rsquo;ll use a tiny piece of real work from later in the course: cleaning a
-          &ldquo;route&rdquo; field from the city&rsquo;s sites export. The raw values are messy
-          &mdash; <code>"2208"</code>, <code>" 81 "</code>, <code>"abc12"</code>, floats like
-          <code>"2208.0"</code>. We want the last 4 digits, zero-padded. Run each version
-          yourself as you read.
-        </p>
+        <h2><span class="sec-num">&middot;</span> Before you begin</h2>
+        <ul class="plain-list">
+          <li>Python 3.11 or 3.12.</li>
+          <li>A GitHub account, with <code>git</code> on your machine.</li>
+          <li>You don&rsquo;t need real municipal data yet &mdash; the tests use synthetic rows.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
 
         <div class="step-block">
-          <h3><span class="step-pill">1</span> How it looks in a notebook</h3>
-          <p>In a notebook you&rsquo;d probably just write the logic inline in a cell and eyeball the result:</p>
-          <pre><code># notebook cell — exploratory, runs top to bottom
-import pandas as pd
-
-s = pd.Series(["2208", " 81 ", "abc12", "2208.0", ""])
-
-# strip to digits, take last 4, pad to width 4
-clean = (
-    s.astype(str).str.strip()
-     .str.replace(r"\.0$", "", regex=True)
-     .str.replace(r"\D+", "", regex=True)
-     .replace("", pd.NA)
-     .str[-4:].str.zfill(4)
-)
-clean   # look at the output</code></pre>
-          <p>This is <em>fine</em> for figuring out the logic. The problem: it only exists in this notebook, in this cell, next to a specific variable <code>s</code>. You can&rsquo;t reuse it elsewhere without copy-pasting, and if you change it, nothing tells you whether you broke it.</p>
+          <h3><span class="step-pill">1</span> Scaffold the package</h3>
+          <p>Create the directory layout and an <code>__init__.py</code> in each subpackage. Every subdirectory gets a docstring that <em>lists what&rsquo;s coming</em> &mdash; this is the part most tutorials skip and it&rsquo;s the part that makes the package feel coherent from day one.</p>
+          <pre><code>opentrash/
+├── adapters/gps/   vendor-specific GPS sources (Geotab, Postgres)
+├── core/           CRS, DuckDB session, vehicle IDs
+├── prep/           parcels, sites, static layers (routes/facilities)
+├── cache/          GPS cache + spatial-temporal indexes
+├── tonnage/        Excel → parquet ingestion + lookup
+├── engine/         THE ROUTING ENGINE
+├── patterns/       pattern detection (consumes engine output)
+└── routeview/      single-route/single-day map (consumes engine output)</code></pre>
+          <p class="note">Look at <code>opentrash/engine/__init__.py</code> right now. It&rsquo;s a docstring that says &ldquo;here&rsquo;s what the routing engine will do.&rdquo; The audience for your code &mdash; future you, contributors, learners &mdash; will read that and instantly understand the architecture. That&rsquo;s free engineering documentation, and it costs about 30 seconds to write.</p>
         </div>
 
         <div class="step-block">
-          <h3><span class="step-pill">2</span> The same logic as a package function</h3>
-          <p>Now lift it into a named function in a module &mdash; this is essentially what <code>clean_route4</code> in <code>prep/sites.py</code> is:</p>
-          <pre><code># prep/sites.py — reusable, documented, testable
-import pandas as pd
-
-
-def clean_route4(series: pd.Series) -&gt; pd.Series:
-    """Normalize a raw route field to its last 4 digits, zero-padded.
-
-    Strips whitespace and non-digits; empty results become NA.
-    """
-    s = series.astype(str).str.strip()
-    s = s.str.replace(r"\.0$", "", regex=True)   # drop trailing ".0" from floats
-    s = s.str.replace(r"\D+", "", regex=True)    # keep digits only
-    s = s.replace("", pd.NA)
-    return s.str[-4:].str.zfill(4)</code></pre>
-          <p>What changed, concretely:</p>
+          <h3><span class="step-pill">2</span> Land the first real module &mdash; <code>prep/sites.py</code></h3>
+          <p>A <em>site</em> is a serviced address. The city&rsquo;s export carries ~29 columns of mixed quality; this module turns it into a clean validated table with canonical route IDs for each commodity (refuse, recycling, organics). The route IDs follow a real schema:</p>
           <ul>
-            <li>It has a <strong>name</strong> and lives in a file &mdash; <code>from opentrash.prep.sites import clean_route4</code> works from anywhere.</li>
-            <li>It takes an <strong>explicit input</strong> (<code>series</code>) and <strong>returns</strong> a value &mdash; no dependence on a notebook variable.</li>
-            <li>The <strong>type hint</strong> (<code>series: pd.Series -&gt; pd.Series</code>) says what goes in and out.</li>
-            <li>The <strong>docstring</strong> explains it to the next person (often future you).</li>
+            <li><strong>Digits 1-2</strong> &mdash; supervisor / commodity zone (21-25, 11-12 for refuse+recycling; 31-35 for organics; 11/12 mark manual collection).</li>
+            <li><strong>Digits 3-4</strong> &mdash; sequence number (also disambiguates commodity when one supervisor handles multiple).</li>
+            <li><strong>Optional suffix</strong> &mdash; <code>O</code> for organics, <code>B</code> for biweekly, blank for weekly.</li>
           </ul>
-          <p class="note">The actual computation is identical. You didn&rsquo;t learn a new algorithm &mdash; you wrapped the one you had in a few conventions.</p>
+          <p>The module exposes pure functions (cleaners, validators) and one top-level <code>load_sites()</code> that does the full pipeline. Heavy imports (pandas, geopandas) are lazy &mdash; declared at the top with <code>from __future__ import annotations</code>, called inside functions &mdash; so the package imports fast even when only a few modules are needed.</p>
         </div>
 
         <div class="step-block">
-          <h3><span class="step-pill">3</span> And a test, so it stays correct</h3>
-          <p>The final habit: a small test pinning the behavior. Now any future change that breaks it gets caught instantly.</p>
-          <pre><code># tests/test_sites.py
-from opentrash.prep.sites import clean_route4
-import pandas as pd
+          <h3><span class="step-pill">3</span> Tests with synthetic data</h3>
+          <p>No real city data is needed to test the cleaners. The test file builds rows in memory and asserts the route IDs come out clean. Run them with:</p>
+          <pre><code>pytest -q</code></pre>
+          <p class="note">Tests are <em>the</em> primary documentation of what a function does. When the test is named <code>test_clean_route4_pads_to_four_digits</code> and synthesizes a row with <code>"234"</code> and asserts the result is <code>"0234"</code>, anyone reading the code knows the behavior in 10 seconds.</p>
+        </div>
 
-def test_clean_route4():
-    out = clean_route4(pd.Series(["2208", "abc12", "1234567"]))
-    assert out.iloc[0] == "2208"
-    assert out.iloc[1] == "0012"   # digits only, padded
-    assert out.iloc[2] == "4567"   # last 4</code></pre>
-          <p>Run it with <code>pytest</code>. Green means it works; red means you broke something. That feedback loop is the whole point of structuring code this way.</p>
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> <code>pyproject.toml</code>, ruff, pytest, CI</h3>
+          <p>Build configuration that&rsquo;s lean today and extensible tomorrow. The base <code>dependencies</code> are what every lesson onward expects (pandas, duckdb, geopandas, shapely, pyproj). Optional <code>[project.optional-dependencies]</code> sections (<code>geotab</code>, <code>postgres</code>, <code>dev</code>) get added as lessons need them.</p>
+          <pre><code>pip install -e ".[dev]"
+ruff check .
+pytest -q</code></pre>
+          <p>Add a small GitHub Actions workflow at <code>.github/workflows/ci.yml</code> that runs ruff + pytest on every push. The badge is the difference between a package that <em>is</em> and a package that <em>looks like it is</em>.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Commit and push</h3>
+          <pre><code>git init
+git add .
+git commit -m "Lesson 0: package skeleton + prep/sites"
+gh repo create opentrash --public --source=. --push</code></pre>
+          <p>By the time you push, you have: a real installable package, one working module with tests, ruff clean, CI green, and a folder layout that tells the whole course story without a word of marketing.</p>
         </div>
       </div>
     </section>
 
-    <!-- CLASSES -->
-    <section id="classes">
+    <!-- PACKAGE ANATOMY -->
+    <section>
       <div class="wrap">
-        <h2><span class="sec-num">&middot;</span> A word on classes (just enough)</h2>
-        <p class="intro">
-          You&rsquo;ll see <strong>classes</strong> here and there in the course. You don&rsquo;t
-          need to master object-oriented programming to follow along, but here&rsquo;s the
-          one-paragraph version so nothing feels foreign.
-        </p>
-        <p class="intro">
-          A function is a verb &mdash; it <em>does</em> something. A class is a noun &mdash; it
-          <em>bundles related data (and the operations on it) into one named thing</em>. When you
-          have a value with several parts that travel together, a class (or its lightweight
-          cousin, a <strong>dataclass</strong>) is cleaner than juggling a loose dictionary.
-        </p>
-        <div class="step-block">
-          <h3><span class="step-pill">&middot;</span> Example: a vehicle ID</h3>
-          <p>Later, a vehicle ID like <code>"815001"</code> needs to be split into a fleet prefix (<code>"815"</code>) and a number (<code>"001"</code>), and classified (automated vs manual). Instead of passing three loose variables around, we bundle them:</p>
-          <pre><code>from dataclasses import dataclass
-
-@dataclass(frozen=True)
-class VehicleId:
-    raw: str        # "815001"
-    prefix: str     # "815"
-    number: str     # "001"
-
-v = VehicleId(raw="815001", prefix="815", number="001")
-v.prefix     # "815"  — access fields by name</code></pre>
-          <p>A <code>@dataclass</code> writes the boilerplate for you (constructor, equality, a readable <code>repr</code>). <code>frozen=True</code> makes it immutable &mdash; you can&rsquo;t accidentally change it after creation. That&rsquo;s genuinely all you need to know to read the code in this course; we build the real <code>VehicleId</code> in Lesson 4 and use it in the GPS lesson.</p>
-        </div>
-        <p class="intro">
-          The same goes for a <strong>Protocol</strong> (an interface that says &ldquo;any class
-          with these methods counts&rdquo;) &mdash; we&rsquo;ll meet one when we make GPS data
-          vendor-independent. We&rsquo;ll explain it in context when it shows up. No need to
-          front-load the theory.
-        </p>
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson. All directories scaffolded with planned-module docstrings.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml                  <span class="comment"># [new]</span>
+├── README.md                       <span class="comment"># [new]</span>
+├── .github/workflows/ci.yml        <span class="comment"># [new]</span>
+├── docs/architecture.md            <span class="comment"># [new]</span>
+├── <span class="dir">opentrash/</span>
+│   ├── __init__.py                 <span class="comment"># [new]</span>
+│   ├── <span class="dir">adapters/gps/</span>        <span class="comment"># scaffolded — planned: base, geotab, postgres</span>
+│   ├── <span class="dir">core/</span>                <span class="comment"># scaffolded — planned: crs, duckdb_session, vehicle_ids</span>
+│   ├── <span class="dir">prep/</span>
+│   │   └── sites.py                <span class="comment"># [new] route-ID parsing + cleaners</span>
+│   ├── <span class="dir">cache/</span>               <span class="comment"># scaffolded — planned: gps_cache, gps_indexes, master_index</span>
+│   ├── <span class="dir">tonnage/</span>             <span class="comment"># scaffolded — planned: registry, cleaners, keys, upsert, pipeline, lookup</span>
+│   ├── <span class="dir">engine/</span>              <span class="comment"># scaffolded — THE ROUTING ENGINE: enrichment + segments</span>
+│   ├── <span class="dir">patterns/</span>            <span class="comment"># scaffolded — planned: config, detector, validator</span>
+│   └── <span class="dir">routeview/</span>           <span class="comment"># scaffolded — planned: rank, trail, parcel_eval, render, runner</span>
+└── <span class="dir">tests/</span>
+    └── test_sites.py               <span class="comment"># [new]</span></div>
       </div>
     </section>
 
     <!-- RECAP -->
     <section id="recap">
       <div class="wrap">
-        <h2><span class="sec-num">&middot;</span> The takeaway</h2>
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
         <ul class="plain-list">
-          <li>Notebook code and package code run the <strong>same logic</strong> &mdash; the difference is a few conventions: modules, clear inputs/outputs, type hints, docstrings, style, tests.</li>
-          <li>You don&rsquo;t need deep OOP to follow this course. Functions carry most of the weight; classes and dataclasses show up only where they genuinely help.</li>
-          <li>The tooling (<code>ruff</code> for style, <code>pytest</code> for tests) does the tedious enforcement so you can focus on the logic.</li>
+          <li>An <strong>installable package</strong> with a real <code>pyproject.toml</code> and lazy imports done right.</li>
+          <li>One working module &mdash; <code>prep/sites.py</code> &mdash; with route-ID anatomy encoded as data, not as comments.</li>
+          <li>Tests with synthetic rows that document the behavior precisely.</li>
+          <li>Ruff + pytest + GitHub Actions CI, green from the first push.</li>
+          <li>A folder layout that maps the whole course &mdash; including the routing engine that doesn&rsquo;t exist yet but already has its place ready.</li>
         </ul>
         <div class="callout">
-          This is the only lesson that&rsquo;s purely about <em>how</em> we write code rather than
-          <em>what</em> we&rsquo;re building. From Lesson 1 on, every lesson adds real
-          functionality to the package &mdash; and you&rsquo;ll be applying these conventions
-          without thinking about them.
+          The package is real. The architecture is on screen. Next lesson dives
+          into how the repo is organized and prepares the environment.
         </div>
       </div>
     </section>
 
-    <!-- RESOURCES -->
+    <!-- COMPANION -->
     <section>
       <div class="wrap">
-        <h2><span class="sec-num">&middot;</span> Go deeper (optional)</h2>
-        <p class="intro">Software engineering is a whole craft; this course only scratches the surface and stays focused on the geospatial work. If you want to build the foundations properly:</p>
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
         <ul class="plain-list">
-          <li><strong>PEP 8:</strong> <a class="inline" href="https://peps.python.org/pep-0008/" target="_blank" rel="noopener">the Python style guide</a> &mdash; the conventions <code>ruff</code> enforces.</li>
-          <li><strong>Python docs:</strong> <a class="inline" href="https://docs.python.org/3/tutorial/modules.html" target="_blank" rel="noopener">Modules</a> and <a class="inline" href="https://docs.python.org/3/tutorial/classes.html" target="_blank" rel="noopener">Classes</a> &mdash; the official tutorial.</li>
-          <li><strong>Dataclasses:</strong> <a class="inline" href="https://docs.python.org/3/library/dataclasses.html" target="_blank" rel="noopener">the reference</a>, with examples.</li>
-          <li><strong>Testing:</strong> <a class="inline" href="https://docs.pytest.org/" target="_blank" rel="noopener">pytest</a> &mdash; getting started with tests.</li>
+          <li><strong>PEP 621 / pyproject.toml:</strong> <a class="inline" href="https://packaging.python.org/en/latest/specifications/pyproject-toml/" target="_blank" rel="noopener">official spec</a> &mdash; the modern way to declare a Python package.</li>
+          <li><strong>src vs flat layout:</strong> <a class="inline" href="https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/" target="_blank" rel="noopener">when to choose which</a>. We use flat (one less directory level) and it works fine for projects of this size.</li>
+          <li><strong>Lazy imports + <code>from __future__ import annotations</code>:</strong> the pattern that lets your package import fast even with heavy deps.</li>
         </ul>
       </div>
     </section>
@@ -228,11 +208,12 @@ v.prefix     # "815"  — access fields by name</code></pre>
       <div class="wrap">
         <h2><span class="sec-num">&middot;</span> Next lesson</h2>
         <p class="intro">
-          <strong>Lesson 1 &mdash; Orientation:</strong> set up the repo and environment, and
-          meet the package skeleton you&rsquo;ll fill in over the rest of the course.
+          <strong>Lesson 1 &mdash; Orientation:</strong> a walkthrough of the
+          repo, the environment, and the package layout map. You&rsquo;ll
+          understand <em>why</em> each directory exists before we start filling
+          them.
         </p>
         <div class="hero-buttons">
-          <a href="lesson-01.html" class="btn btn-primary">Start Lesson 1 &rarr;</a>
           <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
         </div>
       </div>
@@ -242,9 +223,9 @@ v.prefix     # "815"  — access fields by name</code></pre>
 
   <footer class="site-footer">
     <div class="wrap">
-      <a href="../index.html">&larr; Course home</a> &nbsp;·&nbsp;
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
       A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
-      &nbsp;·&nbsp; &copy; <span id="year"></span>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
     </div>
   </footer>
 
