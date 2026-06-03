@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 1 — Orientation · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 1 of the opentrash course: a guided tour of the package layout, the dev loop, and why every directory is shaped the way it is.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 1 · Orientation</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#tour">The tour</a>
+        <a href="#devloop">Dev loop</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 1 of 12 &middot; The guided tour</span>
+        <h1>Know the shape before you fill it.</h1>
+        <p class="lede">
+          You landed a working package in Lesson 0. Eight subdirectories,
+          one real module, every <code>__init__.py</code> already labeled with
+          what&rsquo;s coming. This lesson is the guided tour: <em>why</em> each
+          directory exists, <em>what</em> an editable install actually does, and
+          <em>how</em> the daily loop &mdash; ruff &rarr; pytest &rarr; commit &rarr;
+          CI green &mdash; will run every lesson from here on.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~40 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> nothing new &mdash; you&rsquo;ll read</span>
+          <span class="hero-chip"><strong>Result:</strong> a mental map of the whole course</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          No new code this lesson. By the end of it you should be able to:
+        </p>
+        <ul class="plain-list intro">
+          <li>Walk every subdirectory of <code>opentrash/</code> and say what it&rsquo;s for &mdash; including the empty ones.</li>
+          <li>Explain what <code>pip install -e ".[dev]"</code> does and why the editable bit matters for everyday development.</li>
+          <li>Describe the dev loop &mdash; the cycle every subsequent lesson runs &mdash; without looking it up.</li>
+          <li>Know when to reach for <code>[geotab]</code> and <code>[postgres]</code> extras and why they&rsquo;re optional.</li>
+        </ul>
+        <div class="callout">
+          <strong>Why a tour lesson?</strong> The package layout is doing real
+          architectural work &mdash; <code>engine/</code> sits where it does
+          because every product consumes from it; <code>cache/</code> is a
+          top-level not a sub-folder because it&rsquo;s the substrate. Skipping
+          past the shape would mean writing code into folders you haven&rsquo;t
+          really seen yet. Forty minutes here saves hours later.
+        </div>
+      </div>
+    </section>
+
+    <!-- THE TOUR -->
+    <section id="tour">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> The package, directory by directory</h2>
+        <p class="intro">
+          Open each <code>__init__.py</code> as we go &mdash; the docstrings are
+          the canonical &ldquo;what goes here&rdquo; reference. Reading them in
+          order is reading the architecture.
+        </p>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> <code>adapters/gps/</code> &mdash; where data comes from</h3>
+          <p>The package consumes GPS data from more than one vendor (Geotab, Postgres streams). Both produce the same canonical schema; vendor-specific quirks are isolated to one file each. The shared interface is a small <code>Protocol</code> in <code>base.py</code>, so swapping vendors is a one-line change in a calling script.</p>
+          <p class="note">Adapters are the only place vendor terminology appears. Everywhere else in the package you see <code>vehicle_id</code>, <code>dt_local</code>, <code>lat</code>, <code>lon</code>, <code>speed_mph</code> &mdash; not Geotab&rsquo;s <code>VehicleName</code> or Postgres&rsquo;s <code>DateTime</code>.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> <code>core/</code> &mdash; foundational primitives</h3>
+          <p>The tiny shared pieces every other module imports: coordinate-reference-system constants (<code>EPSG:2230</code> for working in feet, <code>EPSG:4326</code> for web), a DuckDB session builder configured for the workload, and vehicle-ID parsing rules. If something feels like &ldquo;a primitive every module needs,&rdquo; it belongs here.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> <code>prep/</code> &mdash; one-time preparation of static data</h3>
+          <p>The data that doesn&rsquo;t stream &mdash; parcels, sites (customer accounts), route polygons, facilities (landfills, depots, other operational sites). Prep turns raw municipal inputs into compact, validated parquet layers the rest of the package consumes. The one module that exists today &mdash; <code>prep/sites.py</code> &mdash; sets the pattern: progressive cleaning, business rules encoded as data, nullable dtypes throughout.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> <code>cache/</code> &mdash; the substrate</h3>
+          <p>One parquet per vehicle per local day, lookup indexes on top, and the master spatial-temporal lookup that joins vehicle-day bboxes to route bboxes. This is what makes &ldquo;which GPS files touch route X on day Y&rdquo; a millisecond query instead of a directory scan.</p>
+          <p class="note">Cache is a <em>top-level</em> module, not a subdirectory of routeview or patterns. That placement is deliberate &mdash; the substrate feeds everything, so it sits at the top with everything else that&rsquo;s foundational.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> <code>tonnage/</code> &mdash; ingestion of legacy tonnage data</h3>
+          <p>Tonnage comes from a legacy system as messy Excel files, daily-ish. The tonnage modules turn that into partitioned parquet with a hash-based deduplication scheme, vehicle-ID parsing, and a lookup interface for &ldquo;what tipped on day D from vehicle V.&rdquo; Idempotent re-runs are mandatory &mdash; the same Excel file processed twice produces zero new rows.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> <code>engine/</code> &mdash; THE ROUTING ENGINE</h3>
+          <p>The architectural heart of the package. Every GPS ping is joined to every applicable GIS layer (routes, parcels, facilities) <em>once</em>, producing <strong>enriched pings</strong>: a canonical stream every product consumes. <code>engine/segments.py</code> takes that stream and runs timeline analysis on top &mdash; service, travel, landfill, load, shift &mdash; using sequence and dwell rules.</p>
+          <p class="note">The principle: <strong>spatial joins are infrastructure, products are calculations</strong>. The engine does the joins once; pattern detection, RouteView, and any future product is a pure aggregation over engine output. Products never do their own spatial joins. This is the single most important architectural rule in the package.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">7</span> <code>patterns/</code> &mdash; pattern detection (product)</h3>
+          <p>Per-parcel service signatures: weekly1, weekly2, and biweekly &mdash; with vehicle, day-of-week, hour, and a composite biweekly score. A DuckDB CTAS pipeline that reads engine output and writes a single wide patterns table. No spatial joins of its own.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">8</span> <code>routeview/</code> &mdash; the interactive map (product)</h3>
+          <p>One route, one day, an interactive MapLibre HTML. Built from engine output: ranked vehicles, the route-clipped trail, parcels served vs missed, tonnage tips. A pure consumer &mdash; rank is an aggregation, trail is a filter, render is template substitution.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTALL & DEV LOOP -->
+    <section id="devloop">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> The dev loop</h2>
+        <p class="intro">
+          Every lesson from here on follows the same cycle. Internalize this once
+          and the rest of the course is muscle memory.
+        </p>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Editable install &mdash; <code>pip install -e ".[dev]"</code></h3>
+          <p>The <code>-e</code> flag (&ldquo;editable&rdquo;) is the unsung hero of Python development. Instead of copying your package files into <code>site-packages</code>, it installs a <em>link</em> &mdash; so when you edit <code>opentrash/prep/sites.py</code>, the next <code>python -c "from opentrash import ..."</code> sees your change immediately. No reinstall, no rebuild.</p>
+          <p>The <code>".[dev]"</code> part installs the package plus the optional <code>dev</code> dependencies declared in <code>pyproject.toml</code> &mdash; ruff and pytest. Add <code>[geotab]</code> or <code>[postgres]</code> too when you start working with those adapters.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Lint &mdash; <code>ruff check .</code></h3>
+          <p>Ruff is a fast Python linter that catches a lot of small problems before tests do. The default config in <code>pyproject.toml</code> enables a tight, useful rule set (errors, undefined names, import sorting, modernization, bug patterns) without going overboard. Fix or auto-fix (<code>ruff check . --fix</code>) until you see <em>All checks passed!</em></p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Test &mdash; <code>pytest -q</code></h3>
+          <p>pytest discovers everything under <code>tests/</code> matching <code>test_*.py</code> and runs it. The <code>-q</code> flag keeps output quiet unless something fails. Today this runs the 9 sites tests from Lesson 0; by the end of the course it will run a hundred or so.</p>
+          <p class="note">Tests live in <code>tests/</code> at the repo top level &mdash; the standard Python convention. <code>tests/</code> is <em>not</em> inside <code>.github/</code>; <code>.github/workflows/ci.yml</code> is a GitHub Actions config that <em>runs</em> the tests, not where they live.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Commit &mdash; <code>git commit -m "Lesson N: ..."</code></h3>
+          <p>One lesson, one commit (or a small handful). The commit message names the lesson so the repo history reads like a course outline. The CI workflow runs automatically on push, runs ruff and pytest on a fresh Linux machine, and shows a green check on GitHub when it passes &mdash; the &ldquo;works on my machine&rdquo; problem solved.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPTIONAL EXTRAS -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Optional extras &mdash; vendor isolation</h2>
+        <p class="intro">
+          Heavy or vendor-specific dependencies live in optional extras, not
+          base. Why: the package should install cleanly for someone who only
+          wants to read a parquet, without dragging in a 200 MB Postgres
+          driver they&rsquo;ll never use.
+        </p>
+        <ul class="plain-list">
+          <li><code>pip install -e ".[geotab]"</code> &mdash; adds <code>mygeotab</code> and <code>pytz</code> for the Geotab API adapter.</li>
+          <li><code>pip install -e ".[postgres]"</code> &mdash; adds <code>psycopg2-binary</code> and <code>sqlalchemy</code> for the streaming Postgres adapter.</li>
+          <li><code>pip install -e ".[dev,geotab,postgres]"</code> &mdash; everything, for full local development.</li>
+        </ul>
+        <p class="note">Inside the adapter modules, the vendor library is imported <em>inside</em> the function that uses it &mdash; not at module top. That way someone who pip-installs the package without the <code>[geotab]</code> extra can still import <code>opentrash</code> without crashes; the Geotab adapter only fails if they actually try to use it.</p>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Unchanged from Lesson 0 &mdash; this lesson is the orientation tour, not new code. The shape we read together:</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── README.md
+├── .github/workflows/ci.yml
+├── docs/architecture.md
+├── <span class="dir">opentrash/</span>
+│   ├── __init__.py
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># where data comes from</span>
+│   ├── <span class="dir">core/</span>                  <span class="comment"># foundational primitives</span>
+│   ├── <span class="dir">prep/</span>
+│   │   └── sites.py               <span class="comment"># the one real module today</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># the substrate</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># legacy-data ingestion</span>
+│   ├── <span class="dir">engine/</span>                <span class="comment"># THE ROUTING ENGINE</span>
+│   ├── <span class="dir">patterns/</span>              <span class="comment"># product: pattern detection</span>
+│   └── <span class="dir">routeview/</span>             <span class="comment"># product: interactive map</span>
+└── <span class="dir">tests/</span>
+    └── test_sites.py</div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you should walk away with</h2>
+        <ul class="plain-list">
+          <li>A <strong>mental map</strong> of where each module lives and why.</li>
+          <li>The <strong>routing-engine rule</strong> &mdash; spatial joins are infrastructure, products are calculations.</li>
+          <li>The <strong>dev loop</strong> &mdash; editable install, ruff, pytest, commit, CI &mdash; you&rsquo;ll run a version of this every lesson.</li>
+          <li>Why <strong>optional extras</strong> exist and when to opt into them.</li>
+          <li>Confidence that the empty directories aren&rsquo;t empty by accident &mdash; each one is waiting for a specific lesson&rsquo;s work.</li>
+        </ul>
+        <div class="callout">
+          The tour is done. The next lesson lands real code &mdash; the foundational primitives that everything else imports.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>Editable installs:</strong> <a class="inline" href="https://pip.pypa.io/en/stable/topics/local-project-installs/" target="_blank" rel="noopener">pip docs on local installs</a> &mdash; what <code>-e</code> actually does under the hood.</li>
+          <li><strong>Optional dependencies:</strong> <a class="inline" href="https://packaging.python.org/en/latest/specifications/pyproject-toml/#dependencies-optional-dependencies" target="_blank" rel="noopener">pyproject.toml spec</a> &mdash; the standard for <code>[project.optional-dependencies]</code>.</li>
+          <li><strong>typing.Protocol:</strong> <a class="inline" href="https://docs.python.org/3/library/typing.html#typing.Protocol" target="_blank" rel="noopener">Python docs</a> &mdash; the structural-typing idea behind the adapter pattern we&rsquo;ll use in Lesson 6.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 2 &mdash; The foundation:</strong> CRS constants, the
+          DuckDB session builder, and the parcels prep module. Three small,
+          foundational pieces that every later lesson imports.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
