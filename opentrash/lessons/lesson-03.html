@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 3 — Routes &amp; Facilities · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 3 of the opentrash course: route polygons (AUTO + HTC with buffer rule) and facilities (landfill + depot split by name).">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 3 · Routes &amp; Facilities</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 3 of 12 &middot; The operational world</span>
+        <h1>Routes and facilities &mdash; the GIS world the trucks live in.</h1>
+        <p class="lede">
+          GPS pings are only meaningful relative to the operational layers
+          they move through &mdash; the routes a truck is supposed to drive,
+          the landfills it tips at, the depot it starts and ends the day in.
+          This lesson lands all of them in one module, parameterized so any
+          agency&rsquo;s data can plug in.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~75 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> prep/static_layers</span>
+          <span class="hero-chip"><strong>Result:</strong> routes &amp; facilities ready for the engine</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          One module, three functions, one config dataclass &mdash; serving every
+          downstream lesson that needs to know &ldquo;where the operations
+          happen.&rdquo;
+        </p>
+        <ul class="plain-list intro">
+          <li><strong>Routes</strong> &mdash; load AUTO and HTC polygons, dissolve, optionally buffer HTC, and reduce to per-route bounding boxes in EPSG:4326 (the format the engine&rsquo;s spatial-temporal index expects).</li>
+          <li><strong>Facilities</strong> &mdash; one source file holding the depot and the landfills together; split them by a name column, apply an optional buffer to landfills, and hand back two GeoDataFrames keyed by role.</li>
+          <li><strong>Parameterized</strong> &mdash; column names and depot identifier are knobs, not hardcoded. Same code works for the next city.</li>
+        </ul>
+        <div class="callout">
+          <strong>The HTC buffer rule.</strong> AUTO routes are large engulfing
+          polygons that already cover the streets a truck drives. HTC routes
+          (Hard-to-Collect, manual pickup) are <em>parcel-shape copies</em> &mdash;
+          a truck driving down the street next to an HTC parcel can fall
+          <em>outside</em> the polygon. The fix: buffer HTC routes by ~150 ft
+          (in the working CRS) so they behave like AUTO routes for spatial joins.
+          This is one of those domain rules that&rsquo;s invisible until you hit
+          missing hits in production.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Route loading &mdash; <code>load_route_polygons()</code></h3>
+          <p>Read a route layer (Shapefile / GeoPackage / GeoParquet), drop empty geometries, repair invalid ones via <code>shapely.validation.make_valid</code>, and return a clean two-column GeoDataFrame in EPSG:4326: <code>route_id</code> (string) and <code>geometry</code>. The function takes the source-specific ID column name as an argument &mdash; common in city data: <code>REF_ROUTE_</code>, <code>ROUTE_ID</code>, etc.</p>
+          <p class="note">The function refuses files with no CRS &mdash; same pattern as <code>load_parcels</code> from Lesson 2. Coordinates without a CRS are ambiguous; better to fail loud than silently produce wrong distances later.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Buffering and bboxes &mdash; <code>buffer_in_working_crs()</code> and <code>route_bboxes()</code></h3>
+          <p>Two small utilities that anchor the bbox-index pattern:</p>
+          <ul>
+            <li><code>buffer_in_working_crs(gdf, buffer_ft)</code> &mdash; buffer in feet, always doing the math in <code>WORKING_CRS</code> (EPSG:2230) regardless of the input CRS. Round-trips through the working CRS and back; <code>gdf.geometry.buffer(50)</code> in EPSG:4326 would silently give you 50&deg; of buffering &mdash; a quarter of the planet &mdash; not 50 feet.</li>
+            <li><code>route_bboxes(routes)</code> &mdash; reduce route polygons to one bbox per <code>route_id</code> in EPSG:4326. Multi-polygon routes (a route that spans several disjoint chunks) dissolve to the encompassing bbox. A small ~100 ft edge buffer is added in lat-degree units so a ping exactly on a boundary still matches; bbox math is cheap.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> The route index &mdash; <code>build_route_index()</code></h3>
+          <p>The end-to-end entry point for the engine&rsquo;s spatial-temporal index:</p>
+          <pre><code>build_route_index(
+    auto_path="static_layers/auto_routes.shp",
+    htc_path="static_layers/htc_routes.shp",
+    auto_route_col="REF_ROUTE_",
+    htc_route_col="REF_ROUTE_",
+    htc_buffer_ft=150,
+)</code></pre>
+          <p>Loads both layers. Routes appearing in both AUTO and HTC keep their AUTO geometry &mdash; AUTO takes precedence because it&rsquo;s already engulfing. Routes present <em>only</em> in HTC get the configured buffer applied. The result is a single DataFrame with one row per <code>route_id</code>: bbox in EPSG:4326.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Facilities &mdash; <code>load_facilities()</code> and <code>FacilitiesConfig</code></h3>
+          <p>The facilities layer is one file holding the depot and the landfills together. The depot is identified by a row whose name column matches a configured value &mdash; every other row is a landfill:</p>
+          <pre><code>@dataclass(frozen=True)
+class FacilitiesConfig:
+    name_col: str = "Name"
+    depot_name: str = "Miramar Place"
+    landfill_buffer_ft: float = 50.0   # tips happen on/just-outside the polygon</code></pre>
+          <p>The defaults match a real San Diego dataset; override <code>name_col</code> and <code>depot_name</code> for any other agency. Landfills get the configured buffer (so a truck near the tip but not exactly on the polygon still registers as tipping); the depot polygon is kept exactly as drawn. Output is a dict: <code>{"landfill": GeoDataFrame, "depot": GeoDataFrame}</code>.</p>
+          <p class="note">Why a dict and not a single dataframe with a <code>kind</code> column? Because the consumers (the routing engine, eventually) treat depots and landfills as distinct concepts &mdash; trucks <em>start</em> and <em>end</em> at a depot but <em>tip at</em> a landfill. Different semantics, different downstream rules. Keeping them apart in the data type makes the intent obvious.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Tests with synthetic data</h3>
+          <p>Twelve tests covering the route bbox math (dissolve, edge buffer, buffer-in-feet), the AUTO + HTC merge logic (HTC-only included with buffer, AUTO wins when both exist), and the facilities split (depot found by name, landfills buffered, custom config for other agencies, missing-depot raises). All synthetic geometries, no real data needed:</p>
+          <pre><code>pip install -e ".[dev]"
+ruff check .
+pytest -q</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Commit and push</h3>
+          <pre><code>git add .
+git commit -m "Lesson 3: prep/static_layers — routes + facilities"
+git push origin main</code></pre>
+          <p>The operational world is in. The package now knows where routes run and where trucks tip.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── README.md
+├── .github/workflows/ci.yml
+├── docs/architecture.md
+├── <span class="dir">opentrash/</span>
+│   ├── __init__.py
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">core/</span>
+│   │   ├── crs.py
+│   │   └── duckdb_session.py
+│   ├── <span class="dir">prep/</span>
+│   │   ├── sites.py
+│   │   ├── parcels.py
+│   │   └── static_layers.py       <span class="comment"># [new] routes + facilities</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">engine/</span>                <span class="comment"># scaffolded — THE ROUTING ENGINE</span>
+│   ├── <span class="dir">patterns/</span>              <span class="comment"># scaffolded</span>
+│   └── <span class="dir">routeview/</span>             <span class="comment"># scaffolded</span>
+└── <span class="dir">tests/</span>
+    ├── test_sites.py
+    ├── test_crs.py
+    ├── test_duckdb_session.py
+    ├── test_parcels.py
+    └── test_static_layers.py      <span class="comment"># [new]</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li><strong>Route loading</strong> with the AUTO + HTC convention and the buffer rule that compensates for HTC geometry.</li>
+          <li>A <strong>route bbox index</strong> &mdash; one row per route in EPSG:4326 &mdash; the format the engine&rsquo;s spatial-temporal join consumes.</li>
+          <li><strong>Facilities loading</strong> with the depot-by-name split and an optional landfill buffer.</li>
+          <li>A <strong>parameterized config</strong> so the next agency&rsquo;s column names just plug in.</li>
+          <li>Twelve tests over synthetic geometries covering the dissolve, buffer, and split logic.</li>
+        </ul>
+        <div class="callout">
+          The operational world is now data. Next lesson goes deeper on sites &mdash;
+          the customer accounts that sit on top of parcels &mdash; the bridge between
+          who pays for service and what gets serviced.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong><code>shapely.validation.make_valid</code>:</strong> <a class="inline" href="https://shapely.readthedocs.io/en/stable/manual.html#shapely.validation.make_valid" target="_blank" rel="noopener">docs</a> &mdash; the polite way to handle slightly-broken polygons from real GIS exports.</li>
+          <li><strong>Geopandas <code>to_crs</code> performance:</strong> reprojecting a large layer once is cheap; doing it inside a loop is expensive. Reproject once, work in the result.</li>
+          <li><strong>Dissolve-by-attribute pattern:</strong> the routes case (multiple polygons sharing a <code>route_id</code> &rarr; one encompassing bbox) generalizes to any &ldquo;multipart features&rdquo; problem.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 4 &mdash; Sites:</strong> a deeper pass on customer
+          accounts &mdash; the rows that bridge parcels (what gets serviced) to
+          billing (who pays for it). Integration patterns with parcels and
+          routes.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
