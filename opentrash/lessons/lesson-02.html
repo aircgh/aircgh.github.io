@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 2 — The Foundation · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 2 of the opentrash course: CRS constants, the DuckDB session builder, and the parcels prep module — the foundational primitives every later lesson imports.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 2 · The Foundation</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 2 of 12 &middot; The foundation</span>
+        <h1>Three small modules every later lesson imports.</h1>
+        <p class="lede">
+          You land three foundational primitives this lesson: the
+          coordinate-reference-system constants and helpers; a DuckDB session
+          builder with the spatial extension loaded; and the parcels prep
+          module with a fast bounding-box prefilter. None of these are flashy
+          on their own. All of them get imported dozens of times across the
+          rest of the course.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~60 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> core/crs &middot; core/duckdb_session &middot; prep/parcels</span>
+          <span class="hero-chip"><strong>Result:</strong> the substrate every later module sits on</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Land three modules and tests for each. Every later lesson assumes
+          these exist.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>core/crs.py</code> &mdash; <code>WORKING_CRS</code> (EPSG:2230, feet) and <code>WEB_CRS</code> (EPSG:4326, lon/lat) constants, plus <code>to_working()</code> / <code>to_web()</code> reprojection helpers.</li>
+          <li><code>core/duckdb_session.py</code> &mdash; <code>connect()</code> returns a DuckDB connection with the <code>spatial</code> extension loaded (and installed on first use).</li>
+          <li><code>prep/parcels.py</code> &mdash; <code>load_parcels()</code>, <code>bbox_filter()</code>, <code>bbox_from_geometry()</code>. The parcel layer is the first real domain object.</li>
+        </ul>
+        <div class="callout">
+          <strong>One convention this lesson establishes:</strong> work in a
+          <em>projected</em> CRS (feet) for anything involving distances or
+          spatial joins, and reproject to lon/lat <em>only</em> at the
+          rendering boundary. Doing the math in degrees gives you nonsense
+          distances; doing it in feet keeps everything correct and fast.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Coordinate reference systems &mdash; <code>core/crs.py</code></h3>
+          <p>Two constants and two helpers. The constants name the CRSs the package will use everywhere; the helpers reproject a GeoDataFrame in or out:</p>
+          <pre><code>WORKING_CRS = "EPSG:2230"   # CA State Plane Zone 6 (NAD83), US survey feet
+WEB_CRS     = "EPSG:4326"   # WGS84 lon/lat for web maps
+
+def to_working(gdf): ...    # reproject to WORKING_CRS
+def to_web(gdf):     ...    # reproject to WEB_CRS</code></pre>
+          <p>The helpers refuse to operate on a GeoDataFrame with no CRS &mdash; coordinates without a CRS are ambiguous and any operation on them is unreliable. Better to fail fast with a clear message than to silently produce wrong distances.</p>
+          <p class="note">If you&rsquo;re adapting the package for a different region, change <code>WORKING_CRS</code> to the appropriate projected CRS for your area &mdash; <a class="inline" href="https://epsg.io/" target="_blank" rel="noopener">epsg.io</a> is the canonical lookup. WGS84 stays at <code>EPSG:4326</code> universally.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> DuckDB session &mdash; <code>core/duckdb_session.py</code></h3>
+          <p>DuckDB is the package&rsquo;s compute engine: serverless, runs in-process, reads parquet straight off disk. The <code>spatial</code> extension adds <code>ST_*</code> functions and geometry types so we can do spatial work in SQL when that&rsquo;s the fastest path.</p>
+          <p><code>connect()</code> opens a connection, tries <code>LOAD spatial</code> first (fast if the extension is already installed), and falls back to <code>INSTALL spatial; LOAD spatial</code> on first use. After this lesson, anything that needs DuckDB calls <code>connect()</code> and gets a session that&rsquo;s ready for spatial SQL.</p>
+          <pre><code>from opentrash.core.duckdb_session import connect
+
+con = connect()
+row = con.execute("SELECT ST_AsText(ST_Point(1.0, 2.0))").fetchone()
+# -> ('POINT (1.0 2.0)',)</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Parcels &mdash; <code>prep/parcels.py</code></h3>
+          <p>A parcel is a property lot with a boundary polygon. In waste operations parcels are how we reason about <em>what should be served</em>. Three functions:</p>
+          <ul>
+            <li><code>load_parcels(path)</code> &mdash; read a vector file (GeoParquet, GeoPackage, etc.), ensure it&rsquo;s in <code>WORKING_CRS</code>, return a GeoDataFrame. Refuses files with no CRS.</li>
+            <li><code>bbox_filter(gdf, minx, miny, maxx, maxy)</code> &mdash; the fast first pass. GeoPandas&rsquo;s spatial-index-backed <code>cx</code> indexer narrows to parcels that intersect a bounding box without doing exact-geometry math. Use this <em>before</em> expensive intersects/within operations on the much smaller result.</li>
+            <li><code>bbox_from_geometry(geom, buffer=0)</code> &mdash; produce a bounding-box tuple from a geometry, optionally padded by a buffer (feet, in the working CRS). Pair this with <code>bbox_filter</code> for &ldquo;parcels within N feet of this route.&rdquo;</li>
+          </ul>
+          <p class="note">The bbox prefilter is the core performance pattern that will repeat across the package &mdash; for routes (Lesson 3), for the GPS-to-parcel join (Lesson 8), for everything that needs &ldquo;narrow down before doing expensive work.&rdquo;</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Tests with synthetic data</h3>
+          <p>One test file per module, all using small synthetic geometries (a few boxes in San Diego, no real data needed):</p>
+          <ul>
+            <li><code>tests/test_crs.py</code> &mdash; constants are correct; reprojection round-trips; no-CRS input raises.</li>
+            <li><code>tests/test_duckdb_session.py</code> &mdash; <code>connect()</code> works; spatial functions are available. (These skip cleanly in environments where the extension can&rsquo;t be downloaded.)</li>
+            <li><code>tests/test_parcels.py</code> &mdash; load round-trips; bbox_filter narrows correctly; no-CRS file raises; bbox_from_geometry math is right.</li>
+          </ul>
+          <pre><code>pip install -e ".[dev]"
+ruff check .
+pytest -q</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Commit and push</h3>
+          <pre><code>git add .
+git commit -m "Lesson 2: core/crs, core/duckdb_session, prep/parcels"
+git push origin main</code></pre>
+          <p>CI runs ruff + pytest on the push. Green check means the foundation is solid.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── README.md
+├── .github/workflows/ci.yml
+├── docs/architecture.md
+├── <span class="dir">opentrash/</span>
+│   ├── __init__.py
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">core/</span>
+│   │   ├── crs.py                 <span class="comment"># [new] WORKING_CRS, WEB_CRS, to_working, to_web</span>
+│   │   └── duckdb_session.py      <span class="comment"># [new] connect() with spatial extension</span>
+│   ├── <span class="dir">prep/</span>
+│   │   ├── sites.py
+│   │   └── parcels.py             <span class="comment"># [new] load_parcels, bbox_filter, bbox_from_geometry</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">engine/</span>                <span class="comment"># scaffolded — THE ROUTING ENGINE</span>
+│   ├── <span class="dir">patterns/</span>              <span class="comment"># scaffolded</span>
+│   └── <span class="dir">routeview/</span>             <span class="comment"># scaffolded</span>
+└── <span class="dir">tests/</span>
+    ├── test_sites.py
+    ├── test_crs.py                <span class="comment"># [new]</span>
+    ├── test_duckdb_session.py     <span class="comment"># [new]</span>
+    └── test_parcels.py            <span class="comment"># [new]</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li><strong>CRS constants and helpers</strong> &mdash; the convention &ldquo;work in feet, render in degrees&rdquo; is now encoded as data.</li>
+          <li>A <strong>DuckDB session builder</strong> with the spatial extension loaded on first use.</li>
+          <li>A <strong>parcels prep module</strong> with the bbox-prefilter pattern that the rest of the package will reuse.</li>
+          <li>Tests for all of it &mdash; with graceful skips in environments where the spatial extension can&rsquo;t be downloaded.</li>
+        </ul>
+        <div class="callout">
+          The foundation is in place. Next lesson layers in the static
+          operational world &mdash; routes and facilities &mdash; on top of it.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>EPSG:2230 details:</strong> <a class="inline" href="https://epsg.io/2230" target="_blank" rel="noopener">epsg.io/2230</a> &mdash; the projected CRS for the San Diego region (use the right one for yours).</li>
+          <li><strong>DuckDB spatial extension:</strong> <a class="inline" href="https://duckdb.org/docs/extensions/spatial/overview" target="_blank" rel="noopener">official docs</a> &mdash; geometry types, ST_* functions, and how DuckDB&rsquo;s spatial layer compares to PostGIS.</li>
+          <li><strong>GeoPandas spatial index:</strong> the <code>.cx</code> indexer uses an R-tree under the hood. <a class="inline" href="https://geopandas.org/en/stable/docs/user_guide/indexing.html" target="_blank" rel="noopener">GeoPandas indexing docs</a>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 3 &mdash; Routes &amp; facilities:</strong> load the route
+          polygons (AUTO + HTC) and the facilities layer (landfills, depots,
+          other org sites). Buffer the HTC routes to compensate for their
+          parcel-shape geometry. The operational world starts to take shape.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
