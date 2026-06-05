@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 5 — Tonnage · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 5 of the opentrash course: tonnage Excel-to-parquet ingestion with idempotent dedup, plus the docs deploy workflow.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 5 · Tonnage</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 5 of 12 &middot; The legacy data path</span>
+        <h1>Excel files in, partitioned parquet out &mdash; idempotent every time.</h1>
+        <p class="lede">
+          Tonnage data &mdash; the records of what each truck tipped at which
+          landfill on which day &mdash; lives in a legacy system that exports
+          messy Excel files. This lesson builds the ingestion pipeline:
+          register input files, clean them, hash each row for dedup, upsert
+          into year-partitioned parquet. Running it twice on the same file
+          produces zero new rows.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~90 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> tonnage/* &middot; core/vehicle_ids</span>
+          <span class="hero-chip"><strong>Result:</strong> tonnage normalized + docs site live at opentrash.app</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Land the tonnage pipeline and one supporting primitive, plus turn
+          on the docs deploy so <code>opentrash.app</code> finally reflects
+          the v2 architecture.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>tonnage/registry.py</code> &mdash; scan a folder of input Excel files, parse source (RAD vs ARTS) and date from filename, pick the latest by mtime.</li>
+          <li><code>tonnage/cleaners.py</code> &mdash; per-source header resolution, type coercion, vehicle-ID normalization, material code normalization.</li>
+          <li><code>tonnage/keys.py</code> &mdash; deterministic row hashes for dedup. Same record produces the same hash on every run.</li>
+          <li><code>tonnage/upsert.py</code> &mdash; idempotent merge into year-partitioned parquet (one file per year per source).</li>
+          <li><code>tonnage/pipeline.py</code> &mdash; the top-level <code>run_ingest()</code> entry point that wires it all together.</li>
+          <li><code>core/vehicle_ids.py</code> &mdash; parse fleet vehicle IDs (e.g. <code>815001</code>) into prefix + number; classify AUTO vs MANUAL vs OTHER.</li>
+          <li><strong>Docs deploy</strong> &mdash; <code>mkdocs.yml</code> + <code>.github/workflows/docs.yml</code> + a <code>docs/CNAME</code> file. After this lesson, every push to main rebuilds and deploys to <code>opentrash.app</code>.</li>
+        </ul>
+        <div class="callout">
+          <strong>The idempotency rule.</strong> Re-running the pipeline on
+          the same input must be safe. Legacy data sources are messy &mdash;
+          files arrive late, get re-sent, change names. The pipeline has to
+          treat every run as &ldquo;catch up to the current state on disk.&rdquo;
+          That&rsquo;s what hash-based dedup buys us: identical rows produce
+          identical hashes; the upsert step drops duplicates by key. Run
+          it ten times in a row, get the same parquet output.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Vehicle IDs &mdash; <code>core/vehicle_ids.py</code></h3>
+          <p>The first foundational primitive in <code>core/</code> we haven&rsquo;t built yet. Vehicle IDs in this fleet follow a pattern: three-digit prefix + sequence number (e.g. <code>815001</code>, prefix <code>815</code>, number <code>001</code>). The prefix classifies the vehicle:</p>
+          <ul>
+            <li><code>815</code>, <code>832</code> &mdash; AUTO fleet (city-owned automated collection trucks)</li>
+            <li>Anything else &mdash; MANUAL or OTHER (contractor, hand-collection)</li>
+          </ul>
+          <p>The module exposes a frozen <code>VehicleId</code> dataclass plus <code>parse_vehicle_id()</code> &mdash; tolerant of Excel-style noise (commas, trailing <code>.0</code> from floats, whitespace).</p>
+          <pre><code>v = parse_vehicle_id("815001")
+v.prefix  # "815"
+v.number  # "001"
+v.kind    # "AUTO"</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> File registry &mdash; <code>tonnage/registry.py</code></h3>
+          <p>Tonnage files arrive daily-ish in a folder. Two sources, two naming conventions:</p>
+          <ul>
+            <li>RAD exports &mdash; the &ldquo;ride-along data&rdquo; tonnage records</li>
+            <li>ARTS exports &mdash; the &ldquo;automated routing tonnage system&rdquo; records</li>
+          </ul>
+          <p>The registry: scan the folder, parse source + date from each filename, attach the file&rsquo;s mtime for tie-breaking. <code>pick_latest_file(registry, source)</code> returns the path of the most recent file for that source. Same input folder, same output &mdash; deterministic.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Cleaners &mdash; <code>tonnage/cleaners.py</code></h3>
+          <p>Each source has its own header conventions and quirks. The cleaners handle:</p>
+          <ul>
+            <li><strong>Header resolution</strong> &mdash; given a list of acceptable header names, find which one this file uses. Legacy systems rename columns occasionally; the cleaner is tolerant.</li>
+            <li><strong>Type coercion</strong> &mdash; dates, floats, fleet IDs &mdash; all the &ldquo;Excel exported numbers as strings or strings as numbers&rdquo; mess.</li>
+            <li><strong>Material code normalization</strong> &mdash; the two systems use different vocabularies for the same materials (RAD: <code>"RFS"</code> for refuse; ARTS: <code>"Refuse"</code>). <code>matl_norm_rad()</code> and <code>matl_norm_arts()</code> map them to a canonical form.</li>
+            <li><strong>Top-level entry points</strong>: <code>clean_arts_file(path)</code> and <code>clean_rad_file(path)</code> &mdash; return a clean DataFrame + a metadata dict.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Hash keys &mdash; <code>tonnage/keys.py</code></h3>
+          <p>For dedup we need a key that&rsquo;s deterministic from the row content alone &mdash; same row, same hash, every time, in every run. Trickier than it sounds because floats have rounding issues and datetimes have timezone issues.</p>
+          <p>The pattern: round tons to 3 decimals, floor datetimes to the minute, normalize text (strip + uppercase), then concatenate the key columns and hash. <code>add_keys_arts()</code> and <code>add_keys_rad()</code> attach the resulting <code>row_hash</code> column to each cleaned DataFrame.</p>
+          <p class="note">Why the floors and rounds? Because <code>0.1 + 0.2 != 0.3</code> in floating point, and a datetime read back from parquet might lose microseconds it had in Excel. If the hash isn&rsquo;t stable across round-trips, dedup falls apart.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Idempotent upsert &mdash; <code>tonnage/upsert.py</code></h3>
+          <p>One year, one parquet file per source: <code>tonnage_out/&lt;source&gt;/&lt;year&gt;.parquet</code>. The upsert step:</p>
+          <ol>
+            <li>Read the existing year file (if it exists).</li>
+            <li>Concatenate new rows.</li>
+            <li>Drop duplicates by <code>row_hash</code> &mdash; first occurrence wins.</li>
+            <li>Write back to disk.</li>
+          </ol>
+          <p>Running this on the same input twice does nothing on the second run, because every row hashes to a key that&rsquo;s already in the file.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Pipeline &mdash; <code>tonnage/pipeline.py</code></h3>
+          <p>The one entry point most callers use:</p>
+          <pre><code>from opentrash.tonnage.pipeline import run_ingest
+
+run_ingest(
+    data_dir="data/tonnage_in/",
+    out_dir="data/tonnage_out/",
+)</code></pre>
+          <p>Internally: scan registry → pick latest of each source → clean → add keys → upsert into the year-partitioned parquet store. The whole job is a few hundred lines but reads top-to-bottom as five clean steps.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">7</span> Docs deploy &mdash; <code>mkdocs.yml</code> + <code>.github/workflows/docs.yml</code></h3>
+          <p>Three small files turn on the live docs site at <code>opentrash.app</code>:</p>
+          <ul>
+            <li><code>mkdocs.yml</code> at repo root &mdash; MkDocs Material configuration. Theme is the same charcoal-and-cyan palette as the v1 site. Nav has Home and Architecture for now; more pages added as the package grows.</li>
+            <li><code>.github/workflows/docs.yml</code> &mdash; GitHub Actions workflow. On every push to main: install <code>mkdocs-material</code>, run <code>mkdocs gh-deploy --force</code>, which builds the site to a <code>gh-pages</code> branch.</li>
+            <li><code>docs/CNAME</code> &mdash; one line: <code>opentrash.app</code>. Tells GitHub Pages to serve under the custom domain.</li>
+          </ul>
+          <p class="note">First push after this lesson, the docs site rebuilds with the new architecture page &mdash; replaces whatever was there before. Take a look at <code>opentrash.app</code> after CI is green.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">8</span> Tests + push</h3>
+          <pre><code>pip install -e ".[dev]"
+ruff check .
+pytest -q
+git add . && git commit -m "Lesson 5: tonnage pipeline + vehicle IDs + docs deploy"
+git push origin main</code></pre>
+          <p>Two workflows now trigger: <code>ci.yml</code> runs tests, <code>docs.yml</code> rebuilds and deploys the site.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── README.md
+├── mkdocs.yml                     <span class="comment"># [new] docs site config</span>
+├── .github/workflows/
+│   ├── ci.yml
+│   └── docs.yml                   <span class="comment"># [new] docs deploy</span>
+├── docs/
+│   ├── architecture.md
+│   ├── index.md                   <span class="comment"># [new] docs home page</span>
+│   └── CNAME                      <span class="comment"># [new] custom domain</span>
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">core/</span>
+│   │   ├── crs.py
+│   │   ├── duckdb_session.py
+│   │   └── vehicle_ids.py         <span class="comment"># [new] fleet ID parsing</span>
+│   ├── <span class="dir">prep/</span>
+│   │   ├── sites.py
+│   │   ├── parcels.py
+│   │   └── static_layers.py
+│   ├── <span class="dir">tonnage/</span>
+│   │   ├── registry.py            <span class="comment"># [new] file inventory</span>
+│   │   ├── cleaners.py            <span class="comment"># [new] per-source cleaning</span>
+│   │   ├── keys.py                <span class="comment"># [new] row-hash dedup keys</span>
+│   │   ├── upsert.py              <span class="comment"># [new] idempotent year-partition merge</span>
+│   │   └── pipeline.py            <span class="comment"># [new] top-level ingest entry point</span>
+│   └── (cache, engine, patterns, routeview scaffolded)
+└── <span class="dir">tests/</span>
+    ├── test_sites.py
+    ├── test_crs.py
+    ├── test_duckdb_session.py
+    ├── test_parcels.py
+    ├── test_static_layers.py
+    ├── test_vehicle_ids.py        <span class="comment"># [new]</span>
+    └── test_tonnage.py            <span class="comment"># [new] full tonnage suite</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>A <strong>vehicle-ID primitive</strong> with prefix/number parsing and fleet classification &mdash; used everywhere fleet IDs appear.</li>
+          <li>A <strong>file registry</strong> that scans an input folder and parses source + date from filenames.</li>
+          <li><strong>Per-source cleaners</strong> for RAD and ARTS exports &mdash; handle header drift and material-code normalization.</li>
+          <li><strong>Hash-based dedup keys</strong> that are stable across round-trips through parquet.</li>
+          <li>An <strong>idempotent upsert</strong> into year-partitioned parquet &mdash; safe to re-run forever.</li>
+          <li>A <strong>pipeline</strong> entry point that wires it all together.</li>
+          <li><strong>Docs deploy live</strong> &mdash; <code>opentrash.app</code> now reflects the v2 architecture on every push.</li>
+        </ul>
+        <div class="callout">
+          The static and semi-static data layers are complete. Next lesson
+          we pivot to the live data stream: GPS adapters (Geotab + Postgres)
+          behind one Protocol, plus the cache-first layer.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>Idempotency in data pipelines:</strong> the same principle that drives database UPSERT exists at every scale &mdash; from one Excel file to a billion-row warehouse load. <a class="inline" href="https://docs.getdbt.com/docs/build/incremental-models" target="_blank" rel="noopener">dbt incremental models</a> are a good production-scale example.</li>
+          <li><strong>Hash-based dedup pitfalls:</strong> floats, datetimes, and unicode normalization are the three classic gotchas. The keys module handles them explicitly &mdash; worth reading the source.</li>
+          <li><strong>MkDocs Material:</strong> <a class="inline" href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">official site</a>. The theme is heavily customizable; we&rsquo;re using ~5% of its features and the result already looks professional.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 6 &mdash; GPS adapters &amp; cache:</strong> the live
+          data path. Two vendors (Geotab API + Postgres stream) behind one
+          Protocol; cache-first reads (one parquet per vehicle per day).
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
