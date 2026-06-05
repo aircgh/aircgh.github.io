@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 4 — Sites · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 4 of the opentrash course: customer sites loaded from CSV, turned into a points layer, spatially joined to parcels to attach APNs.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 4 · Sites</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 4 of 12 &middot; The customer bridge</span>
+        <h1>From a CSV of customers to a layer of points on parcels.</h1>
+        <p class="lede">
+          Sites are customer accounts &mdash; they come from a Salesforce export
+          with addresses and lat/lon coordinates. They&rsquo;re the bridge between
+          billing (who pays for service) and operations (which parcel gets
+          serviced). This lesson turns the tabular sites table from Lesson 0
+          into a real points layer, then uses point-in-polygon spatial join to
+          attach each site to its parcel.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~60 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> prep/sites (three new functions)</span>
+          <span class="hero-chip"><strong>Result:</strong> sites with parcel APNs attached via geometry</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Extend <code>prep/sites.py</code> with three new functions that take
+          the existing tabular cleaner one step further &mdash; into geometry.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>sites_to_geo(df, lon_col, lat_col, source_crs)</code> &mdash; build a points GeoDataFrame from the cleaned tabular sites; drop rows with missing or out-of-range coordinates.</li>
+          <li><code>attach_apns_via_spatial_join(sites_gdf, parcels_gdf, apn_col)</code> &mdash; point-in-polygon spatial join. Every site gets the APN of the parcel it sits on; sites that fall outside any parcel get <code>NaN</code> (a useful data-quality flag).</li>
+          <li><code>load_sites_with_apns(sites_path, parcels_gdf, ...)</code> &mdash; the convenience one-call entry point: load &rarr; clean &rarr; geom &rarr; spatial join &rarr; APNs attached.</li>
+        </ul>
+        <div class="callout">
+          <strong>Why a spatial join when the data has an APN column already?</strong>
+          Because data quality is what it is &mdash; APNs in customer records
+          drift, get typo&rsquo;d, fall out of sync with the assessor&rsquo;s map.
+          A geometry-based attribution is grounded truth: this lon/lat is
+          inside <em>this</em> parcel, full stop. When the customer-record APN
+          and the spatially-derived APN agree, you&rsquo;ve confirmed the
+          record. When they disagree, you&rsquo;ve found a data-quality
+          issue worth investigating.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Sites as points &mdash; <code>sites_to_geo()</code></h3>
+          <p>Take the cleaned tabular sites (from <code>load_sites</code> &mdash; the function we built back in Lesson 0) and turn it into a points GeoDataFrame:</p>
+          <ul>
+            <li>Coerce the lon/lat columns to numeric (a tolerant <code>pd.to_numeric(errors=&quot;coerce&quot;)</code>; any junk becomes NaN).</li>
+            <li>Drop rows with missing coordinates or out-of-range values (lon outside [&minus;180, 180] or lat outside [&minus;90, 90]). A point with no location can&rsquo;t be joined to anything; keeping it would just pollute downstream output with nulls.</li>
+            <li>Build <code>shapely.geometry.Point</code> objects from the survivors and wrap them in a GeoDataFrame at <code>source_crs</code> (default EPSG:4326, virtually always right for CSV).</li>
+          </ul>
+          <p class="note">Column names are knobs (<code>lon_col</code>, <code>lat_col</code>) with sensible defaults (<code>&quot;Longitude&quot;</code>, <code>&quot;Latitude&quot;</code>). Salesforce uses those; other exports might use <code>&quot;Long&quot;</code> / <code>&quot;Lat&quot;</code> or <code>&quot;X-Coordinate&quot;</code> / <code>&quot;Y-Coordinate&quot;</code>. Same pattern; just pass the right column names.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Spatial join &mdash; <code>attach_apns_via_spatial_join()</code></h3>
+          <p>The cornerstone operation: point-in-polygon join via GeoPandas&rsquo; <code>sjoin</code>.</p>
+          <pre><code>joined = gpd.sjoin(
+    sites_gdf,
+    parcels_min,
+    how="left",       # keep all sites; APN becomes NaN for misses
+    predicate="within"   # point is "within" polygon
+)</code></pre>
+          <ul>
+            <li><strong>CRS matching</strong> &mdash; both sides must agree on what coordinates mean. If sites are in EPSG:4326 and parcels are in EPSG:2230, the function reprojects parcels to match sites (we preserve the sites&rsquo; CRS so any downstream rendering doesn&rsquo;t need to reproject again).</li>
+            <li><strong>Column collision avoidance</strong> &mdash; we keep only <code>APN</code> + <code>geometry</code> from parcels before the join, because sites and parcels often share field names like <code>ADDRESS</code> or <code>OWNER</code> which would collide.</li>
+            <li><strong>Cleanup</strong> &mdash; sjoin adds an <code>index_right</code> column we don&rsquo;t want; we drop it before returning.</li>
+          </ul>
+          <p class="note">A parcel is a non-overlapping property lot, so a point sits on at most one parcel in practice. We don&rsquo;t need to disambiguate multi-matches; the <code>within</code> predicate handles boundary cases via shapely&rsquo;s own rules.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> The convenience entry point &mdash; <code>load_sites_with_apns()</code></h3>
+          <p>For most callers, the one-call entry point is what you want:</p>
+          <pre><code>from opentrash.prep.parcels import load_parcels
+from opentrash.prep.sites import load_sites_with_apns
+
+parcels = load_parcels("data/parcels.gpkg")
+sites_with_apns = load_sites_with_apns("data/sites_export.csv", parcels)</code></pre>
+          <p>Equivalent to chaining <code>load_sites()</code> &rarr; <code>sites_to_geo()</code> &rarr; <code>attach_apns_via_spatial_join()</code>, but in one obvious function for the common case.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Tests with synthetic Salesforce-style data</h3>
+          <p>Seven new tests appended to <code>tests/test_sites.py</code>:</p>
+          <ul>
+            <li><code>sites_to_geo</code> builds points; drops bad coords; raises when columns missing.</li>
+            <li><code>attach_apns</code> finds parcels; missing APN column raises; missing CRS raises.</li>
+            <li>Cross-CRS works &mdash; if parcels are in EPSG:2230 and sites are in EPSG:4326, the function reprojects parcels in.</li>
+          </ul>
+          <pre><code>pip install -e ".[dev]"
+ruff check .
+pytest -q</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Commit and push</h3>
+          <pre><code>git add .
+git commit -m "Lesson 4: sites_to_geo + spatial join to parcels"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added or extended this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── README.md
+├── .github/workflows/ci.yml
+├── docs/architecture.md
+├── <span class="dir">opentrash/</span>
+│   ├── __init__.py
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">core/</span>
+│   │   ├── crs.py
+│   │   └── duckdb_session.py
+│   ├── <span class="dir">prep/</span>
+│   │   ├── sites.py               <span class="comment"># [updated] +sites_to_geo, +spatial join, +entry point</span>
+│   │   ├── parcels.py
+│   │   └── static_layers.py
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># scaffolded</span>
+│   ├── <span class="dir">engine/</span>                <span class="comment"># scaffolded — THE ROUTING ENGINE</span>
+│   ├── <span class="dir">patterns/</span>              <span class="comment"># scaffolded</span>
+│   └── <span class="dir">routeview/</span>             <span class="comment"># scaffolded</span>
+└── <span class="dir">tests/</span>
+    ├── test_sites.py              <span class="comment"># [updated] +7 geometry/spatial-join tests</span>
+    ├── test_crs.py
+    ├── test_duckdb_session.py
+    ├── test_parcels.py
+    └── test_static_layers.py</div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li><strong>Sites as a points layer</strong> built from a Salesforce-style CSV &mdash; with sensible defaults for the column names and tolerant handling of bad coordinates.</li>
+          <li>A <strong>point-in-polygon spatial join</strong> that bridges customer accounts to assessor parcels via geometry, not assumed-correct identifiers.</li>
+          <li>A <strong>one-call entry point</strong> &mdash; <code>load_sites_with_apns()</code> &mdash; for the common case.</li>
+          <li>Seven new tests covering bad-coord handling, the join itself, cross-CRS behavior, and the error paths.</li>
+        </ul>
+        <div class="callout">
+          The static-data foundation is complete: parcels, routes, facilities,
+          sites. The next lesson adds the last static-ish piece &mdash; tonnage
+          ingestion &mdash; before we pivot to the live data stream.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>GeoPandas sjoin:</strong> <a class="inline" href="https://geopandas.org/en/stable/docs/user_guide/mergingdata.html#spatial-joins" target="_blank" rel="noopener">spatial joins user guide</a> &mdash; the predicates (within, intersects, contains) and when each applies.</li>
+          <li><strong>Shapely Point objects:</strong> <a class="inline" href="https://shapely.readthedocs.io/en/stable/reference/shapely.Point.html" target="_blank" rel="noopener">Point docs</a> &mdash; the tiny class that powers tens of thousands of customer records.</li>
+          <li><strong>Data-quality framing:</strong> when you reconcile the spatially-derived APN against a record-carried APN, agreements are silent confirmation and disagreements are usually the interesting stuff &mdash; addresses split across parcels, geocoder errors, parcel re-numbering after a re-subdivision.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 5 &mdash; Tonnage:</strong> the Excel-to-parquet
+          ingestion pipeline. Daily-ish files, vehicle-ID parsing,
+          hash-based idempotent dedup. After this, all static and
+          semi-static data is in &mdash; the GPS stream is next.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
