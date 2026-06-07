@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 10 — Pattern Detection · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 10 of the opentrash course: route-agnostic per-parcel service-signature detection — weekly1, weekly2, biweekly — via chunked DuckDB.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 10 · Pattern Detection</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 10 of 12 &middot; The first product</span>
+        <h1>How regular are the ants? A year of pings, condensed to one row per parcel.</h1>
+        <p class="lede">
+          You have months or years of enriched pings on disk. Each one carries
+          a parcel APN, a vehicle, a timestamp. The question this lesson
+          answers: for every parcel, who shows up <em>regularly</em>, on what
+          day, at what hour, with what cadence &mdash; weekly, every other
+          week, irregularly? The output is one wide table, one row per parcel,
+          with weekly1 / weekly2 / biweekly slots. Plot it as a gradient by
+          DOW and hour and the route choreography reveals itself.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~100 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> patterns/{config,window,detector,runner,validator}</span>
+          <span class="hero-chip"><strong>Result:</strong> per-parcel service signatures across an analysis window</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Five modules. One product. Designed for route-agnostic detection
+          with chunked DuckDB execution.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>patterns/config.py</code> &mdash; <code>PatternConfig</code>, all 15 detection knobs in one frozen dataclass.</li>
+          <li><code>patterns/window.py</code> &mdash; <code>compute_window("past_year")</code>, <code>"past_quarter"</code>, etc. &mdash; tiny helper that turns named periods into explicit dates.</li>
+          <li><code>patterns/detector.py</code> &mdash; <code>detect_patterns_chunk()</code>, the DuckDB CTAS pipeline. Pure function; one chunk at a time.</li>
+          <li><code>patterns/runner.py</code> &mdash; <code>run_patterns()</code>, the chunked orchestrator with idempotent writes + skip-if-fresh.</li>
+          <li><code>patterns/validator.py</code> &mdash; post-run diagnostics: how many parcels got a pattern? Are the slots disjoint? Is the biweekly score distribution healthy?</li>
+        </ul>
+        <div class="callout">
+          <strong>The rule that drives the algorithm:</strong> detection groups
+          on <code>(APN, vehicle_id)</code> pairs <em>only</em>. Route columns
+          (<code>route_ref</code>, <code>route_org</code>, <code>route_rec</code>)
+          flow through from parcels_wkb as sidecar metadata, but never enter the
+          detection logic. Why? Because the top-3 ranked vehicles per parcel
+          naturally map to the 3 commodities (refuse, organics, recycling) &mdash;
+          one vehicle is dedicated to one commodity stream. The algorithm
+          doesn&rsquo;t need to be told which vehicle does what; the ranking
+          surfaces it.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> The window helper &mdash; <code>patterns/window.py</code></h3>
+          <p>Pattern detection runs over an explicit time window. The detector takes <code>start_date</code> and <code>end_date</code> dates; this helper turns operational shorthand into the matching pair:</p>
+          <pre><code>compute_window("past_year")    # -> (today - 365 days, today)
+compute_window("past_quarter") # -> (today - 90 days, today)
+compute_window("custom", start_date="2025-01-01",
+                          end_date="2025-12-31")</code></pre>
+          <p>Decoupled from the detector so the time-window decision stays visible at the call site, and so a test can dial in any reproducible window via the <code>anchor</code> parameter.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Config &mdash; <code>patterns/config.py</code></h3>
+          <p>Fifteen knobs in one frozen dataclass:</p>
+          <ul>
+            <li><strong>Stop binning</strong> &mdash; <code>stop_bin_minutes=15</code> for dwell de-noising. When a truck passes the same parcel twice in a short window (e.g. serving both sides of a street), the pings cluster within 15 min; the bin collapses them to one visit. Removes pass-by noise without losing real visits.</li>
+            <li><strong>Weekly acceptance</strong> &mdash; <code>weekly_min_regularity=0.25</code>, <code>weekly_min_weeks=6</code>, <code>weekly_min_weeks_ratio=0.25</code>. Effective threshold = <code>max(floor, ratio * total_weeks)</code> &mdash; flat floor protects short windows, ratio scales with long windows.</li>
+            <li><strong>Biweekly</strong> &mdash; gap target 14 days &plusmn; 4, phase share &ge; 0.72, composite score &ge; 0.58, max weekly regularity 0.80 (above 80% it&rsquo;s weekly, not biweekly).</li>
+            <li><strong>Composite biweekly scoring</strong> &mdash; weights on phase share, percent of gaps near 14 days, and "regularity centeredness" (rewards values near 0.5, which is what a clean biweekly looks like in weekly-regularity terms). Weights sum to 1.0 by convention.</li>
+          </ul>
+          <p>Defaults match the values that produced clean patterns on a year of real residential-collection data. Override per-field for a different agency&rsquo;s cadence.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Detector &mdash; the DuckDB CTAS pipeline</h3>
+          <p>The hardest-working file in the package. Read it top to bottom; it&rsquo;s a tour of set-based analytics done right:</p>
+          <pre><code>enriched pings + parcels_wkb (sidecar)
+  WHERE apn IS NOT NULL AND dt_local BETWEEN start AND end
+    [AND apn IN (chunk's APNs)]
+  -&gt; refined         (the analysis universe — route-agnostic from here)
+  -&gt; stops           (15-min dwell debouncing)
+  -&gt; daily_visits    (one row per parcel/vehicle/day)
+  -&gt; dow_stats       (weeks_present / total_weeks per parcel/vehicle/DOW)
+  -&gt; best_dow        (top DOW per parcel/vehicle)
+  -&gt; best_days       (the actual daily rows on that best DOW)
+  Branch A — biweekly:
+    -&gt; biweekly_gaps        (gap-day analysis between consecutive visits)
+    -&gt; biweekly_phase       (even/odd week share around an anchor)
+    -&gt; biweekly_scored      (composite score, threshold filter)
+    -&gt; biweekly_best        (top parcel/vehicle pair per APN)
+  Branch B — weekly ranking (excludes biweekly winners):
+    -&gt; weekly_pool          (best_dow rows minus biweekly winners)
+    -&gt; weekly_ranked        (row_number per APN)
+    -&gt; weekly1, weekly2     (rank 1 and 2)
+  Final:
+    -&gt; patterns             (parcels_wkb LEFT JOIN weekly1 weekly2 biweekly)</code></pre>
+          <p>One DuckDB connection, one chunk, one wide DataFrame out. No spatial extension needed &mdash; this is pure timeline analysis.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> The runner &mdash; chunked, idempotent, resumable</h3>
+          <p>The detector is a pure function. The runner is the orchestrator. It iterates chunks of parcels (one per route_id in parcels_wkb, for organizational batching only), calls the detector once per chunk, writes the result to a partitioned parquet:</p>
+          <pre><code>patterns/
+  &lt;window_label&gt;/                       e.g. "2025-03-01_to_2026-02-28"
+    by_route/
+      11722.parquet                       one chunk per route_id
+      11632.parquet
+      ...
+    _manifest.parquet                     audit trail: ran when, with what config</code></pre>
+          <p>Three properties that matter for real ops:</p>
+          <ul>
+            <li><strong>Idempotent</strong> &mdash; re-running a chunk overwrites cleanly. Same input, same output.</li>
+            <li><strong>Resumable</strong> &mdash; the runner skips chunks whose output is newer than the inputs. Crash mid-run? Re-run; it picks up.</li>
+            <li><strong>Parallel-safe at the caller</strong> &mdash; chunks are independent. A workflow runner can dispatch them across processes without locking; each process opens its own DuckDB connection.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Validator &mdash; post-run diagnostics</h3>
+          <p>After a run, the validator answers: how many parcels got a pattern? Are weekly1 and weekly2 picking the same vehicle (a bug; they should be disjoint)? What does the biweekly score distribution look like? Returns a single <code>ValidationReport</code> dataclass &mdash; print it, or pipe it into a small markdown report.</p>
+          <pre><code>from opentrash.patterns.validator import validate_patterns
+from opentrash.patterns.runner import load_patterns
+
+combined = load_patterns("patterns/", "2025-03-01_to_2026-02-28")
+report = validate_patterns(combined)
+print(report)</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Tests + commit</h3>
+          <p>22 tests covering the window helper, config invariants, the detector on a known weekly pattern (Tuesdays at 8am for 52 weeks &rarr; weekly1_regularity &ge; 0.95), a known biweekly pattern, the "top 3 commodities" scenario (refuse + organics + recycling on one parcel &rarr; correct vehicles land in weekly1/weekly2/biweekly), sparse-input behavior (no pattern detected), the floor/ratio threshold math, runner chunking + skip-if-fresh + refresh, and validator basics. All run on synthetic data &mdash; no real GPS, no network.</p>
+          <pre><code>pip install -e ".[dev,geotab,postgres]"
+ruff check .
+pytest -q
+git add . && git commit -m "Lesson 10: pattern detection — route-agnostic chunked DuckDB"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml &middot; mkdocs.yml &middot; .github/workflows/{ci,docs}.yml
+├── docs/{index,architecture}.md + CNAME
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># base, geotab, postgres</span>
+│   ├── <span class="dir">core/</span>                  <span class="comment"># crs, duckdb_session, vehicle_ids</span>
+│   ├── <span class="dir">prep/</span>                  <span class="comment"># sites, parcels, static_layers, parcels_wkb</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># gps_cache, gps_indexes, master_index</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># registry, cleaners, keys, upsert, pipeline</span>
+│   ├── <span class="dir">engine/</span>                <span class="comment"># config, enrichment, segments</span>
+│   ├── <span class="dir">patterns/</span>
+│   │   ├── config.py              <span class="comment"># [new] 15 knobs</span>
+│   │   ├── window.py              <span class="comment"># [new] compute_window helper</span>
+│   │   ├── detector.py            <span class="comment"># [new] DuckDB CTAS pipeline</span>
+│   │   ├── runner.py              <span class="comment"># [new] chunked orchestrator</span>
+│   │   └── validator.py           <span class="comment"># [new] post-run diagnostics</span>
+│   └── (routeview scaffolded)
+└── <span class="dir">tests/</span>
+    ├── (existing 16 test files)
+    └── test_patterns.py           <span class="comment"># [new] 22 tests</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>A <strong>route-agnostic detector</strong> that groups on (parcel, vehicle) only &mdash; the top-3 vehicles per parcel emerge as the 3 commodities naturally.</li>
+          <li>A <strong>dwell-debounced visit counter</strong> &mdash; the 15-min bin removes pass-by noise without losing real visits.</li>
+          <li><strong>Floor + ratio thresholds</strong> &mdash; weekly_min_weeks = max(6, 25% of total_weeks) &mdash; scales gracefully across short and long analysis windows.</li>
+          <li>A <strong>chunked runner</strong> that processes the city in route-sized batches, writes idempotent parquets, skips up-to-date chunks, and is parallel-safe at the caller layer.</li>
+          <li><strong>Zero spatial joins</strong> &mdash; the detection algorithm is pure (parcel, vehicle) timeline analysis on top of the engine&rsquo;s output. The architectural rule paying off again.</li>
+        </ul>
+        <div class="callout">
+          One product on top of the engine, done. RouteView is next &mdash; the
+          interactive map that takes one route, one day, one vehicle and
+          renders the choreography on top of static GIS layers + enriched
+          pings + segments. The macro view (patterns) and the micro view
+          (RouteView) together: how the routes are <em>actually</em> driven.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>DuckDB CTAS pipelines:</strong> <a class="inline" href="https://duckdb.org/docs/sql/statements/create_table#create-table-as-select-ctas" target="_blank" rel="noopener">official docs</a> &mdash; the "build a derived table in one shot" idiom we lean on throughout.</li>
+          <li><strong>Idempotency in data pipelines:</strong> the same pattern as <a class="inline" href="https://docs.getdbt.com/docs/build/incremental-models" target="_blank" rel="noopener">dbt incremental models</a> at production scale. Same shape, smaller library.</li>
+          <li><strong>Composite scoring:</strong> the biweekly score blends three signals (phase, gap percentage, regularity centeredness) into one threshold. The general technique &mdash; weighted sum of normalized signals &mdash; is everywhere from ML feature engineering to credit scoring.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 11 &mdash; RouteView:</strong> one route + one day + one
+          vehicle, rendered as an interactive MapLibre HTML. Reads enriched
+          pings, segments, and patterns; renders parcels-served vs missed, the
+          truck&rsquo;s trail, the load cycles. The micro counterpart to
+          patterns&rsquo; macro view.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
