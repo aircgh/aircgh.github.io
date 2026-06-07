@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 9 — Segments · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 9 of the opentrash course: load-organized workday timeline derived from enriched pings — depot, windshield, collection, dump.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 9 · Segments</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 9 of 12 &middot; The workday timeline</span>
+        <h1>An ant colony has a routine. So does a collection truck.</h1>
+        <p class="lede">
+          A typical residential-collection day looks like an ant colony at
+          work: leave home, travel to the site, do the job, come back to
+          dump, repeat until done, return home. The truck has the same
+          choreography &mdash; depot, windshield, collection, dump, repeat.
+          This lesson takes the enriched ping stream from Lesson 8 and
+          aggregates it into the segment-level <em>timeline</em>: one row
+          per phase, organized by <strong>load</strong>, with mileage and
+          duration baked in. Plus operational red flags when the
+          choreography breaks.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~90 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> engine/segments &middot; engine/config (mileage knob)</span>
+          <span class="hero-chip"><strong>Result:</strong> the load-organized workday timeline</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          One module, one canonical artifact, one operational tool.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>derive_phase_per_ping()</code> &mdash; classify each enriched ping as <code>depot</code>, <code>landfill</code>, <code>collection</code>, or <code>windshield</code> from the L8 enrichment flags + speed.</li>
+          <li><code>build_timeline()</code> &mdash; gap-and-island grouping into chronological segments, with load numbers, cumulative haversine mileage, and duration per segment.</li>
+          <li><code>flag_choreography_violations()</code> &mdash; surface operational red flags from the timeline: loaded depot returns/departures, overrun loads, mid-load route switches.</li>
+          <li><code>build_all_segments()</code> &mdash; the driver: read one enriched parquet, write <code>timeline.parquet</code> + <code>violations.parquet</code>.</li>
+          <li><code>engine/config.py</code> gets a new knob: <code>mileage_inflation_pct</code> for opt-in road-network approximation.</li>
+        </ul>
+        <div class="callout">
+          <strong>The choreography we&rsquo;re modeling:</strong>
+          <code>DEPOT_DEPARTURE</code> &rarr; <code>LOAD 1 (windshield + collection + dump)</code> &rarr; <code>LOAD 2</code> &rarr; <code>LOAD 3</code>? &rarr; <code>DEPOT_ARRIVAL</code>.
+          A typical 10-hour day is 2&ndash;3 loads. The depot bookends carry no
+          load number. Every active segment carries a load number 1..N.
+          That structure is what makes operational reports possible: per-load
+          mileage, per-load duration, per-load tonnage (joined in a later
+          product lesson).
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Phase per ping &mdash; <code>derive_phase_per_ping()</code></h3>
+          <p>The enriched ping already carries the flags we need (<code>at_depot</code>, <code>in_landfill</code>, <code>route_id</code>, <code>speed_mph</code>). Phase derivation is a 4-rule priority cascade:</p>
+          <ol>
+            <li><code>at_depot</code> = true &rarr; <code>depot</code> (overrides everything &mdash; start/end-of-shift dwell)</li>
+            <li><code>in_landfill</code> = true &rarr; <code>landfill</code> (truck is tipping)</li>
+            <li><code>route_id</code> not null AND <code>speed_mph &le; slow_mph_max</code> &rarr; <code>collection</code></li>
+            <li>otherwise &rarr; <code>windshield</code> (travel time)</li>
+          </ol>
+          <p>Implementation is one numpy <code>np.full(len, &quot;windshield&quot;)</code> + 3 boolean masks. No loops, no Python-level row iteration. Millions of pings classify in milliseconds.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Gap-and-island &rarr; segments</h3>
+          <p>Adjacent rows sharing the same phase (and route_id, for collection phases) collapse into one segment. Classic SQL pattern done in pandas:</p>
+          <pre><code>effective_key = where(is_collection, phase + "|" + route_id, phase)
+boundaries = effective_key[1:] != effective_key[:-1]
+segment_id = boundaries.cumsum()</code></pre>
+          <p>The route_id is part of the key <em>only</em> for collection segments. A truck driving down route A then B then back to A produces three collection segments, not one &mdash; we want per-route attribution. Windshield phases ignore route_id (the truck is just moving; the route polygons it passes through aren&rsquo;t meaningful).</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Mileage &mdash; haversine, cumulative, optional inflation</h3>
+          <p>For each segment, sum the great-circle distance between consecutive pings:</p>
+          <pre><code>haversine(lat1, lon1, lat2, lon2)   # great-circle, miles
+miles = sum(haversine(p_i, p_{i+1}) for i in segment)
+miles *= (1 + config.mileage_inflation_pct)</code></pre>
+          <ul>
+            <li><strong>Haversine</strong> &mdash; accurate to ~0.5% at this scale. No reprojection cost; numpy-vectorized over all ping-pairs in a segment at once.</li>
+            <li><strong>Cumulative</strong> &mdash; sum of pairwise distances reflects what the truck drove; displacement (first-to-last) would zero out for any loop.</li>
+            <li><strong>Inflation knob</strong> &mdash; straight-line GPS mileage systematically undercounts real road-network distance by 5&ndash;15% because trucks follow streets (which curve) while the line cuts corners. <code>mileage_inflation_pct</code> defaults to <code>0.0</code> (honest straight-line). Set to <code>0.08</code> for an 8% road-network approximation. Never silently inflate; let the operator opt in.</li>
+          </ul>
+          <p class="note">Higher accuracy would require a road network (OpenStreetMap, OSM). That&rsquo;s a future release; for now the inflation knob calibrates against whatever ground-truth dataset the operator can produce.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Load numbers &mdash; the workday backbone</h3>
+          <p>Walk the timeline chronologically. Bookend depot segments get <code>load_number = NaN</code>. The first active segment after depot_departure starts load 1. After every dump, look ahead: if any future segment is a collection or dump, this is a new load. If the next active segment is depot_arrival, the truck is going home; that windshield stays in the current load.</p>
+          <pre><code>DEPOT_DEPARTURE     load=NaN
+windshield          load=1   (going to first route)
+collection (A)      load=1
+dump                load=1   (load 1 complete)
+windshield          load=2   (more work ahead, going to next route)
+collection (B)      load=2
+dump                load=2   (load 2 complete)
+windshield          load=2   (going home — no future work)
+DEPOT_ARRIVAL       load=NaN</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Choreography violations &mdash; the operational payoff</h3>
+          <p>The timeline is descriptive. The violations are what make it useful:</p>
+          <ul>
+            <li><code>loaded_depot_return</code> (severity high) &mdash; day ended on a collection segment without a closing dump. Truck went home loaded.</li>
+            <li><code>loaded_depot_departure</code> (severity high) &mdash; day started with a dump before any collection. Truck started loaded from yesterday.</li>
+            <li><code>overrun_loads</code> (severity medium) &mdash; more than 3 loads. Review for shift overrun.</li>
+            <li><code>mid_load_route_switch</code> (severity low) &mdash; a single load touched multiple route_ids. Could be HTC parcels off the main route, or could indicate routing inefficiency.</li>
+          </ul>
+          <p class="note">This is the analytical payoff of the segment abstraction. A pile of GPS pings is just dots; a load-organized timeline is a <em>workday</em>; flagged violations are a <em>review queue</em>.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Driver + output layout &mdash; <code>build_all_segments()</code></h3>
+          <pre><code>build_all_segments(
+    enriched_path="enriched/2026-01-18/815001.parquet",
+    out_root="segments/",
+)
+# writes:
+#   segments/timeline/2026-01-18/815001.parquet
+#   segments/violations/2026-01-18/815001.parquet</code></pre>
+          <p>One enriched vehicle-day in, two parquets out. Loop over the L7 master index and you get the whole fleet&rsquo;s timeline in one batch.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">7</span> Tests + commit</h3>
+          <p>26 tests covering the haversine math, phase derivation cascade, gap-and-island grouping, load numbering edge cases, mileage inflation, and every violation type. All synthetic data &mdash; no DuckDB, no network. The whole suite runs in under 2 seconds.</p>
+          <pre><code>pip install -e ".[dev,geotab,postgres]"
+ruff check .
+pytest -q
+git add . && git commit -m "Lesson 9: segments — load-organized timeline + violations"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml &middot; mkdocs.yml &middot; .github/workflows/{ci,docs}.yml
+├── docs/{index,architecture}.md + CNAME
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># base, geotab, postgres</span>
+│   ├── <span class="dir">core/</span>                  <span class="comment"># crs, duckdb_session, vehicle_ids</span>
+│   ├── <span class="dir">prep/</span>                  <span class="comment"># sites, parcels, static_layers, parcels_wkb</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># gps_cache, gps_indexes, master_index</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># registry, cleaners, keys, upsert, pipeline</span>
+│   ├── <span class="dir">engine/</span>
+│   │   ├── config.py              <span class="comment"># [updated] +mileage_inflation_pct</span>
+│   │   ├── enrichment.py
+│   │   └── segments.py            <span class="comment"># [new] timeline + violations</span>
+│   └── (patterns, routeview scaffolded)
+└── <span class="dir">tests/</span>
+    ├── (existing 15 test files)
+    └── test_engine_segments.py    <span class="comment"># [new] 26 tests</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>A <strong>per-ping phase classifier</strong> &mdash; depot / landfill / collection / windshield, derived from the L8 enrichments via a 4-rule priority cascade.</li>
+          <li>A <strong>load-organized timeline</strong> &mdash; one row per segment, chronological, with cumulative haversine mileage and load numbers that respect the &ldquo;going home&rdquo; windshield case.</li>
+          <li><strong>Choreography-violation flags</strong> &mdash; four operational red flags surfaced from the timeline. The descriptive becomes prescriptive.</li>
+          <li>An <strong>opt-in mileage inflation knob</strong> &mdash; default 0.0; honest reporting; calibrate against ground truth when needed.</li>
+          <li><strong>Zero spatial joins.</strong> The whole module is a pure aggregation on the engine&rsquo;s enriched-ping output. The L8 architectural rule paying off for the first time.</li>
+        </ul>
+        <div class="callout">
+          With the engine and segments built, the package now has both
+          ingredients for downstream products. Patterns (next) reads enriched
+          pings + segments to surface per-parcel service signatures.
+          RouteView reads them to render a single-route, single-day map.
+          Both are pure consumers; neither does spatial work.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>Haversine formula:</strong> <a class="inline" href="https://en.wikipedia.org/wiki/Haversine_formula" target="_blank" rel="noopener">Wikipedia</a> &mdash; great-circle distance, taught for centuries to navigators.</li>
+          <li><strong>Gap-and-island problem:</strong> <a class="inline" href="https://www.sqlservercentral.com/articles/gaps-and-islands" target="_blank" rel="noopener">canonical pattern</a> &mdash; SQL by origin, pandas by adaptation. Recognize it once and you&rsquo;ll see it everywhere event-stream data appears.</li>
+          <li><strong>The ant colony as metaphor:</strong> a real research thread on <a class="inline" href="https://en.wikipedia.org/wiki/Ant_colony_optimization_algorithms" target="_blank" rel="noopener">ACO algorithms</a> &mdash; same routine-following behavior at much larger scale. Different problem, same intuition.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 10 &mdash; Pattern detection:</strong> per-parcel service
+          signatures (weekly1, weekly2, biweekly) derived from a long history of
+          enriched pings. Zero spatial joins; pure DuckDB CTAS aggregation. The
+          first true product on top of the engine.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
