@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 8 — The Routing Engine · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 8 of the opentrash course: the routing engine — one DuckDB pass joins every GPS ping to every applicable GIS layer.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 8 · The Routing Engine</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 8 of 12 &middot; The architectural payoff</span>
+        <h1>One spatial join. Done once. For everything that follows.</h1>
+        <p class="lede">
+          Eight lessons have been preparation. Foundational primitives,
+          static GIS layers, GPS adapters, the cache, the substrate &mdash; all
+          of it set up so that today, one module can do the only spatial join
+          the package needs. Every GPS ping joins, in one DuckDB pass, to
+          its route polygon, nearest parcel, landfill membership, and depot
+          proximity. The output is the canonical <em>enriched ping</em>
+          stream. From here forward, every downstream module is a pure
+          aggregation on top of it.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~90 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> engine/config &middot; engine/enrichment</span>
+          <span class="hero-chip"><strong>Result:</strong> the canonical enriched ping stream</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Two modules, one architectural payoff.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>engine/config.py</code> &mdash; <code>EngineConfig</code>, a frozen dataclass holding every tunable knob the engine uses: parcel edge distance, slow-speed threshold for service-event candidacy, landfill buffer, depot radius, output CRS, and batch size. One place to read, one place to change.</li>
+          <li><code>engine/enrichment.py</code> &mdash; <code>enrich_pings()</code>: the single spatial-join entry point. Takes a vehicle-day&rsquo;s pings and the substrate; returns the same pings with four new columns (<code>route_id</code>, <code>apn</code>, <code>in_landfill</code>, <code>at_depot</code>). Plus <code>enrich_vehicle_day()</code>, the convenience that reads a cache file and writes an enriched parquet in the mirror layout.</li>
+        </ul>
+        <div class="callout">
+          <strong>The rule the whole architecture rests on:</strong>
+          <em>spatial joins are infrastructure; products are calculations.</em>
+          The engine does the spatial work once. Every downstream module &mdash;
+          segments, patterns, RouteView, reports &mdash; reads the engine&rsquo;s
+          output and aggregates. None of them open a parcel polygon. None of
+          them buffer a landfill. The rule is what keeps the system simple
+          even as the surface area grows.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Engine config &mdash; <code>engine/config.py</code></h3>
+          <p>A frozen dataclass that surfaces every tunable value. Defaults reflect the City of San Diego setup; override individual fields for a different agency or commodity:</p>
+          <pre><code>@dataclass(frozen=True, slots=True)
+class EngineConfig:
+    parcel_edge_ft: float = 25.0     # how close to parcel boundary counts
+    slow_mph_max: float = 12.0       # fast pings don't service parcels
+    landfill_buffer_ft: float = 50.0
+    depot_radius_ft: float = 250.0
+    output_crs: str = "EPSG:4326"
+    batch_size: int = 200_000</code></pre>
+          <p>Why a dataclass and not a settings file? Because the engine is library code, not an application. The caller&rsquo;s notebook owns configuration; the package gives them a typed, immutable object to pass.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Canonical output shape &mdash; <code>ENRICHED_COLUMNS</code></h3>
+          <p>Six original GPS columns + four engine-added columns, in this exact order:</p>
+          <pre><code>ENRICHED_COLUMNS = (
+    "vehicle_id", "dt_utc", "dt_local", "lat", "lon", "speed_mph",
+    "route_id",       # the route polygon containing the ping, or NULL
+    "apn",            # nearest parcel (within parcel_edge_ft), or NULL
+    "in_landfill",    # bool: ping is inside any landfill polygon
+    "at_depot",       # bool: ping is within depot_radius_ft of the depot
+)</code></pre>
+          <p>Downstream modules &mdash; segments (Lesson 9), patterns (Lesson 10), RouteView (Lesson 11) &mdash; expect this shape. Treat the column tuple as the contract.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> The single CTAS &mdash; <code>enrich_pings()</code></h3>
+          <p>The whole enrichment is one DuckDB <code>CREATE TABLE AS SELECT</code>. Inputs registered as views; LEFT JOINs ensure pings are never dropped:</p>
+          <pre><code>WITH ping_routes AS (
+    SELECT p.*, r.route_id
+    FROM pings p
+    LEFT JOIN routes r
+        ON ST_Within(ST_Point(p.lon, p.lat),
+                     ST_GeomFromWKB(r.geom_wkb))
+),
+ping_parcels AS (
+    SELECT pr.*, pc.APN AS apn
+    FROM ping_routes pr
+    LEFT JOIN 'parcels_wkb.parquet' pc
+        ON pr.speed_mph &lt;= config.slow_mph_max
+       AND <em>bbox prefilter on min/max columns from L7</em>
+       AND ST_DWithin(ST_Point(pr.lon, pr.lat),
+                      ST_GeomFromWKB(pc.geom_wkb),
+                      parcel_edge_deg)
+),
+ping_landfills AS (...),
+ping_depot AS (...)
+SELECT ... FROM ping_depot ORDER BY vehicle_id, dt_utc</code></pre>
+          <p>Three things this design buys us:</p>
+          <ul>
+            <li><strong>The bbox prefilter from Lesson 7 pays off here.</strong> Without it, joining millions of pings against a half-million-parcel layer would scan every polygon. With the precomputed min/max columns, DuckDB filters numerically first and only computes exact <code>ST_DWithin</code> on a tiny survivor set.</li>
+            <li><strong>Speed gating happens in the JOIN, not after.</strong> Fast-moving pings don&rsquo;t even compute a parcel match. The truck driving past at 35 mph isn&rsquo;t servicing parcels; the engine doesn&rsquo;t pretend otherwise.</li>
+            <li><strong>Landfill / depot tests are <code>EXISTS</code> subqueries.</strong> Cheap. The substrate is small (one or two depot polygons, a handful of landfills); the engine answers &ldquo;is this ping at one of them?&rdquo; with constant-time checks.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Vehicle-day driver &mdash; <code>enrich_vehicle_day()</code></h3>
+          <p>The convenience entry point most callers use. Reads one cache parquet, runs enrichment, writes to the mirror layout:</p>
+          <pre><code>enrich_vehicle_day(
+    cache_path="cache/2026-01-18/815001.parquet",
+    out_root="enriched/",
+    parcels_wkb_path="parcels_wkb.parquet",
+    routes_gdf=routes_gdf,
+    landfills_gdf=landfills_gdf,
+    depot_gdf=depot_gdf,
+)
+# -> writes enriched/2026-01-18/815001.parquet</code></pre>
+          <p>One vehicle-day in, one enriched vehicle-day out. Looping over the master index from Lesson 7 gives you a whole fleet&rsquo;s worth of enrichment in one script.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Tests with synthetic substrate</h3>
+          <p>Seventeen tests &mdash; ten pure unit tests (no DuckDB needed) plus seven behavior tests that build a tiny synthetic substrate (one route box, one parcel, one landfill, one depot) and verify each enrichment column in isolation:</p>
+          <ul>
+            <li>Route attribution: a ping inside route A gets <code>route_id="A"</code>.</li>
+            <li>Parcel attribution: a slow ping near a parcel gets its APN; a fast ping doesn&rsquo;t.</li>
+            <li>Landfill flag: ping inside the polygon &rarr; <code>in_landfill=True</code>.</li>
+            <li>Depot flag: ping near the depot centroid &rarr; <code>at_depot=True</code>.</li>
+            <li>Ping outside everything: all four enrichments are NULL/false.</li>
+          </ul>
+          <p class="note">The seven behavior tests skip gracefully in environments where DuckDB&rsquo;s spatial extension can&rsquo;t be downloaded (a sandboxed CI, for example). On any machine with network access to <code>extensions.duckdb.org</code>, all seventeen pass.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Commit and push</h3>
+          <pre><code>pip install -e ".[dev,geotab,postgres]"
+ruff check .
+pytest -q
+git add . && git commit -m "Lesson 8: routing engine — config + enrichment"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── mkdocs.yml
+├── .github/workflows/{ci,docs}.yml
+├── docs/{index,architecture}.md + CNAME
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># base, geotab, postgres</span>
+│   ├── <span class="dir">core/</span>                  <span class="comment"># crs, duckdb_session, vehicle_ids</span>
+│   ├── <span class="dir">prep/</span>                  <span class="comment"># sites, parcels, static_layers, parcels_wkb</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># gps_cache, gps_indexes, master_index</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># registry, cleaners, keys, upsert, pipeline</span>
+│   ├── <span class="dir">engine/</span>
+│   │   ├── config.py              <span class="comment"># [new] EngineConfig dataclass</span>
+│   │   └── enrichment.py          <span class="comment"># [new] THE ONE SPATIAL JOIN</span>
+│   └── (patterns, routeview scaffolded)
+└── <span class="dir">tests/</span>
+    ├── (existing 14 test files)
+    └── test_engine_enrichment.py  <span class="comment"># [new] 17 tests</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>A <strong>frozen config dataclass</strong> &mdash; every engine knob in one place, immutable, typed.</li>
+          <li>The <strong>canonical enriched-ping shape</strong> &mdash; six GPS columns + four engine enrichments, in a tuple that downstream code treats as a contract.</li>
+          <li><strong>One DuckDB CTAS</strong> &mdash; one spatial join, four enrichments, bbox-prefiltered, speed-gated, written for millions of pings.</li>
+          <li>A <strong>vehicle-day driver</strong> that reads from the L6 cache and writes to a mirror layout downstream lessons can scan cheaply.</li>
+          <li><strong>Seventeen tests</strong> over synthetic substrate covering every enrichment in isolation.</li>
+        </ul>
+        <div class="callout">
+          From here forward, the package gets simpler. The hard work is done.
+          Segments, patterns, RouteView &mdash; each one is a focused calculation
+          on top of the engine&rsquo;s output. No spatial joins anywhere downstream.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>DuckDB CTAS pattern:</strong> <a class="inline" href="https://duckdb.org/docs/sql/statements/create_table#create-table-as-select-ctas" target="_blank" rel="noopener">CREATE TABLE AS SELECT</a> &mdash; the &ldquo;build a derived table in one shot&rdquo; idiom we use throughout.</li>
+          <li><strong>ST_DWithin and ST_Within:</strong> <a class="inline" href="https://duckdb.org/docs/extensions/spatial/functions" target="_blank" rel="noopener">spatial function reference</a> &mdash; the two predicates this engine relies on.</li>
+          <li><strong>Why frozen dataclasses:</strong> <a class="inline" href="https://docs.python.org/3/library/dataclasses.html#frozen-instances" target="_blank" rel="noopener">Python docs on frozen instances</a> &mdash; immutability as a property of the type, not a runtime check.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 9 &mdash; Segments:</strong> timeline analysis on top of
+          the enriched-ping stream. Service, travel, landfill, load, shift &mdash;
+          all derived from sequences of enriched pings. The first downstream
+          module that proves the architecture: zero spatial joins, pure
+          aggregation on the engine output.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
