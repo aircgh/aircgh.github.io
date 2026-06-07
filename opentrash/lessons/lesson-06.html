@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 6 — GPS Adapters &amp; Cache · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 6 of the opentrash course: vendor-neutral GPS adapters (Geotab + Postgres) behind one Protocol, and the cache-first read layer.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 6 · GPS Adapters &amp; Cache</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 6 of 12 &middot; The live data path</span>
+        <h1>One Protocol, two vendors, one cache that never re-fetches.</h1>
+        <p class="lede">
+          GPS data is the stream the whole engine sits on. This lesson builds
+          the three pieces that make the stream consumable: a tiny
+          <code>GPSAdapter</code> Protocol that defines the canonical
+          input shape, two concrete adapters (Geotab API and streaming
+          Postgres) that produce it from real vendor data, and a cache-first
+          read layer that lands one parquet per vehicle per local day.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~75 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> adapters/gps/{base,geotab,postgres} &middot; cache/gps_cache</span>
+          <span class="hero-chip"><strong>Result:</strong> swappable GPS sources, persistent local cache</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Build the data ingress for the rest of the package.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>adapters/gps/base.py</code> &mdash; the <code>GPSAdapter</code> Protocol and the canonical 6-column output schema. Anything that supplies GPS must produce this shape.</li>
+          <li><code>adapters/gps/geotab.py</code> &mdash; Geotab MyGeotab API adapter. Pulls one vehicle&rsquo;s pings for a local-day window via the LogRecord API.</li>
+          <li><code>adapters/gps/postgres.py</code> &mdash; Streaming Postgres adapter. The production data path: a database where pings stream in every ~10 seconds.</li>
+          <li><code>cache/gps_cache.py</code> &mdash; cache-first reads: ask once, write to disk, subsequent reads hit disk. One parquet per vehicle per local day in <code>cache/YYYY-MM-DD/&lt;vehicle&gt;.parquet</code>.</li>
+        </ul>
+        <div class="callout">
+          <strong>The credentials rule.</strong> No credentials in code. Ever.
+          Every adapter takes its URL/API-key/password as a constructor argument
+          or reads it from an environment variable. The package itself contains
+          zero secret values, so it&rsquo;s safe to commit, fork, and share. If
+          a credential lands in a notebook or a script, that&rsquo;s on the user
+          to manage &mdash; and to rotate immediately if it ever hit version control.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> The Protocol &mdash; <code>adapters/gps/base.py</code></h3>
+          <p>A Python <code>typing.Protocol</code> defines an interface by <em>shape</em>, not inheritance. Anything with a matching <code>fetch()</code> method satisfies the protocol &mdash; no base-class wiring required. That&rsquo;s the right tool for the &ldquo;swap vendors freely&rdquo; design:</p>
+          <pre><code>class GPSAdapter(Protocol):
+    def fetch(self, vehicle: str, start_date, end_date) -> pd.DataFrame:
+        """Return canonical GPS rows for one vehicle over a local-day range."""
+        ...</code></pre>
+          <p>The canonical 6-column schema (<code>GPS_COLUMNS</code>) is also defined here:</p>
+          <pre><code>GPS_COLUMNS = ("vehicle_id", "dt_utc", "dt_local", "lat", "lon", "speed_mph")</code></pre>
+          <p>Every downstream module imports those names. Adapter quirks &mdash; Geotab&rsquo;s <code>VehicleName</code>, Postgres&rsquo;s <code>DateTime</code>, mph vs km/h, naive vs aware datetimes &mdash; all get normalized to this shape inside each adapter.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Geotab adapter &mdash; <code>adapters/gps/geotab.py</code></h3>
+          <p>Geotab is the legacy / on-demand path: a REST API you authenticate against and call to pull one vehicle&rsquo;s LogRecord rows. The adapter:</p>
+          <ul>
+            <li>Takes <code>username</code>, <code>password</code>, <code>database</code> as constructor args, with env-var fallback (<code>GEOTAB_USERNAME</code> etc.). No values committed.</li>
+            <li>Lazily imports <code>mygeotab</code> &mdash; the package installs cleanly without the <code>[geotab]</code> extra; the adapter only fails if you actually try to use it.</li>
+            <li>Looks up the device by vehicle name, queries LogRecord for the local-day UTC window, normalizes km/h speeds to mph and naive UTC datetimes to (UTC, Pacific) aware ones.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Postgres adapter &mdash; <code>adapters/gps/postgres.py</code></h3>
+          <p>The production path: a Postgres database where a separate streaming process writes pings every ~10 seconds. Reads are cheap and incremental, and you can do range queries efficiently with SQL.</p>
+          <ul>
+            <li>Takes a SQLAlchemy URL (<code>postgresql+psycopg2://...</code>) as a constructor arg, with env-var fallback (<code>OPENTRASH_PG_URL</code>). Same no-creds-in-code rule.</li>
+            <li>Default queries match a Geotab-style schema (<code>LogRecords2</code>, <code>Devices2</code>); override <code>devices_sql</code> / <code>pings_sql</code> on the constructor if your shape differs.</li>
+            <li><strong>Server-side chunked fetch</strong> (<code>execution_options(stream_results=True)</code> + <code>fetchmany(chunksize)</code>) so multi-year pulls don&rsquo;t pin memory. The default 250k-row chunk handles a year of pings comfortably.</li>
+          </ul>
+          <p class="note">Both adapters implement the same <code>fetch(vehicle, start_date, end_date)</code> signature. Downstream code &mdash; <code>cache/gps_cache.py</code> below, the engine, RouteView &mdash; never knows or cares which vendor is behind the call. Swap one for the other and nothing else changes.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Cache-first reads &mdash; <code>cache/gps_cache.py</code></h3>
+          <p>Calling a vendor every time we want pings is wasteful and slow. The cache layer fixes that:</p>
+          <pre><code>get_gps_day(adapter, "815001", "2026-01-18", cache_dir="cache/")
+# First call: adapter.fetch(...) -> writes cache/2026-01-18/815001.parquet
+# Second call: reads cache/2026-01-18/815001.parquet directly</code></pre>
+          <ul>
+            <li><strong>Layout</strong>: one file per vehicle per local day. The <code>YYYY-MM-DD/</code> directory naming sorts chronologically and matches what the Postgres extractor writes natively.</li>
+            <li><strong>Refresh</strong>: pass <code>refresh=True</code> to force a re-fetch (useful when a vendor is back-filling history).</li>
+            <li><strong>Fleet helper</strong>: <code>get_gps_fleet_day(adapter, vehicles, day)</code> loops through a list, calls <code>get_gps_day</code> for each, returns one concatenated DataFrame.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Tests with stub adapters</h3>
+          <p>Real GPS APIs need real credentials. For tests, we use a <code>StubAdapter</code> &mdash; a tiny class that satisfies the Protocol by returning canned pings and counting how many times it&rsquo;s called. That lets us prove cache-miss writes, cache-hit reads (no second call), refresh behavior, fleet concatenation, and all the error-path conditions &mdash; without network.</p>
+          <pre><code>pip install -e ".[dev]"        # base + dev tools
+pip install -e ".[postgres]"   # if you'll use the Postgres adapter
+ruff check .
+pytest -q</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Commit and push</h3>
+          <pre><code>git add .
+git commit -m "Lesson 6: GPS adapters (Geotab + Postgres) + cache-first reads"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── mkdocs.yml
+├── .github/workflows/{ci,docs}.yml
+├── docs/{index,architecture}.md + CNAME
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/gps/</span>
+│   │   ├── base.py                <span class="comment"># [new] GPSAdapter Protocol + canonical schema</span>
+│   │   ├── geotab.py              <span class="comment"># [new] Geotab API adapter</span>
+│   │   └── postgres.py            <span class="comment"># [new] Streaming Postgres adapter</span>
+│   ├── <span class="dir">core/</span>
+│   │   ├── crs.py
+│   │   ├── duckdb_session.py
+│   │   └── vehicle_ids.py
+│   ├── <span class="dir">prep/</span>
+│   │   ├── sites.py
+│   │   ├── parcels.py
+│   │   └── static_layers.py
+│   ├── <span class="dir">cache/</span>
+│   │   └── gps_cache.py           <span class="comment"># [new] cache-first GPS reads</span>
+│   ├── <span class="dir">tonnage/</span>          <span class="comment"># registry, cleaners, keys, upsert, pipeline</span>
+│   └── (engine, patterns, routeview scaffolded)
+└── <span class="dir">tests/</span>
+    ├── (existing 7 test files)
+    ├── test_gps_adapter_base.py   <span class="comment"># [new]</span>
+    ├── test_geotab_adapter.py     <span class="comment"># [new]</span>
+    ├── test_postgres_adapter.py   <span class="comment"># [new]</span>
+    └── test_gps_cache.py          <span class="comment"># [new]</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>A <strong>Protocol</strong> that lets the package treat any GPS vendor identically &mdash; the foundational decoupling that keeps engine code vendor-neutral.</li>
+          <li>Two concrete adapters &mdash; <strong>Geotab</strong> (REST, on-demand) and <strong>Postgres</strong> (streaming, server-side chunked) &mdash; both producing the canonical 6-column shape.</li>
+          <li>A <strong>cache-first read layer</strong> that turns repeated &ldquo;give me this vehicle-day&rdquo; calls into disk reads after the first fetch.</li>
+          <li><strong>Credentials via args or env, never in code</strong> &mdash; the package is safe to fork and commit without leaking secrets.</li>
+          <li>Tests using stub adapters &mdash; no network, no real credentials, full behavior coverage.</li>
+        </ul>
+        <div class="callout">
+          <strong>One housekeeping reminder.</strong> If you ever committed real
+          Geotab or Postgres credentials to any repo (notebooks count) &mdash;
+          rotate them now. Git history is forever; the moment a secret hits
+          a public branch, treat it as leaked. The package never has this problem
+          because we never put credentials in the package.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong><code>typing.Protocol</code>:</strong> <a class="inline" href="https://docs.python.org/3/library/typing.html#typing.Protocol" target="_blank" rel="noopener">official docs</a> &mdash; structural typing in Python.</li>
+          <li><strong>SQLAlchemy streaming results:</strong> <a class="inline" href="https://docs.sqlalchemy.org/en/20/core/connections.html#streaming-with-a-fixed-buffer-via-yield-per" target="_blank" rel="noopener">stream_results docs</a> &mdash; how to fetch huge result sets without holding them in memory.</li>
+          <li><strong>The 12-factor app:</strong> <a class="inline" href="https://12factor.net/config" target="_blank" rel="noopener">factor III, &ldquo;Config&rdquo;</a> &mdash; the canonical argument for environment-variable configuration.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 7 &mdash; The substrate:</strong> parcels with WKB
+          geometry, per-day vehicle-day indexes, and the master GPS index that
+          joins them. The lookup tables that make the routing engine fast.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
