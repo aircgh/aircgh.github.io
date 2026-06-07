@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 7 — The Substrate · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 7 of the opentrash course: parcels with WKB geometry, per-day vehicle-day indexes, and the master GPS index that joins them.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 7 · The Substrate</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 7 of 12 &middot; The lookup tables</span>
+        <h1>Bounding boxes, byte strings, and the &ldquo;which-files-do-I-need&rdquo; query.</h1>
+        <p class="lede">
+          You have the static layers. You have the live data path. What you
+          don&rsquo;t yet have is a fast way to answer &ldquo;which vehicle-day
+          GPS files touch route X on day Y?&rdquo; The routing engine in Lesson 8
+          needs to ask that question millions of times. This lesson builds the
+          three lookup tables that make it cheap: parcels with WKB geometry +
+          per-route assignment + bbox columns; per-day vehicle-day summary
+          indexes; and a STAC-like master index that joins them.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~75 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> prep/parcels_wkb &middot; cache/gps_indexes &middot; cache/master_index</span>
+          <span class="hero-chip"><strong>Result:</strong> the indexes the engine uses to be fast</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Build the three lookup tables. Each one answers one specific
+          question fast.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>prep/parcels_wkb.py</code> &mdash; parcels in a DuckDB-friendly form: WKB geometry bytes, per-parcel <code>route_id</code> assignment via spatial join to route polygons, bbox columns precomputed. Answers &ldquo;which parcels belong to route X?&rdquo; in milliseconds.</li>
+          <li><code>cache/gps_indexes.py</code> &mdash; one summary row per vehicle-day parquet file: <code>min_dt</code>, <code>max_dt</code>, <code>n_rows</code>, bounding box in 4326. Cheap metadata that lets you skip files that can&rsquo;t possibly matter.</li>
+          <li><code>cache/master_index.py</code> &mdash; the cross-join: vehicle-day bbox &times; route bbox &rarr; pairs that overlap. The &ldquo;STAC-like&rdquo; lookup that turns &ldquo;which GPS files touch route X on day Y?&rdquo; into a small filter on a small table.</li>
+        </ul>
+        <div class="callout">
+          <strong>The rule that runs through this lesson:</strong> the cheapest
+          way to filter big data is to filter against small data. Don&rsquo;t
+          scan 500 vehicle-day parquet files to find the ones that touch a
+          route. Build a small lookup table once, scan that, then open only the
+          files it points to. Engineering big-data queries to feel small is
+          almost always &ldquo;build the right index.&rdquo;
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Parcels with WKB &mdash; <code>prep/parcels_wkb.py</code></h3>
+          <p>The parcels module from Lesson 2 returned a GeoPandas <code>GeoDataFrame</code>. That&rsquo;s great for Python-side work, but DuckDB doesn&rsquo;t speak GeoPandas; it speaks <strong>WKB</strong> (Well-Known Binary), the standard byte encoding for geometries. So we produce a derived form designed for DuckDB consumption:</p>
+          <pre><code>build_parcels_wkb(
+    parcels_gdf,        # the GeoDataFrame from prep.parcels
+    routes_gdf,         # the route polygons (for assignment)
+)
+# Returns a plain DataFrame with columns:
+#   APN, route_id, geom_wkb (bytes), min_lon, min_lat, max_lon, max_lat</code></pre>
+          <ul>
+            <li><strong>WKB bytes</strong> &mdash; the geometry as a <code>bytes</code> column DuckDB can <code>ST_GeomFromWKB</code> on without Python ever touching it.</li>
+            <li><strong>Per-parcel <code>route_id</code> assignment</strong> &mdash; a spatial join (parcels-in-routes) attaches the route each parcel belongs to. Parcels outside any route get <code>NULL</code>; they&rsquo;re not serviced.</li>
+            <li><strong>Bbox columns precomputed</strong> &mdash; min/max lon/lat directly on the row. Bbox filtering becomes plain SQL <code>WHERE</code> clauses.</li>
+          </ul>
+          <p class="note">Writing the output to a single parquet via <code>write_parcels_wkb()</code> gives you a file DuckDB can query directly: <code>SELECT * FROM 'parcels_wkb.parquet' WHERE route_id = 'A1'</code>.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Vehicle-day indexes &mdash; <code>cache/gps_indexes.py</code></h3>
+          <p>Each GPS cache file (one parquet per vehicle per local day from Lesson 6) gets summarized to a single row of metadata:</p>
+          <pre><code>build_day_index(cache_dir, "2026-01-18")
+# -> writes cache/2026-01-18/_vehicle_day_index.parquet
+#    columns: vehicle_id, n_rows, min_dt, max_dt,
+#             min_lon, min_lat, max_lon, max_lat</code></pre>
+          <p>The index file lives <em>inside</em> the day directory, so it&rsquo;s discoverable next to the data it summarizes. The <code>_</code> prefix sorts it to the top and makes it look like the &ldquo;table of contents&rdquo; for that day.</p>
+          <ul>
+            <li><code>summarize_vehicle_day_file(path)</code> &mdash; do the math for one file. Reads min/max dt and lon/lat in a single pyarrow scan; no full materialization.</li>
+            <li><code>build_day_index(cache_dir, day)</code> &mdash; loop one day&rsquo;s files, write the summary parquet.</li>
+            <li><code>build_all_day_indexes(cache_dir)</code> &mdash; rebuild every day&rsquo;s index. Idempotent.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> The master index &mdash; <code>cache/master_index.py</code></h3>
+          <p>The headline lookup table. For every <code>(vehicle, day)</code> in the cache and every <code>route_id</code> in your route bbox index, check whether their bounding boxes overlap. If they do, emit a row. If not, don&rsquo;t.</p>
+          <pre><code>build_master_index(
+    vehicle_day_indexes_df,   # concatenated output of build_day_index
+    route_bboxes_df,          # output of build_route_index from Lesson 3
+)
+# -> DataFrame with columns:
+#    vehicle_id, day, route_id, n_rows, min_dt, max_dt</code></pre>
+          <p>This is STAC-like in spirit: a small lookup of &ldquo;which assets cover which spatial extents.&rdquo; The actual implementation is a self-join with bbox-overlap predicates &mdash; no heavy geometry library needed, just numeric comparisons.</p>
+          <p class="note"><code>files_for_route(master_df, route_id, day)</code> is the tiny convenience: takes the master index and a (route, day), returns the list of vehicle-day cache files that need to be opened. The routing engine in Lesson 8 will call this once at the top of each route-day analysis &mdash; <em>maybe 5 files instead of 500</em>.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Tests with synthetic data</h3>
+          <p>Three test files, all using synthetic geometries and pings (no real data):</p>
+          <ul>
+            <li><code>tests/test_parcels_wkb.py</code> &mdash; WKB encoding round-trips; spatial-join assignment correct; bbox columns match geometry.</li>
+            <li><code>tests/test_gps_indexes.py</code> &mdash; summary stats correct; index file written; <code>build_all</code> idempotent.</li>
+            <li><code>tests/test_master_index.py</code> &mdash; bbox-overlap logic; non-overlapping pairs excluded; <code>files_for_route</code> returns the right paths.</li>
+          </ul>
+          <pre><code>pip install -e ".[dev,geotab,postgres]"
+ruff check .
+pytest -q</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Commit and push</h3>
+          <pre><code>git add .
+git commit -m "Lesson 7: parcels_wkb + GPS indexes + master index"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml
+├── mkdocs.yml
+├── .github/workflows/{ci,docs}.yml
+├── docs/{index,architecture}.md + CNAME
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># base, geotab, postgres</span>
+│   ├── <span class="dir">core/</span>                  <span class="comment"># crs, duckdb_session, vehicle_ids</span>
+│   ├── <span class="dir">prep/</span>
+│   │   ├── sites.py
+│   │   ├── parcels.py
+│   │   ├── static_layers.py
+│   │   └── parcels_wkb.py         <span class="comment"># [new] WKB + route assignment + bbox</span>
+│   ├── <span class="dir">cache/</span>
+│   │   ├── gps_cache.py
+│   │   ├── gps_indexes.py         <span class="comment"># [new] per-day summary indexes</span>
+│   │   └── master_index.py        <span class="comment"># [new] STAC-like cross-join</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># registry, cleaners, keys, upsert, pipeline</span>
+│   └── (engine, patterns, routeview scaffolded)
+└── <span class="dir">tests/</span>
+    ├── (existing 11 test files)
+    ├── test_parcels_wkb.py        <span class="comment"># [new]</span>
+    ├── test_gps_indexes.py        <span class="comment"># [new]</span>
+    └── test_master_index.py       <span class="comment"># [new]</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li><strong>Parcels in WKB form</strong> &mdash; the parquet DuckDB queries directly, with per-parcel route assignment and bbox columns precomputed.</li>
+          <li><strong>Per-day vehicle-day summary indexes</strong> &mdash; the &ldquo;table of contents&rdquo; for each day&rsquo;s GPS cache.</li>
+          <li><strong>The master spatial-temporal index</strong> &mdash; the small lookup table that answers &ldquo;which files touch which routes when&rdquo; in a SQL filter.</li>
+          <li><strong>Three new tests</strong> covering encoding, summary math, bbox-overlap logic, and the convenience lookup.</li>
+        </ul>
+        <div class="callout">
+          The substrate is in place. <strong>Next lesson is the routing engine</strong>
+          &mdash; the layer that uses these indexes to join every GPS ping to every
+          applicable GIS layer once, producing the enriched ping stream every
+          downstream product consumes.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>WKB and WKT:</strong> <a class="inline" href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank" rel="noopener">Wikipedia</a> &mdash; the binary/text geometry standards every spatial DB consumes.</li>
+          <li><strong>STAC:</strong> <a class="inline" href="https://stacspec.org/" target="_blank" rel="noopener">SpatioTemporal Asset Catalog</a> &mdash; the geospatial-data-catalog spec our master index resembles in spirit (we&rsquo;re building a private one; STAC is the public version).</li>
+          <li><strong>DuckDB&rsquo;s spatial extension:</strong> <a class="inline" href="https://duckdb.org/docs/extensions/spatial/functions" target="_blank" rel="noopener">spatial functions reference</a> &mdash; <code>ST_GeomFromWKB</code>, <code>ST_Intersects</code>, and friends.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 8 &mdash; The routing engine:</strong> the architectural
+          heart of the package. One unified spatial join that takes raw GPS
+          pings and enriches them with route, parcel, and facility context.
+          Every downstream product consumes the engine&rsquo;s output.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
