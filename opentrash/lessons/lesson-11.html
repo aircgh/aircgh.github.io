@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 11 — RouteView · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 11 of the opentrash course: RouteView — one route, one day, one vehicle, rendered as a self-contained interactive MapLibre HTML.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 11 · RouteView</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#recap">Recap</a>
+        <a href="#next">Next</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 11 of 12 &middot; The micro view</span>
+        <h1>One route, one day, one vehicle. The map that tells the day&rsquo;s story.</h1>
+        <p class="lede">
+          Pattern detection (Lesson 10) was the macro view &mdash; a year of pings
+          condensed to per-parcel signatures. RouteView is the macro&rsquo;s opposite
+          number: <em>zoom all the way in</em>. Pick a single (route, day,
+          vehicle). Render a self-contained HTML with an interactive MapLibre
+          map &mdash; the truck&rsquo;s trail as colored GPS dots, every parcel
+          colored served / missed / unknown, the depot, the landfills, a
+          side panel with the load-by-load tonnage breakdown. Drop the file on
+          a USB stick, email it, host it static. The day&rsquo;s story, one HTML
+          per (route, vehicle).
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~120 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> routeview/{rank,trail,parcel_eval,render,runner}</span>
+          <span class="hero-chip"><strong>Result:</strong> a self-contained interactive HTML per (route, day, vehicle)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Five modules, one bundled HTML template, three runner modes. All
+          built on top of the engine and segments &mdash; zero new spatial work.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>routeview/rank.py</code> &mdash; for one (route, day), which vehicles touched it, sorted by ping count.</li>
+          <li><code>routeview/trail.py</code> &mdash; GPS pings as colored dots (not a polyline); phase color comes from the L9 segments timeline.</li>
+          <li><code>routeview/parcel_eval.py</code> &mdash; per parcel: served today? Expected by the L10 patterns analysis? Surfaces both in the popup.</li>
+          <li><code>routeview/render.py</code> &mdash; wraps the bundled <code>king.html</code> template from the v1 RouteView notebook (preserved byte-for-byte) and substitutes the data blobs.</li>
+          <li><code>routeview/runner.py</code> &mdash; file-in / HTML-out driver with three modes: one (route, day, vehicle); all routes on a day; top-N vehicles.</li>
+        </ul>
+        <div class="callout">
+          <strong>Trail as dots, not polylines.</strong> A polyline interpolates
+          between pings &mdash; it hides the corners cut, the stops, the irregularities.
+          Dots preserve every recorded ping and let the viewer see the truck&rsquo;s
+          actual stop-and-go behavior. Each dot colored by phase (depot = green,
+          windshield = gray, collection = blue, dump = red) gives an instant
+          read of how the workday was spent. Granularity preserved, no
+          interpretation imposed.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> Rank vehicles per route-day &mdash; <code>routeview/rank.py</code></h3>
+          <p>For a (route, day) tuple, return the vehicles that meaningfully touched it, sorted by ping count. The runner uses this to pick which vehicle to render (top-1 by default, top-N for the multi-HTML mode). Filters out drive-bys via a <code>min_pings</code> floor &mdash; a vehicle with 2 pings on a route polygon was almost certainly just passing through.</p>
+          <pre><code>ranked = rank_vehicles_for_route_day(
+    enriched_glob="enriched/2026-01-18/*.parquet",
+    route_id="R1", day="2026-01-18", min_pings=5,
+)
+# vehicle_id  n_pings  first_dt_local       last_dt_local
+# 815001      843      2026-01-18 06:42:00  2026-01-18 16:18:00
+# 815014       18      2026-01-18 09:30:00  2026-01-18 09:35:00</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> Trail as colored dots &mdash; <code>routeview/trail.py</code></h3>
+          <p>Filter enriched pings to (route, day, vehicle). Optionally downsample to keep HTML size sane (default: one ping per 30 seconds &rarr; about 1200 dots per shift). Time-range-join against the L9 segments timeline so each ping carries the segment_type it falls into. Map segment_type to a hex color. Emit GeoJSON.</p>
+          <pre><code>PHASE_COLORS = {
+    "depot_departure":  "#22c55e",  # green
+    "windshield":        "#9ca3af",  # gray
+    "collection":        "#2563eb",  # blue
+    "dump":              "#dc2626",  # red
+    "depot_arrival":     "#16a34a",
+}</code></pre>
+          <p>One subtle bug worth knowing about: pyarrow often hands you <code>datetime64[us]</code> not <code>[ns]</code>, so the bucket-math for downsampling must coerce to ns first. Caught by the tests on the first run.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> Parcel evaluation + patterns integration &mdash; <code>routeview/parcel_eval.py</code></h3>
+          <p>For each parcel on the route, three pieces of information per popup:</p>
+          <ul>
+            <li><strong>Served today?</strong> Did any enriched ping for this (day, vehicle) carry this APN? Boolean.</li>
+            <li><strong>Expected from patterns</strong> (optional, from L10): the weekly1 / weekly2 / biweekly vehicles that the long-period analysis surfaced. If they exist and the parcel wasn&rsquo;t served, the parcel is colored red (<em>missed</em>); if it was served, green; if no expectation either way, gray.</li>
+            <li><strong>Actual vehicle</strong>: whichever vehicle this view is showing, with served/not-served context.</li>
+          </ul>
+          <pre><code>parcels_json = build_parcels_geojson(
+    parcels_wkb_path="parcels_wkb.parquet",
+    enriched_glob="enriched/2026-01-18/*.parquet",
+    route_id="R1", day="2026-01-18", vehicle_id="815001",
+    patterns_chunk_path="patterns/2025-03-01_to_2026-02-28/by_route/R1.parquet",
+)</code></pre>
+          <p>This is the validation loop: the macro prediction (patterns) overlaid on the micro reality (today&rsquo;s pings). Generously matching = ops are running to plan. Diverging = a story to investigate.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> Render the HTML &mdash; <code>routeview/render.py</code></h3>
+          <p>The KING template from the v1 RouteView notebook is bundled as package data at <code>opentrash/routeview/templates/king.html</code>. It&rsquo;s preserved byte-for-byte except for one transformation: Python f-string expressions were swapped for plain <code>str.format()</code> placeholders so we can render without <code>eval</code>. Literal JS braces (MapLibre tile-URL <code>{x}/{y}/{z}</code>, regex escapes) are doubled in the template so they survive the format pass.</p>
+          <pre><code>html = build_routeview_html(
+    route_id="R1", vehicle="815001",
+    day=date(2026, 1, 18),
+    day_time_label="06:42 &rarr; 16:18",
+    route_json=route_geojson_string,
+    pts_json=trail_geojson_string,
+    parcels_json=parcels_geojson_string,
+    lf_json=landfills_geojson, sites_json=sites_geojson,
+    summary_json=summary_blob, stats_json_enriched=stats_blob,
+    center_lon=-117.20, center_lat=32.70,
+    rad_note="RAD: ...", arts_note="ARTS: ...",
+)
+out_path.write_text(html, encoding="utf-8")</code></pre>
+          <p class="note">No Jinja2 dependency. The template is f-string-shaped already, and <code>str.format()</code> handles the substitution. One less package to install.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> Three runner modes &mdash; <code>routeview/runner.py</code></h3>
+          <p>The unit of work is one (route, day, vehicle) HTML. Three drivers iterate that unit differently:</p>
+          <ul>
+            <li><code>render_routeview(route_id, day, vehicle_id, ...)</code> &mdash; the singular case. One HTML out.</li>
+            <li><code>render_all_routes_for_day(day, ...)</code> &mdash; pick the top-1 vehicle for each route touched that day. One HTML per route.</li>
+            <li><code>render_top_n_vehicles(day, top_n=5, ...)</code> &mdash; the day&rsquo;s busiest 5 vehicles, each with HTMLs for every route they meaningfully touched.</li>
+          </ul>
+          <p>The runner also wires in the tonnage join: for each dump segment in the day&rsquo;s timeline, look up L5 tonnage by vehicle + time-window matching (45-min pad, matching the notebook&rsquo;s approach). The side panel surfaces per-load tons.</p>
+          <pre><code>routeview/
+  2026-01-18/
+    R1__815001.html       one (route, day, vehicle) HTML
+    R1__815014.html
+    R2__815002.html
+    ...</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> Tests + commit</h3>
+          <p>11 tests covering rank (sorting + min_pings filter), trail (phase coloring + downsample correctness across datetime precisions), parcel_eval (served / missed / unknown statuses, patterns integration), render (template substitution + no unfilled placeholders + tile-URL literals preserved), and an end-to-end runner test that produces a real HTML on disk.</p>
+          <pre><code>pip install -e ".[dev,geotab,postgres]"
+ruff check .
+pytest -q
+git add . && git commit -m "Lesson 11: RouteView — interactive map product"
+git push origin main</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">Where everything lives now. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── pyproject.toml &middot; mkdocs.yml &middot; .github/workflows/{ci,docs}.yml
+├── docs/{index,architecture}.md + CNAME
+├── <span class="dir">opentrash/</span>
+│   ├── <span class="dir">adapters/gps/</span>          <span class="comment"># base, geotab, postgres</span>
+│   ├── <span class="dir">core/</span>                  <span class="comment"># crs, duckdb_session, vehicle_ids</span>
+│   ├── <span class="dir">prep/</span>                  <span class="comment"># sites, parcels, static_layers, parcels_wkb</span>
+│   ├── <span class="dir">cache/</span>                 <span class="comment"># gps_cache, gps_indexes, master_index</span>
+│   ├── <span class="dir">tonnage/</span>               <span class="comment"># registry, cleaners, keys, upsert, pipeline</span>
+│   ├── <span class="dir">engine/</span>                <span class="comment"># config, enrichment, segments</span>
+│   ├── <span class="dir">patterns/</span>              <span class="comment"># config, window, detector, runner, validator</span>
+│   └── <span class="dir">routeview/</span>
+│       ├── rank.py                <span class="comment"># [new]</span>
+│       ├── trail.py               <span class="comment"># [new]</span>
+│       ├── parcel_eval.py         <span class="comment"># [new]</span>
+│       ├── render.py              <span class="comment"># [new]</span>
+│       ├── runner.py              <span class="comment"># [new]</span>
+│       └── <span class="dir">templates/</span>
+│           └── king.html          <span class="comment"># [new] bundled template</span>
+└── <span class="dir">tests/</span>
+    ├── (existing 17 test files)
+    └── test_routeview.py          <span class="comment"># [new] 11 tests</span></div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built</h2>
+        <ul class="plain-list">
+          <li>The <strong>micro counterpart</strong> to pattern detection &mdash; one (route, day, vehicle) rendered as a self-contained interactive HTML.</li>
+          <li><strong>GPS pings as colored dots</strong> &mdash; granularity preserved, phase legible at a glance, irregularities visible (which a polyline would smooth over).</li>
+          <li><strong>Parcel popups with patterns integration</strong> &mdash; the macro view&rsquo;s expectations overlaid on the micro view&rsquo;s reality. The validation loop made visual.</li>
+          <li><strong>Tonnage on the load-by-load panel</strong> &mdash; L5 tonnage joined in at render time via vehicle + time-window matching (no spatial work).</li>
+          <li><strong>Three runner modes</strong> &mdash; one HTML, all routes on a day, top-N vehicles. The atomic unit (one HTML per route×vehicle) is shared; the drivers differ only in iteration.</li>
+          <li><strong>Zero spatial joins.</strong> Every input was already produced by the engine, segments, parcels_wkb, or static layers. RouteView is pure rendering.</li>
+        </ul>
+        <div class="callout">
+          The architecture has held across 11 lessons. Spatial joins are
+          infrastructure; products are calculations. Patterns is route-agnostic
+          regularity analysis; RouteView is route-aware visual rendering.
+          Both products read from the same enriched-ping stream produced by
+          the engine. One package, two views, one validation loop.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">Optional, for going deeper.</p>
+        <ul class="plain-list">
+          <li><strong>MapLibre GL JS:</strong> <a class="inline" href="https://maplibre.org/maplibre-gl-js/docs/" target="_blank" rel="noopener">official docs</a> &mdash; the open-source fork of Mapbox GL JS, fully community-maintained. Sources, layers, sprites, expressions: everything that makes the KING template tick.</li>
+          <li><strong>Tile servers:</strong> the template uses OpenStreetMap raster tiles by default. For production map quality, swap in a vector-tile provider (Stadia, MapTiler, Protomaps) by editing the <code>sources</code> block in the template.</li>
+          <li><strong>Self-contained HTML as a product:</strong> single-file deliverables travel well &mdash; USB sticks, email attachments, static hosting. The same pattern as <a class="inline" href="https://docs.bokeh.org/en/latest/docs/user_guide/output/embed.html" target="_blank" rel="noopener">Bokeh embeds</a> or <a class="inline" href="https://plotly.com/python/interactive-html-export/" target="_blank" rel="noopener">Plotly's interactive export</a>. Reliable, low-friction, no servers to maintain.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section id="next">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Next lesson</h2>
+        <p class="intro">
+          <strong>Lesson 12 &mdash; Publishing:</strong> tag a release, push to
+          PyPI, finalize the documentation site, and write the README. The
+          last lesson takes the working package and turns it into a real
+          open-source artifact that other agencies can pip-install and run.
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
