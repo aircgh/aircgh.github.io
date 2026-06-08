@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 12 — Publishing · opentrash Course</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lesson 12 of the opentrash course: the repeatable release loop — Apache 2.0 license, PyPI publishing on a git tag, CHANGELOG and CITATION discipline.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="bar">
+      <div class="brand">
+        <img src="../../assets/img/AIRC_LOGO.png" alt="AIRC logo" class="logo" onerror="this.style.display='none'">
+        <div class="brand-text">
+          <span class="brand-name">Lesson 12 · Publishing</span>
+          <span class="brand-sub">opentrash course</span>
+        </div>
+      </div>
+      <nav>
+        <a href="../index.html">&larr; Home</a>
+        <a href="#objective">Objective</a>
+        <a href="#steps">Steps</a>
+        <a href="#release-loop">Release loop</a>
+        <a href="#recap">Recap</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Lesson 12 of 12 &middot; The release</span>
+        <h1>Ship it. Then keep shipping it.</h1>
+        <p class="lede">
+          The package works. The tests are green. Now turn the working
+          repository into an artifact other people can <code>pip install</code>
+          and use. This lesson is different from every prior one: almost no
+          new code, but every file you add matters disproportionately for
+          whether anyone adopts your work. We&rsquo;ll set up a license, a
+          README that earns trust, a CHANGELOG that documents what each
+          release contains, an academic citation file, and a GitHub Actions
+          workflow that publishes to PyPI on a git tag. Then we&rsquo;ll
+          cut <code>v0.1.0</code> &mdash; not as a one-off ceremony, but as
+          the first turn of a loop you&rsquo;ll repeat for every future release.
+        </p>
+        <div class="hero-meta">
+          <span class="hero-chip"><strong>Time:</strong> ~90 min</span>
+          <span class="hero-chip"><strong>You'll touch:</strong> LICENSE &middot; NOTICE &middot; README &middot; CHANGELOG &middot; CITATION &middot; release.yml &middot; pyproject</span>
+          <span class="hero-chip"><strong>Result:</strong> <code>pip install opentrash</code> works for anyone, anywhere</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Objective</h2>
+        <p class="intro">
+          Six new files, one workflow, one version bump. Then a tag, a
+          push, and PyPI does the rest.
+        </p>
+        <ul class="plain-list intro">
+          <li><code>LICENSE</code> &mdash; Apache License 2.0 verbatim. Permissive, recognized, protects attribution.</li>
+          <li><code>NOTICE</code> &mdash; the short attribution file Apache 2.0 expects alongside the license.</li>
+          <li><code>README.md</code> &mdash; the front door. Concise, with install + a real quickstart code example.</li>
+          <li><code>CHANGELOG.md</code> &mdash; <a class="inline" href="https://keepachangelog.com/" target="_blank" rel="noopener">Keep a Changelog</a> format. First entry: 0.1.0.</li>
+          <li><code>CITATION.cff</code> &mdash; academic citation metadata. GitHub renders a "Cite this repository" button once public.</li>
+          <li><code>.github/workflows/release.yml</code> &mdash; tag-triggered build, test, and publish-to-PyPI.</li>
+          <li><code>pyproject.toml</code> &mdash; version 0.1.0, license metadata, classifiers, project URLs.</li>
+          <li><code>MANIFEST.in</code> &mdash; tells setuptools to include LICENSE/NOTICE/etc. in the sdist.</li>
+        </ul>
+        <div class="callout">
+          <strong>The discipline this lesson teaches:</strong> a release is
+          a loop, not a one-time event. v0.1.0 is the first turn. v0.2.0,
+          v0.3.0, ..., v1.0.0 are the same six-step dance every time. The
+          workflow automates the build and publish; you stay focused on
+          what changed and why.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Build it, step by step</h2>
+
+        <div class="step-block">
+          <h3><span class="step-pill">1</span> License: Apache 2.0</h3>
+          <p>Apache 2.0 is the right tool when the goal is maximum adoption with proper attribution. Free for researchers, students, public entities, AND companies, with a strict attribution requirement, an explicit patent grant, and an industry-standard footprint that no legal team will object to. Source-available non-commercial licenses (PolyForm and friends) make sense when you want to charge companies; if you don&rsquo;t, Apache is the better fit.</p>
+          <ul>
+            <li>Download the canonical text from <a class="inline" href="https://www.apache.org/licenses/LICENSE-2.0.txt" target="_blank" rel="noopener">apache.org/licenses/LICENSE-2.0.txt</a> and save as <code>LICENSE</code>.</li>
+            <li>Fill in your copyright line in the appendix (e.g., <code>Copyright 2026 Your Name / Your Organization</code>).</li>
+            <li>Add a short <code>NOTICE</code> file with your attribution and a pointer to the LICENSE.</li>
+          </ul>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">2</span> README.md &mdash; the front door</h3>
+          <p>The single most important file in the repository for adoption. People decide whether to engage in 30 seconds based on what they see here. Concise, with three blocks that earn trust:</p>
+          <ol>
+            <li><strong>What it is</strong>, in 2&ndash;3 sentences. No marketing language. State the function.</li>
+            <li><strong>Install instructions</strong> immediately under the description. Don&rsquo;t make readers scroll.</li>
+            <li><strong>A real quickstart code example</strong> that proves the package does something concrete. Not pseudocode &mdash; actual imports, actual function calls, actual output paths.</li>
+          </ol>
+          <p>Then: architecture diagram, doc links, license, citation, acknowledgments. Resist the urge to put everything in the README; deep documentation belongs on the docs site.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">3</span> CHANGELOG.md &mdash; document what each release contains</h3>
+          <p><a class="inline" href="https://keepachangelog.com/en/1.1.0/" target="_blank" rel="noopener">Keep a Changelog</a> format with semver. First entry:</p>
+          <pre><code>## [0.1.0] — 2026-06-07
+
+First public release.
+
+### Added
+- `opentrash.core` — CRS, DuckDB session, vehicle IDs
+- `opentrash.engine` — the routing engine
+- `opentrash.patterns` — per-parcel signature detection
+- `opentrash.routeview` — interactive HTML maps
+- ...</code></pre>
+          <p>Future entries follow the same template: ### Added, ### Changed, ### Deprecated, ### Removed, ### Fixed, ### Security. The discipline pays off when someone asks "what changed in 0.4.0?" and you point at the file.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">4</span> CITATION.cff &mdash; for academic users</h3>
+          <p>A simple YAML file that GitHub uses to render a "Cite this repository" button (once the repo is public). Tells researchers exactly how to cite the package in papers:</p>
+          <pre><code>cff-version: 1.2.0
+title: "opentrash: open-source geospatial analytics for residential waste collection"
+authors:
+  - given-names: Your
+    family-names: Name
+    affiliation: "Your Organization"
+license: Apache-2.0
+version: "0.1.0"
+date-released: "2026-06-07"
+url: "https://opentrash.app/"</code></pre>
+          <p>Small file, big payoff: it&rsquo;s the difference between getting properly cited and being lumped under "various open-source tools."</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">5</span> pyproject.toml &mdash; the metadata that lands on PyPI</h3>
+          <p>Three changes from the dev version:</p>
+          <ul>
+            <li><strong>Version</strong>: <code>0.1.0.dev0</code> &rarr; <code>0.1.0</code>.</li>
+            <li><strong>License</strong>: <code>{ text = "Apache-2.0" }</code>. Classifier: <code>"License :: OSI Approved :: Apache Software License"</code>.</li>
+            <li><strong>Project URLs + classifiers</strong>: Homepage, Documentation, Changelog, Issues; classifiers for Development Status, Intended Audience, Topic. These show up on the PyPI page.</li>
+          </ul>
+          <p>One TOML gotcha caught during this lesson: <code>[project.urls]</code> must come AFTER <code>dependencies</code> and <code>[project.optional-dependencies]</code> in the TOML &mdash; otherwise <code>dependencies</code> ends up parsed as a key inside <code>project.urls</code>. Setuptools yells. Easy to fix; easy to miss.</p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">6</span> MANIFEST.in &mdash; what gets shipped in the sdist</h3>
+          <p>Setuptools&rsquo; defaults don&rsquo;t include LICENSE, NOTICE, CHANGELOG, or CITATION in the sdist. Tell it to:</p>
+          <pre><code>include LICENSE
+include NOTICE
+include CHANGELOG.md
+include CITATION.cff
+include README.md
+recursive-include opentrash/routeview/templates *.html</code></pre>
+          <p>Verify by building and inspecting the artifact:</p>
+          <pre><code>pip install build
+python -m build
+tar tzf dist/opentrash-0.1.0.tar.gz | grep -E "(LICENSE|NOTICE|CHANGELOG|CITATION|README|template)"</code></pre>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">7</span> Release workflow &mdash; <code>.github/workflows/release.yml</code></h3>
+          <p>Tag-triggered automation. Four jobs in sequence:</p>
+          <ol>
+            <li><code>verify-version</code> &mdash; refuses to proceed if the git tag doesn&rsquo;t match the version in pyproject.toml. Catches typos before they hit PyPI.</li>
+            <li><code>test</code> &mdash; runs the full suite + lint on Python 3.11 and 3.12. Fail fast if something regressed.</li>
+            <li><code>build</code> &mdash; produces sdist + wheel into <code>dist/</code>, uploads as a CI artifact.</li>
+            <li><code>publish-pypi</code> &mdash; downloads the dist artifact, runs <code>twine upload</code> using the <code>PYPI_API_TOKEN</code> repository secret.</li>
+          </ol>
+          <p>One-time PyPI setup before the first release:</p>
+          <ol>
+            <li>Create a PyPI account at <a class="inline" href="https://pypi.org/account/register/" target="_blank" rel="noopener">pypi.org</a>.</li>
+            <li>Generate a project-scoped API token at <a class="inline" href="https://pypi.org/manage/account/token/" target="_blank" rel="noopener">pypi.org/manage/account/token/</a>. Scope it to the <code>opentrash</code> project once it exists; for the very first upload, use an account-wide token, then narrow it.</li>
+            <li>In the repo, add a secret named <code>PYPI_API_TOKEN</code> at Settings &rarr; Secrets and variables &rarr; Actions &rarr; New repository secret.</li>
+          </ol>
+          <p class="note">
+            <strong>Private repo &rarr; public PyPI is fine.</strong> They&rsquo;re
+            independent systems. The PyPI artifact contains the source code
+            snapshot, but the git history, issues, and drafts stay private
+            until you flip the repository&rsquo;s public switch.
+          </p>
+        </div>
+
+        <div class="step-block">
+          <h3><span class="step-pill">8</span> Cut the release</h3>
+          <pre><code># 1. CHANGELOG entry already added in step 3
+# 2. pyproject.toml version already bumped to 0.1.0 in step 5
+
+# 3. Commit the release-prep changes
+git add LICENSE NOTICE README.md CHANGELOG.md CITATION.cff \
+        MANIFEST.in pyproject.toml \
+        .github/workflows/release.yml
+git commit -m "Release 0.1.0: license, README, CHANGELOG, citation, release workflow"
+git push origin main
+
+# 4. Tag and push
+git tag -a v0.1.0 -m "First public release"
+git push origin v0.1.0
+
+# 5. Watch GitHub Actions run the workflow. It verifies, tests, builds,
+#    and publishes to PyPI automatically.
+
+# 6. Verify (from any clean environment, ~5 minutes after the workflow finishes)
+pip install opentrash
+python -c "import opentrash; print(opentrash.__version__)"
+# expected: 0.1.0</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE RELEASE LOOP -->
+    <section id="release-loop">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> The release loop (for every future version)</h2>
+        <p class="intro">
+          v0.1.0 was the first turn. Every future release is the same six steps.
+          Memorize this; you&rsquo;ll do it many times.
+        </p>
+        <pre><code># 1. Update CHANGELOG with the new entry
+#    (keep [Unreleased] at top; add a new ## [0.2.0] — YYYY-MM-DD section below)
+
+# 2. Bump version in pyproject.toml AND opentrash/__init__.py to 0.2.0
+
+# 3. Commit
+git add CHANGELOG.md pyproject.toml opentrash/__init__.py
+git commit -m "Release 0.2.0"
+git push origin main
+
+# 4. Tag and push
+git tag -a v0.2.0 -m "Release 0.2.0: <one-line summary>"
+git push origin v0.2.0
+
+# 5. Watch the workflow run. It does the rest.
+
+# 6. Verify
+pip install --upgrade opentrash
+python -c "import opentrash; print(opentrash.__version__)"</code></pre>
+        <p>That&rsquo;s it. The discipline isn&rsquo;t in the steps; it&rsquo;s in following them every time. Six steps, every release, forever &mdash; through 0.2.0, 0.3.0, the eventual 1.0.0, and beyond.</p>
+        <div class="callout">
+          <strong>One nuance worth knowing about semver:</strong> while you&rsquo;re
+          in 0.x, breaking changes between minor versions (0.1 &rarr; 0.2) are
+          acceptable as long as the CHANGELOG documents them. At 1.0.0 the
+          contract tightens: breaking changes require a major bump (1.x &rarr;
+          2.0.0). Stay in 0.x until the API has had real-world use and you&rsquo;re
+          confident you don&rsquo;t want to change it. opentrash will probably
+          live in 0.x for a few months yet.
+        </div>
+      </div>
+    </section>
+
+    <!-- PACKAGE ANATOMY -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Package anatomy after this lesson</h2>
+        <p class="intro">The final shape. <span class="pill pill-next">new</span> marks files added this lesson.</p>
+        <div class="tree"><span class="dir">opentrash/</span>
+├── LICENSE                          <span class="comment"># [new] Apache 2.0</span>
+├── NOTICE                           <span class="comment"># [new] Apache attribution</span>
+├── README.md                        <span class="comment"># [updated] real README</span>
+├── CHANGELOG.md                     <span class="comment"># [new] Keep a Changelog format</span>
+├── CITATION.cff                     <span class="comment"># [new] academic citation</span>
+├── MANIFEST.in                      <span class="comment"># [new] sdist inclusion list</span>
+├── pyproject.toml                   <span class="comment"># [updated] version 0.1.0, Apache, urls</span>
+├── .github/workflows/
+│   ├── ci.yml
+│   ├── docs.yml
+│   └── release.yml                  <span class="comment"># [new] tag-triggered PyPI publish</span>
+├── docs/{index,architecture}.md
+├── <span class="dir">opentrash/</span>
+│   ├── __init__.py                  <span class="comment"># [updated] __version__ = "0.1.0"</span>
+│   ├── adapters/ &middot; cache/ &middot; core/ &middot; prep/ &middot; tonnage/
+│   ├── engine/ &middot; patterns/ &middot; routeview/
+│   └── (all module trees from L0&ndash;L11)
+└── <span class="dir">tests/</span> (18 test files, 180 tests)</div>
+      </div>
+    </section>
+
+    <!-- RECAP -->
+    <section id="recap">
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What you built &mdash; the whole course</h2>
+        <p class="intro">12 lessons. One working open-source package. Here&rsquo;s the entire arc:</p>
+        <ul class="plain-list">
+          <li><strong>L0&ndash;L2:</strong> notebook &rarr; package, repo skeleton, core foundations (CRS, DuckDB, parcels).</li>
+          <li><strong>L3&ndash;L5:</strong> static GIS layers, sites, tonnage pipeline with idempotent upsert.</li>
+          <li><strong>L6&ndash;L7:</strong> GPS adapters, cache, master index, WKB substrate.</li>
+          <li><strong>L8&ndash;L9:</strong> the routing engine &mdash; one spatial-join pass &mdash; and load-organized segments timeline.</li>
+          <li><strong>L10:</strong> route-agnostic per-parcel pattern detection.</li>
+          <li><strong>L11:</strong> RouteView interactive HTML map with patterns overlay.</li>
+          <li><strong>L12:</strong> license, README, CHANGELOG, citation, release workflow, and the published <code>pip install opentrash</code> artifact.</li>
+        </ul>
+        <div class="callout">
+          The architectural rule held across all 12 lessons: <strong>spatial
+          joins are infrastructure; products are calculations.</strong> The
+          engine does the spatial work once; everything downstream is pure
+          aggregation. Patterns + RouteView are two views of the same enriched
+          stream &mdash; macro and micro &mdash; forming a validation loop
+          between long-period prediction and single-day reality.
+          <br><br>
+          The package is now live on PyPI, citable, properly licensed, and
+          ready for the next turn of the loop. Congratulations: you&rsquo;ve
+          built and shipped a real open-source artifact.
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> Companion resources</h2>
+        <p class="intro">For going further.</p>
+        <ul class="plain-list">
+          <li><strong>Apache 2.0 license guide:</strong> <a class="inline" href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">canonical text</a> + <a class="inline" href="https://infra.apache.org/licensing-howto.html" target="_blank" rel="noopener">how-to from the ASF</a>. The patent-grant clause is the under-appreciated value.</li>
+          <li><strong>Choosing a license:</strong> <a class="inline" href="https://choosealicense.com/" target="_blank" rel="noopener">choosealicense.com</a> &mdash; GitHub&rsquo;s own walkthrough. Run through the questionnaire if you&rsquo;re unsure.</li>
+          <li><strong>Keep a Changelog:</strong> <a class="inline" href="https://keepachangelog.com/" target="_blank" rel="noopener">keepachangelog.com</a> &mdash; the format we use.</li>
+          <li><strong>Semantic Versioning:</strong> <a class="inline" href="https://semver.org/" target="_blank" rel="noopener">semver.org</a> &mdash; the contract that lets users pin <code>opentrash &gt;= 0.1, &lt; 0.2</code> and trust what they get.</li>
+          <li><strong>PyPI publishing guide:</strong> <a class="inline" href="https://packaging.python.org/en/latest/tutorials/packaging-projects/" target="_blank" rel="noopener">Python Packaging Authority tutorial</a> &mdash; for when you want to understand what the workflow is doing under the hood.</li>
+          <li><strong>Citation.cff spec:</strong> <a class="inline" href="https://citation-file-format.github.io/" target="_blank" rel="noopener">citation-file-format.github.io</a> &mdash; the schema is small and clear.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- NEXT -->
+    <section>
+      <div class="wrap">
+        <h2><span class="sec-num">&middot;</span> What&rsquo;s next</h2>
+        <p class="intro">
+          The course ends here, but the package&rsquo;s life is just starting.
+          Some honest next directions if you&rsquo;d like to keep building:
+        </p>
+        <ul class="plain-list">
+          <li><strong>0.2.0</strong>: the next release. Could be road-network
+            mileage to replace the haversine approximation; could be a
+            tonnage-into-segments product; could be tile-server alternatives
+            in RouteView. Whatever real use surfaces first.</li>
+          <li><strong>Per-commodity awareness</strong>: the engine currently
+            collapses to one <code>route_id</code>; production has three
+            (refuse, organics, recycling). A future release could carry the
+            commodity dimension through the engine.</li>
+          <li><strong>conda-forge package</strong>: PyPI handles pip users;
+            conda-forge reaches the scientific-Python conda crowd. The recipe
+            is small once PyPI is live.</li>
+          <li><strong>Public repo flip</strong>: when you&rsquo;re ready,
+            making the GitHub repo public unlocks issues, PRs, GitHub Stars
+            for visibility, and the "Cite this repository" button.</li>
+        </ul>
+        <p class="intro">
+          Thanks for walking through 12 lessons. Now go build the next one. 🚀
+        </p>
+        <div class="hero-buttons">
+          <a href="../index.html#lessons" class="btn btn-secondary">Back to all lessons</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="../index.html">&larr; Course home</a> &nbsp;&middot;&nbsp;
+      A course by <a href="https://airesearchcorps.org/" target="_blank" rel="noopener">AI Research Corps (AIRC)</a>
+      &nbsp;&middot;&nbsp; &copy; <span id="year"></span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
